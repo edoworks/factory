@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Non-submitting App Store Connect preparation draft",
+  "type": "object",
+  "required": ["schema_version", "kind", "product", "metadata", "preflight_report", "submission", "secrets"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "kind": {"const": "APP_STORE_CONNECT_DRAFT"},
+    "product": {"type": "string", "minLength": 1},
+    "metadata": {"type": "object"},
+    "preflight_report": {"type": "string"},
+    "submission": {
+      "type": "object",
+      "required": ["performed", "human_authorization_required", "endpoint"],
+      "properties": {
+        "performed": {"const": false},
+        "human_authorization_required": {"const": true},
+        "endpoint": {"const": "NOT_INVOKED"}
+      }
+    },
+    "secrets": {"const": "NONE"}
+  }
+}

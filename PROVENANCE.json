@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "generated": "2026-09-20",
+  "source_repo": "edoworks/sf0.8",
+  "license_clearance": "MIT (internal to edoworks org, owner-authorized port)",
+  "extractions": [
+    {
+      "id": "apple-quality",
+      "source_path": "scripts/apple-quality.py",
+      "source_commit": "9a904f9990a712ce49a06bc11dc1e87fbd2bde78",
+      "target_path": "scripts/apple-quality.py",
+      "modifications": "none",
+      "reason": "Generic Apple experience quality validator with no product-specific references"
+    },
+    {
+      "id": "submission-draft-schema",
+      "source_path": ".factory/apple-distribution/submission-draft.schema.json",
+      "source_commit": "9a904f9990a712ce49a06bc11dc1e87fbd2bde78",
+      "target_path": "schemas/apple-distribution/submission-draft.schema.json",
+      "modifications": "none",
+      "reason": "Pure JSON Schema, no product references"
+    },
+    {
+      "id": "rejection-feedback-schema",
+      "source_path": ".factory/apple-distribution/rejection-feedback.schema.json",
+      "source_commit": "9a904f9990a712ce49a06bc11dc1e87fbd2bde78",
+      "target_path": "schemas/apple-distribution/rejection-feedback.schema.json",
+      "modifications": "none",
+      "reason": "Pure JSON Schema, no product references"
+    },
+    {
+      "id": "capabilities-registry",
+      "source_path": ".factory/apple-distribution/capabilities.json",
+      "source_commit": "9a904f9990a712ce49a06bc11dc1e87fbd2bde78",
+      "target_path": "schemas/apple-distribution/capabilities.json",
+      "modifications": "sanitized: removed product-a example_product values, removed blocking_issues arrays, cleared verification_evidence paths, updated last_verified date",
+      "reason": "Capability taxonomy is generic; product-specific evidence and issue numbers removed"
+    },
+    {
+      "id": "privacy-manifest-template",
+      "source_path": "product-a/ProductA/PrivacyInfo.xcprivacy",
+      "source_commit": "9a904f9990a712ce49a06bc11dc1e87fbd2bde78",
+      "target_path": "templates/PrivacyInfo.xcprivacy",
+      "modifications": "none (template as-is; comment references audio on-device but template is generic for offline apps)",
+      "reason": "Generic privacy manifest for offline, no-tracking, UserDefaults-only apps"
+    }
+  ]
+}
