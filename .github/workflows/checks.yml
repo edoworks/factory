@@ -1,0 +1,43 @@
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    name: Factory policy gate
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run factory doctor
+        run: ./bin/factory-doctor
+
+      - name: Run Python unit tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Verify template builds
+        run: |
+          cd /tmp
+          ${{ github.workspace }}/bin/factory-init TestApp --bundle-id com.example.testapp
+          cd TestApp
+          ${{ github.workspace }}/bin/factory-verify
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: factory-evidence
+          path: |
+            .factory-verify-result.json
+            /tmp/TestApp/.factory-verify-result.json
