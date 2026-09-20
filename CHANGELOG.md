@@ -5,7 +5,7 @@ All notable changes to Edoworks Factory are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [v0.1.0-rc1] — 2026-09-20
 
 ### Added
 
@@ -19,6 +19,21 @@ project adheres to [Semantic Versioning](https://semver.org/).
 - SECURITY.md: Vulnerability reporting and security posture
 - CONTRIBUTING.md: How to contribute, code style, testing
 - .gitignore: Xcode, Swift, Python, secrets
+- bin/factory-doctor: Toolchain readiness verification
+- bin/factory-init: App scaffolding from template
+- bin/factory-verify: Build, test, analyze, and archive
+- bin/factory-uninstall: Local state cleanup
+- bin/find-simulators.py: Simulator discovery helper
+- templates/AppTemplate: SwiftUI universal app template (iPhone + iPad)
+- schemas/apple-distribution/: Capability registry, submission draft schema,
+  rejection feedback schema, product manifest template
+- scripts/apple-quality.py: Apple experience quality validator
+- templates/PrivacyInfo.xcprivacy: Privacy manifest template
+- tests/test_apple_quality.py: 4 unit tests for apple-quality validator
+- PROVENANCE.json: Provenance manifest for ported components
+- compatibility-matrix.md: Supported macOS/Xcode/Swift versions
+- public-api.md: Paved road contract and command reference
+- .github/workflows/checks.yml: CI policy gate
 
 ### Decisions
 
