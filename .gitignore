@@ -1,0 +1,33 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.swp
+*~
+.DS_Store
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+Package.pins
+Package.resolved
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Factory evidence (generated, not committed)
+.factory/evidence/
+.factory/artifacts/
+
+# Secrets — never commit
+*.p12
+*.cer
+*.mobileprovision
+AuthKey_*.p8
