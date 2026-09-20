@@ -1,0 +1,52 @@
+name: AppTemplate
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "18.0"
+  developmentLanguage: en
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+targets:
+  AppTemplate:
+    type: application
+    platform: iOS
+    sources:
+      - AppTemplate
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.apptemplate
+        INFOPLIST_FILE: AppTemplate/Info.plist
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MACCATALYST: NO
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+    dependencies: []
+  AppTemplateTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - AppTemplateTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.apptemplate.tests
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: AppTemplate
+  AppTemplateUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - AppTemplateUITests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.apptemplate.uitests
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: AppTemplate

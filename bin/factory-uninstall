@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipeflag
+
+# factory uninstall — remove factory and residual local state
+# Usage: factory uninstall [--purge]
+#
+# Without --purge: removes factory-specific cached state only.
+# With --purge: removes the factory installation itself.
+
+FACTORY_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PURGE=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --purge)
+      PURGE=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+echo "Cleaning factory local state..."
+
+# Remove DerivedData for factory projects
+rm -rf ~/Library/Developer/Xcode/DerivedData/Factory-* 2>/dev/null || true
+rm -rf /tmp/factory-* 2>/dev/null || true
+
+echo "Local state cleaned."
+
+if [ "$PURGE" = true ]; then
+  echo "Removing factory installation at $FACTORY_ROOT..."
+  echo "This will delete the factory itself. Press Ctrl-C to abort."
+  sleep 3
+  rm -rf "$FACTORY_ROOT"
+  echo "Factory removed."
+fi
+
+echo "Done."

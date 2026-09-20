@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# factory init — scaffold a new iOS app from the factory template
+# Usage: factory init <app-name> [--bundle-id com.example.app]
+#
+# Creates a new directory with:
+# - SwiftUI universal app (iPhone + iPad)
+# - xcodegen project.yml
+# - PrivacyInfo.xcprivacy
+# - Unit and UI test targets
+# - Factory verification config
+
+APP_NAME=""
+BUNDLE_ID=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --bundle-id)
+      BUNDLE_ID="$2"
+      shift 2
+      ;;
+    *)
+      APP_NAME="$1"
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$APP_NAME" ]; then
+  echo "Usage: factory init <app-name> [--bundle-id com.example.app]"
+  exit 1
+fi
+
+if [ -d "$APP_NAME" ]; then
+  echo "ERROR: Directory '$APP_NAME' already exists"
+  exit 1
+fi
+
+if [ -z "$BUNDLE_ID" ]; then
+  BUNDLE_ID="com.example.$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
+fi
+
+FACTORY_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+TEMPLATE_DIR="$FACTORY_ROOT/templates/AppTemplate"
+
+if [ ! -d "$TEMPLATE_DIR" ]; then
+  echo "ERROR: Template directory not found at $TEMPLATE_DIR"
+  exit 1
+fi
+
+echo "Creating $APP_NAME (bundle ID: $BUNDLE_ID)..."
+
+mkdir -p "$APP_NAME"
+
+# Copy template files
+cp -R "$TEMPLATE_DIR/" "$APP_NAME/"
+
+# Rename files from AppTemplate to the app name
+cd "$APP_NAME"
+
+# Rename source directories
+mv "AppTemplate" "$APP_NAME" 2>/dev/null || true
+mv "AppTemplateTests" "${APP_NAME}Tests" 2>/dev/null || true
+mv "AppTemplateUITests" "${APP_NAME}UITests" 2>/dev/null || true
+
+# Rename Swift files
+mv "$APP_NAME/AppTemplateApp.swift" "$APP_NAME/${APP_NAME}App.swift" 2>/dev/null || true
+mv "$APP_NAME/AppTemplate.swift" "$APP_NAME/${APP_NAME}.swift" 2>/dev/null || true
+mv "${APP_NAME}Tests/AppTemplateTests.swift" "${APP_NAME}Tests/${APP_NAME}Tests.swift" 2>/dev/null || true
+mv "${APP_NAME}UITests/AppTemplateUITests.swift" "${APP_NAME}UITests/${APP_NAME}UITests.swift" 2>/dev/null || true
+
+# Replace placeholders in all text files
+find . -type f \( -name "*.swift" -o -name "*.yml" -o -name "*.plist" -o -name "*.xcprivacy" \) -exec sed -i '' "s/AppTemplate/$APP_NAME/g" {} \; 2>/dev/null || \
+find . -type f \( -name "*.swift" -o -name "*.yml" -o -name "*.plist" -o -name "*.xcprivacy" \) -exec sed -i "s/AppTemplate/$APP_NAME/g" {} \; 2>/dev/null || true
+
+find . -type f \( -name "*.swift" -o -name "*.yml" -o -name "*.plist" -o -name "*.xcprivacy" \) -exec sed -i '' "s/com\.example\.apptemplate/${BUNDLE_ID}/g" {} \; 2>/dev/null || \
+find . -type f \( -name "*.swift" -o -name "*.yml" -o -name "*.plist" -o -name "*.xcprivacy" \) -exec sed -i "s/com\.example\.apptemplate/${BUNDLE_ID}/g" {} \; 2>/dev/null || true
+
+# Generate Xcode project if xcodegen is available
+if command -v xcodegen >/dev/null 2>&1; then
+  echo "Generating Xcode project..."
+  xcodegen generate 2>&1
+else
+  echo "WARNING: xcodegen not found. Install it to generate the Xcode project:"
+  echo "  brew install xcodegen"
+  echo "Then run: cd $APP_NAME && xcodegen generate"
+fi
+
+# Output evidence receipt
+cat > .factory-verify.json << EOF
+{
+  "schema_version": 1,
+  "command": "factory init",
+  "app_name": "$APP_NAME",
+  "bundle_id": "$BUNDLE_ID",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "factory_version": "0.1.0-dev",
+  "template_source": "$FACTORY_ROOT/templates/AppTemplate"
+}
+EOF
+
+echo ""
+echo "Done. Created $APP_NAME with bundle ID $BUNDLE_ID."
+echo "Next steps:"
+echo "  cd $APP_NAME"
+echo "  ../bin/factory-verify"

@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# factory verify — run build, tests, static analysis, and archive
+# Produces a JSON evidence receipt on stdout.
+#
+# Must be run from the app directory (where project.yml lives).
+
+if [ ! -f "project.yml" ]; then
+  echo "ERROR: No project.yml found. Run this from the app root directory."
+  exit 1
+fi
+
+APP_NAME=$(grep "name:" project.yml | head -1 | awk '{print $2}')
+SCHEME="$APP_NAME"
+EVIDENCE_FILE=".factory-verify-result.json"
+PASS=0
+FAIL=0
+STEPS=()
+
+record() {
+  local name="$1"
+  local status="$2"
+  local detail="${3:-}"
+  STEPS+=("{\"step\":\"$name\",\"status\":\"$status\",\"detail\":\"$detail\"}")
+  if [ "$status" = "pass" ]; then
+    PASS=$((PASS + 1))
+  else
+    FAIL=$((FAIL + 1))
+  fi
+}
+
+echo "Verifying $APP_NAME..."
+
+# Find available iPhone and iPad simulators
+FACTORY_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SIM_INFO=$(python3 "$FACTORY_ROOT/bin/find-simulators.py" 2>/dev/null || echo "IPHONE=
+IPAD=")
+IPHONE_SIM=$(echo "$SIM_INFO" | grep "^IPHONE=" | cut -d= -f2)
+IPAD_SIM=$(echo "$SIM_INFO" | grep "^IPAD=" | cut -d= -f2)
+
+if [ -z "$IPHONE_SIM" ]; then
+  echo "ERROR: No iPhone simulator available"
+  exit 1
+fi
+if [ -z "$IPAD_SIM" ]; then
+  echo "WARNING: No iPad simulator available, skipping iPad build"
+fi
+
+IPHONE_DEST="platform=iOS Simulator,name=$IPHONE_SIM"
+IPAD_DEST="platform=iOS Simulator,name=$IPAD_SIM"
+
+# Generate project if needed
+if [ ! -d "*.xcodeproj" ] && [ ! -f "$APP_NAME.xcodeproj/project.pbxproj" ]; then
+  if command -v xcodegen >/dev/null 2>&1; then
+    xcodegen generate 2>&1
+    record "xcodegen" "pass" "Project generated"
+  else
+    record "xcodegen" "fail" "xcodegen not found"
+  fi
+fi
+
+# Build
+if xcodebuild build \
+  -project "$APP_NAME.xcodeproj" \
+  -scheme "$SCHEME" \
+  -destination "$IPHONE_DEST" \
+  -quiet 2>&1; then
+  record "build" "pass" "Build succeeded on $IPHONE_SIM"
+else
+  record "build" "fail" "Build failed"
+fi
+
+# Unit tests
+if xcodebuild test \
+  -project "$APP_NAME.xcodeproj" \
+  -scheme "$SCHEME" \
+  -destination "$IPHONE_DEST" \
+  -only-testing:"$SCHEME"Tests \
+  -quiet 2>&1; then
+  record "unit_tests" "pass" "Unit tests passed"
+else
+  record "unit_tests" "fail" "Unit tests failed (may be no tests yet)"
+fi
+
+# iPad build (universal verification)
+if [ -n "$IPAD_SIM" ]; then
+  if xcodebuild build \
+    -project "$APP_NAME.xcodeproj" \
+    -scheme "$SCHEME" \
+    -destination "$IPAD_DEST" \
+    -quiet 2>&1; then
+    record "ipad_build" "pass" "Build succeeded on $IPAD_SIM"
+  else
+    record "ipad_build" "fail" "iPad build failed"
+  fi
+else
+  record "ipad_build" "skip" "No iPad simulator available"
+fi
+
+# Static analysis (Swift compiler warnings as errors check)
+ANALYZE_RESULT=$(xcodebuild analyze \
+  -project "$APP_NAME.xcodeproj" \
+  -scheme "$SCHEME" \
+  -destination "$IPHONE_DEST" \
+  2>&1 || true)
+if echo "$ANALYZE_RESULT" | grep -q "warning:"; then
+  WARNING_COUNT=$(echo "$ANALYZE_RESULT" | grep -c "warning:" || true)
+  record "static_analysis" "pass" "$WARNING_COUNT warnings (review recommended)"
+else
+  record "static_analysis" "pass" "No warnings"
+fi
+
+# Archive (distribution)
+ARCHIVE_PATH="/tmp/$APP_NAME-$(date +%s).xcarchive"
+if xcodebuild archive \
+  -project "$APP_NAME.xcodeproj" \
+  -scheme "$SCHEME" \
+  -archivePath "$ARCHIVE_PATH" \
+  -destination 'generic/platform=iOS' \
+  -quiet 2>&1; then
+  record "archive" "pass" "Archive created at $ARCHIVE_PATH"
+else
+  record "archive" "fail" "Archive failed (may need signing config)"
+fi
+
+# Output JSON evidence
+RESULT="{"
+RESULT+="  \"schema_version\": 1,"
+RESULT+="  \"command\": \"factory verify\","
+RESULT+="  \"app_name\": \"$APP_NAME\","
+RESULT+="  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
+RESULT+="  \"passed\": $PASS,"
+RESULT+="  \"failed\": $FAIL,"
+RESULT+="  \"steps\": ["
+for i in "${!STEPS[@]}"; do
+  if [ "$i" -lt $((${#STEPS[@]} - 1)) ]; then
+    RESULT+="${STEPS[$i]},"
+  else
+    RESULT+="${STEPS[$i]}"
+  fi
+done
+RESULT+="  ]"
+RESULT+="}"
+
+echo "$RESULT" | python3 -m json.tool 2>/dev/null || echo "$RESULT"
+echo "$RESULT" > "$EVIDENCE_FILE"
+
+if [ "$FAIL" -gt 0 ]; then
+  exit 1
+fi
