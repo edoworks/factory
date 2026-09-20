@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# factory doctor — verify toolchain readiness
+# Exits 0 if all checks pass, 1 if any fail.
+# Produces a JSON evidence receipt on stdout.
+
+PASS=0
+FAIL=0
+CHECKS=()
+
+check() {
+  local name="$1"
+  local result="$2"
+  local detail="${3:-}"
+  if [ "$result" = "pass" ]; then
+    CHECKS+=("{\"name\":\"$name\",\"status\":\"pass\",\"detail\":\"$detail\"}")
+    PASS=$((PASS + 1))
+  else
+    CHECKS+=("{\"name\":\"$name\",\"status\":\"fail\",\"detail\":\"$detail\"}")
+    FAIL=$((FAIL + 1))
+  fi
+}
+
+# Xcode
+if command -v xcodebuild >/dev/null 2>&1; then
+  XCODE_VERSION=$(xcodebuild -version 2>/dev/null | head -1 | awk '{print $2}')
+  check "xcode" "pass" "Xcode $XCODE_VERSION"
+else
+  check "xcode" "fail" "Xcode not found"
+fi
+
+# Swift
+if command -v swift >/dev/null 2>&1; then
+  SWIFT_VERSION=$(swift --version 2>/dev/null | head -1)
+  check "swift" "pass" "$SWIFT_VERSION"
+else
+  check "swift" "fail" "Swift not found"
+fi
+
+# Git
+if command -v git >/dev/null 2>&1; then
+  GIT_VERSION=$(git --version 2>/dev/null)
+  check "git" "pass" "$GIT_VERSION"
+else
+  check "git" "fail" "Git not found"
+fi
+
+# xcodegen (optional, used by bootstrap)
+if command -v xcodegen >/dev/null 2>&1; then
+  check "xcodegen" "pass" "xcodegen available"
+else
+  check "xcodegen" "warn" "xcodegen not found (required for factory init)"
+  FAIL=$((FAIL + 1))
+fi
+
+# Simulators
+if [ "$PASS" -gt 0 ] && command -v xcrun >/dev/null 2>&1; then
+  SIM_COUNT=$(xcrun simctl list devices available 2>/dev/null | grep -c "(" || true)
+  if [ "$SIM_COUNT" -gt 0 ]; then
+    check "simulators" "pass" "$SIM_COUNT available simulators"
+  else
+    check "simulators" "fail" "No available simulators"
+  fi
+else
+  check "simulators" "fail" "Cannot list simulators"
+fi
+
+# Disk space (need at least 10 GB free)
+DISK_FREE=$(df -g / 2>/dev/null | tail -1 | awk '{print $4}')
+if [ -n "${DISK_FREE:-}" ] && [ "$DISK_FREE" -ge 10 ]; then
+  check "disk_space" "pass" "${DISK_FREE} GB free"
+else
+  check "disk_space" "fail" "Less than 10 GB free (found ${DISK_FREE:-unknown} GB)"
+fi
+
+# Output JSON evidence
+echo "{"
+echo "  \"schema_version\": 1,"
+echo "  \"command\": \"factory doctor\","
+echo "  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
+echo "  \"passed\": $PASS,"
+echo "  \"failed\": $FAIL,"
+echo "  \"checks\": ["
+for i in "${!CHECKS[@]}"; do
+  if [ "$i" -lt $((${#CHECKS[@]} - 1)) ]; then
+    echo "    ${CHECKS[$i]},"
+  else
+    echo "    ${CHECKS[$i]}"
+  fi
+done
+echo "  ]"
+echo "}"
+
+if [ "$FAIL" -gt 0 ]; then
+  exit 1
+fi
