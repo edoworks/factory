@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "id": "",
+  "internal_codename": "",
+  "public_name": {
+    "name": "",
+    "authorized": false
+  },
+  "repository": "",
+  "source_commit": "",
+  "app_type": "",
+  "product_purpose": "",
+  "authorization_evidence": [],
+  "capabilities": [],
+  "default_blocking_issue": null,
+  "archive": null,
+  "archive_inspection": null,
+  "archive_commit": null,
+  "purchases": {
+    "product_identifiers": [],
+    "local_behavior_evidence": []
+  }
+}

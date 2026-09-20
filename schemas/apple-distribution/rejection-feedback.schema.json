@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "App Review feedback learning record",
+  "type": "object",
+  "required": ["schema_version", "feedback", "issue", "failure_class", "root_cause", "fix", "regression_criterion", "factory_lesson", "contribution_gate"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "feedback": {"type": "string", "minLength": 1},
+    "issue": {"type": "integer", "minimum": 1},
+    "failure_class": {"type": "string", "minLength": 1},
+    "root_cause": {"type": "string", "minLength": 1},
+    "fix": {"type": "string", "minLength": 1},
+    "regression_criterion": {"type": "string", "minLength": 1},
+    "factory_lesson": {"type": "string", "minLength": 1},
+    "contribution_gate": {"enum": ["PRODUCT_SPECIFIC", "INTERNAL_REUSABLE", "PUBLIC_REUSABLE", "UPSTREAM_CANDIDATE", "NOT_YET_CLASSIFIED"]}
+  }
+}
