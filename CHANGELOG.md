@@ -5,6 +5,24 @@ All notable changes to Edoworks Factory are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v0.1.0-rc2] - 2026-09-20
+
+### Fixed
+
+- Made doctor version checks safe under `pipefail` on hosted runners.
+- Declared and installed xcodegen before clean-runner verification.
+- Added lifecycle shell syntax and doctor receipt validation to CI.
+- Corrected the uninstall shell option typo.
+- Rejected invalid app names before template substitution.
+- Produced unsigned CI archives without claiming distribution signing.
+- Made XCUITests compatible with Swift 6 strict concurrency.
+
+### Added
+
+- FocusGate v0 PRD for Reference App 1.
+- Clean-runner defect 5-Whys and recurrence guard.
+- VERSION as the factory receipt's canonical release identity.
+
 ## [v0.1.0-rc1] — 2026-09-20
 
 ### Added
