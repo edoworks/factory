@@ -48,6 +48,7 @@ fi
 
 FACTORY_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TEMPLATE_DIR="$FACTORY_ROOT/templates/AppTemplate"
+FACTORY_VERSION=$(tr -d '[:space:]' < "$FACTORY_ROOT/VERSION")
 
 if [ ! -d "$TEMPLATE_DIR" ]; then
   echo "ERROR: Template directory not found at $TEMPLATE_DIR"
@@ -100,7 +101,7 @@ cat > .factory-verify.json << EOF
   "app_name": "$APP_NAME",
   "bundle_id": "$BUNDLE_ID",
   "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "factory_version": "0.1.0-dev",
+  "factory_version": "$FACTORY_VERSION",
   "template_source": "$FACTORY_ROOT/templates/AppTemplate"
 }
 EOF
