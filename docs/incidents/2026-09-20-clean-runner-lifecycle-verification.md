@@ -37,6 +37,8 @@ process-level cause would be speculation.
   human-authorized gate.
 - Reject app names containing spaces or path separators before template
   substitution; callers choose the destination through their working directory.
+- Mark XCUITest classes `@MainActor` so the template compiles under Swift 6
+  strict concurrency on hosted runners as well as the founder workstation.
 
 ## Recurrence Guard
 
