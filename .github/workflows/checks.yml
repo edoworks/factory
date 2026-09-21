@@ -20,8 +20,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install declared build dependency
+        run: brew install xcodegen
+
+      - name: Check lifecycle script syntax
+        run: |
+          bash -n bin/factory-doctor
+          bash -n bin/factory-init
+          bash -n bin/factory-verify
+          bash -n bin/factory-uninstall
+
       - name: Run factory doctor
-        run: ./bin/factory-doctor
+        run: ./bin/factory-doctor | tee doctor-receipt.json
+
+      - name: Validate doctor receipt
+        run: python3 -m json.tool doctor-receipt.json >/dev/null
 
       - name: Run Python unit tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
@@ -39,5 +52,5 @@ jobs:
         with:
           name: factory-evidence
           path: |
-            .factory-verify-result.json
+            doctor-receipt.json
             /tmp/TestApp/.factory-verify-result.json
