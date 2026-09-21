@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipeflag
+set -euo pipefail
 
 # factory uninstall — remove factory and residual local state
 # Usage: factory uninstall [--purge]

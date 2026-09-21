@@ -32,6 +32,11 @@ if [ -z "$APP_NAME" ]; then
   exit 1
 fi
 
+if [[ ! "$APP_NAME" =~ ^[A-Za-z][A-Za-z0-9]*$ ]]; then
+  echo "ERROR: App name must be a Swift identifier without spaces or path separators"
+  exit 1
+fi
+
 if [ -d "$APP_NAME" ]; then
   echo "ERROR: Directory '$APP_NAME' already exists"
   exit 1

@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class AppTemplateUITests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false

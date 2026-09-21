@@ -24,7 +24,9 @@ check() {
 
 # Xcode
 if command -v xcodebuild >/dev/null 2>&1; then
-  XCODE_VERSION=$(xcodebuild -version 2>/dev/null | head -1 | awk '{print $2}')
+  XCODE_OUTPUT=$(xcodebuild -version 2>/dev/null || true)
+  XCODE_LINE=${XCODE_OUTPUT%%$'\n'*}
+  XCODE_VERSION=${XCODE_LINE#Xcode }
   check "xcode" "pass" "Xcode $XCODE_VERSION"
 else
   check "xcode" "fail" "Xcode not found"
@@ -32,7 +34,8 @@ fi
 
 # Swift
 if command -v swift >/dev/null 2>&1; then
-  SWIFT_VERSION=$(swift --version 2>/dev/null | head -1)
+  SWIFT_OUTPUT=$(swift --version 2>/dev/null || true)
+  SWIFT_VERSION=${SWIFT_OUTPUT%%$'\n'*}
   check "swift" "pass" "$SWIFT_VERSION"
 else
   check "swift" "fail" "Swift not found"
@@ -51,7 +54,6 @@ if command -v xcodegen >/dev/null 2>&1; then
   check "xcodegen" "pass" "xcodegen available"
 else
   check "xcodegen" "warn" "xcodegen not found (required for factory init)"
-  FAIL=$((FAIL + 1))
 fi
 
 # Simulators

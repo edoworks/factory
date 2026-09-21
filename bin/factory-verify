@@ -118,10 +118,12 @@ if xcodebuild archive \
   -scheme "$SCHEME" \
   -archivePath "$ARCHIVE_PATH" \
   -destination 'generic/platform=iOS' \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
   -quiet 2>&1; then
-  record "archive" "pass" "Archive created at $ARCHIVE_PATH"
+  record "archive" "pass" "Unsigned verification archive created at $ARCHIVE_PATH"
 else
-  record "archive" "fail" "Archive failed (may need signing config)"
+  record "archive" "fail" "Unsigned verification archive failed"
 fi
 
 # Output JSON evidence
