@@ -6,8 +6,10 @@ iOS/iPadOS apps through a deterministic paved road.
 ## Quick Start
 
 ```bash
-# Download the latest release
-curl -L https://github.com/edoworks/factory/releases/latest/download/factory.tar.gz | tar xz
+# Download the exact verified release used by this quick start
+FACTORY_VERSION=0.1.0-rc2
+curl -fsSL "https://github.com/edoworks/factory/archive/refs/tags/v${FACTORY_VERSION}.tar.gz" | tar xz
+mv "factory-${FACTORY_VERSION}" factory
 
 # Verify your toolchain
 ./factory/bin/factory doctor
