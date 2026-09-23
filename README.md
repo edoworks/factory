@@ -7,7 +7,7 @@ iOS/iPadOS apps through a deterministic paved road.
 
 ```bash
 # Download the exact verified release used by this quick start
-FACTORY_VERSION=0.1.0-rc2
+FACTORY_VERSION=0.1.0-rc3
 curl -fsSL "https://github.com/edoworks/factory/archive/refs/tags/v${FACTORY_VERSION}.tar.gz" | tar xz
 mv "factory-${FACTORY_VERSION}" factory
 

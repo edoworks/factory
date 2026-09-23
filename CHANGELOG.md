@@ -5,6 +5,28 @@ All notable changes to Edoworks Factory are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v0.1.0-rc3] - 2026-09-22
+
+### Fixed
+
+- Pinned README quick start to exact tag archive URL (from PR #38).
+- Strengthened release-contract test to verify live URL resolves and release
+  record matches README version (from PR #40).
+
+### Added
+
+- Release-contract CI test now checks HTTP 200 on documented download URL and
+  verifies GitHub release API returns matching tag with prerelease flag.
+- Obligation disposition manifest for cutover gate #16 (sf0.8 issues
+  classified: 5 migrated, 1 completed, 9 superseded, 6 retained-evidence).
+- Cutover evidence contracts and blocker rubberduck review in sf0.8 PRD.
+
+### Changed
+
+- Bumped VERSION to 0.1.0-rc3.
+- Factory issues #29, #30, #33, #34, #35, #36 closed with evidence after
+  maintainer-reviewed closeout verification.
+
 ## [v0.1.0-rc2] - 2026-09-20
 
 ### Fixed
