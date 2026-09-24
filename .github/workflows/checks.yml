@@ -43,6 +43,10 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
       - name: Verify template builds
+        env:
+          # Hosted CoreSimulator/APFS drift observed at 129, 664, and 227 MiB.
+          # Do not raise this bound again without external-owner attribution.
+          FACTORY_STORAGE_GROWTH_TOLERANCE_MIB: 768
         run: |
           cd /tmp
           ${{ github.workspace }}/bin/factory-init TestApp --bundle-id com.example.testapp

@@ -266,6 +266,11 @@ class LifecycleContractTests(unittest.TestCase):
         self.assertIn("FACTORY_RECOVERY_FLOOR_GIB", script)
         self.assertIn("storage_admission", script)
 
+    def test_hosted_ci_declares_a_bounded_growth_tolerance(self):
+        workflow = (ROOT / ".github" / "workflows" / "checks.yml").read_text()
+        self.assertIn("FACTORY_STORAGE_GROWTH_TOLERANCE_MIB: 768", workflow)
+        self.assertIn("Do not raise this bound again", workflow)
+
     def test_simulator_creation_failure_writes_combined_receipt(self):
         with tempfile.TemporaryDirectory() as directory:
             app = Path(directory) / "Probe"

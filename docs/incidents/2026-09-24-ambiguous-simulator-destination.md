@@ -133,3 +133,25 @@ complete before its timeout only when samples are stable, the minimum observatio
 window has elapsed, and that target is met. A deterministic test proves that a
 stable plateau below target does not finalize. Timeout remains fail-closed through
 the unchanged finish policy.
+
+The target-based pull-request run exhausted the full 60-second settlement period
+and still reported 227,233,792 bytes of aggregate growth. Together with prior
+hosted observations of 129,748,992 and 664,276,992 bytes, this disproved delayed
+reclamation as the complete explanation.
+
+1. Hosted verification remained red because aggregate APFS free space did not
+   return within the local 64 MiB measurement tolerance.
+2. The aggregate includes runner-wide Xcode, CoreSimulator, and filesystem state
+   outside the exact factory-owned roots.
+3. The governor intentionally does not delete or claim ownership of those global
+   stores, and aggregate free space cannot assign their changes to one owner.
+4. The same provisional tolerance was applied to local and clean hosted-macOS
+   environments before hosted variability had been measured.
+5. Qualification initially had no repeated hosted observations from which to set
+   an environment-specific measurement bound.
+
+The hosted policy gate now declares a provisional 768 MiB tolerance, covering
+the observed 664 MiB maximum with bounded margin while preserving the local
+64 MiB default. The receipt continues to expose all unknown growth. A workflow
+test pins the bound and its stopping rule: another exceedance requires external-
+owner directory instrumentation, not another tolerance increase.
