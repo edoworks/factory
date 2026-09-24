@@ -6,8 +6,9 @@ iOS/iPadOS apps through a deterministic paved road.
 ## Quick Start
 
 ```bash
-# Download the exact verified release used by this quick start
+# Download the generated source archive for the exact verified prerelease tag
 FACTORY_VERSION=0.1.0-rc3
+FACTORY_REVISION=a627c88ff9382b4a24887b0a4a5418e8f6c6de7e
 curl -fsSL "https://github.com/edoworks/factory/archive/refs/tags/v${FACTORY_VERSION}.tar.gz" | tar xz
 mv "factory-${FACTORY_VERSION}" factory
 
@@ -63,9 +64,15 @@ No AI agent, cloud provider, or external service is required at runtime.
 ## License
 
 MIT — see [LICENSE](LICENSE). The "edoworks" name and logo are trademarks of
-the owner and are not covered by the MIT license.
+the owner and are not covered by the MIT license; see
+[TRADEMARKS.md](TRADEMARKS.md).
 
 ## Status
 
 Pre-v1.0. The factory is being qualified by its founder (customer zero) through
 two reference apps before any general usability claim is made.
+
+The documented `v0.1.0-rc3` GitHub release is a mutable prerelease with no
+attached assets. Quick Start uses GitHub's generated archive for that exact tag,
+not a separately uploaded release artifact. `FACTORY_REVISION` records the
+source commit expected at the tag so movement is detectable.

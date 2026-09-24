@@ -9,9 +9,9 @@ Reference: [PRD](https://github.com/edoworks/sf0.8/blob/main/docs/PRD-edoworks-f
 
 Edoworks Factory is a public, versioned, MIT-licensed software factory that
 produces offline-first iOS/iPadOS apps through a deterministic paved road. The
-founder is customer zero. The factory is downloaded as an immutable release
-artifact, used to scaffold and verify an app, and produces human-gated release
-candidates for Apple App Store submission.
+founder is customer zero. The factory is downloaded from the generated source
+archive for an exact release tag, used to scaffold and verify an app, and
+produces human-gated release candidates for Apple App Store submission.
 
 The factory does not autonomously publish. It does not promise Apple approval
 dates. It does not manage multiple tenants until v1.0.0.
@@ -120,8 +120,10 @@ Track these, not app count:
 - `v1.0.0` — Stable public compatibility contract (only after second
   independent consumer and paid pilot)
 
-Every factory correction is a new immutable version. The reference app pins to
-an exact release artifact digest and upgrades explicitly.
+Every factory correction is a new tagged version. The reference app records the
+exact tag and source revision and upgrades explicitly. Release records must
+state whether they are prereleases, immutable, and accompanied by attached
+assets rather than implying those properties from the tag alone.
 
 ## Stop Rules
 
@@ -180,9 +182,10 @@ state only; it never sends data externally.
 ## Trademark Policy
 
 The MIT license covers the code. The "edoworks" name and logo are brand
-trademarks of the owner. Others may use, modify, and distribute the code under
-the MIT license but may not use the "edoworks" name, logo, or brand for their
-own products or services without written permission from the owner.
+trademarks of the owner under [TRADEMARKS.md](TRADEMARKS.md). Others may use,
+modify, and distribute the code under the MIT license but may not use the
+"edoworks" name, logo, or brand for their own products or services without
+written permission from the owner.
 
 ## Brand Reconciliation
 
