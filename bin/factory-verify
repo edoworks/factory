@@ -6,6 +6,20 @@ set -euo pipefail
 #
 # Must be run from the app directory (where project.yml lives).
 
+RETAIN_ARCHIVE=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --retain-archive)
+      RETAIN_ARCHIVE=true
+      shift
+      ;;
+    *)
+      echo "ERROR: Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
 if [ ! -f "project.yml" ]; then
   echo "ERROR: No project.yml found. Run this from the app root directory."
   exit 1
@@ -17,6 +31,25 @@ EVIDENCE_FILE=".factory-verify-result.json"
 PASS=0
 FAIL=0
 STEPS=()
+GIB=$((1024 * 1024 * 1024))
+VERIFY_MAX_GIB="${FACTORY_VERIFY_MAX_GIB:-8}"
+RECOVERY_FLOOR_GIB="${FACTORY_RECOVERY_FLOOR_GIB:-10}"
+GROWTH_TOLERANCE_MIB="${FACTORY_STORAGE_GROWTH_TOLERANCE_MIB:-64}"
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+RUN_ROOT=".factory/runs/$RUN_ID"
+DERIVED_DATA_PATH="$RUN_ROOT/DerivedData"
+ARCHIVE_PATH="$RUN_ROOT/$APP_NAME.xcarchive"
+RESERVATION_ID=""
+FINALIZED=false
+GENERATED_PROJECT=false
+PROJECT_WAS_MISSING=false
+FACTORY_IPHONE_SIM=""
+FACTORY_IPAD_SIM=""
+OWNED_ROOT_ARGUMENTS=(--owned-root "$RUN_ROOT")
+if [ ! -f "$APP_NAME.xcodeproj/project.pbxproj" ]; then
+  PROJECT_WAS_MISSING=true
+  OWNED_ROOT_ARGUMENTS+=(--owned-root "$APP_NAME.xcodeproj")
+fi
 
 record() {
   local name="$1"
@@ -30,30 +63,156 @@ record() {
   fi
 }
 
+observe_storage() {
+  python3 "$FACTORY_ROOT/scripts/factory_storage.py" observe "$RESERVATION_ID" --path / >/dev/null 2>&1 || true
+}
+
+retire_simulators() {
+  local failed=0
+  if [ -n "$FACTORY_IPHONE_SIM" ]; then
+    xcrun simctl shutdown "$FACTORY_IPHONE_SIM" >/dev/null 2>&1 || true
+    if xcrun simctl delete "$FACTORY_IPHONE_SIM" >/dev/null 2>&1; then
+      FACTORY_IPHONE_SIM=""
+    else
+      failed=1
+    fi
+  fi
+  if [ -n "$FACTORY_IPAD_SIM" ]; then
+    xcrun simctl shutdown "$FACTORY_IPAD_SIM" >/dev/null 2>&1 || true
+    if xcrun simctl delete "$FACTORY_IPAD_SIM" >/dev/null 2>&1; then
+      FACTORY_IPAD_SIM=""
+    else
+      failed=1
+    fi
+  fi
+  return "$failed"
+}
+
+write_result() {
+  local storage_receipt="$1"
+  local result="{"
+  result+="  \"schema_version\": 1,"
+  result+="  \"command\": \"factory verify\","
+  result+="  \"app_name\": \"$APP_NAME\","
+  result+="  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
+  result+="  \"passed\": $PASS,"
+  result+="  \"failed\": $FAIL,"
+  result+="  \"storage\": $storage_receipt,"
+  result+="  \"steps\": ["
+  for i in "${!STEPS[@]}"; do
+    if [ "$i" -lt $((${#STEPS[@]} - 1)) ]; then
+      result+="${STEPS[$i]},"
+    else
+      result+="${STEPS[$i]}"
+    fi
+  done
+  result+="  ]"
+  result+="}"
+  echo "$result" | python3 -m json.tool 2>/dev/null || echo "$result"
+  echo "$result" | python3 -m json.tool > "$EVIDENCE_FILE" 2>/dev/null || echo "$result" > "$EVIDENCE_FILE"
+}
+
+finish_interrupted() {
+  local exit_status=$?
+  if [ "$FINALIZED" != true ] && [ -n "$RESERVATION_ID" ]; then
+    retire_simulators || true
+    mkdir -p "$RUN_ROOT"
+    local finish_arguments=(--outcome INTERRUPTED --retained-artifact "$RUN_ROOT")
+    if [ "$PROJECT_WAS_MISSING" = true ] && [ -e "$APP_NAME.xcodeproj" ]; then
+      finish_arguments+=(--retained-artifact "$APP_NAME.xcodeproj")
+    fi
+    if [ -n "$FACTORY_IPHONE_SIM" ]; then
+      finish_arguments+=(--retained-artifact "coresimulator-device:$FACTORY_IPHONE_SIM")
+    fi
+    if [ -n "$FACTORY_IPAD_SIM" ]; then
+      finish_arguments+=(--retained-artifact "coresimulator-device:$FACTORY_IPAD_SIM")
+    fi
+    local storage_receipt
+    storage_receipt=$(python3 "$FACTORY_ROOT/scripts/factory_storage.py" finish "$RESERVATION_ID" \
+      --path / \
+      "${finish_arguments[@]}" 2>/dev/null) || storage_receipt='{"schema_version":1,"decision":"BLOCKED","error":"storage finalization failed"}'
+    printf '%s\n' "$storage_receipt" > "$RUN_ROOT/storage-receipt.json"
+    record "interrupted" "fail" "Verification exited before normal finalization"
+    write_result "$storage_receipt"
+    FINALIZED=true
+  fi
+  trap - EXIT
+  exit "$exit_status"
+}
+
+trap finish_interrupted EXIT
+
 echo "Verifying $APP_NAME..."
 
 # Find available iPhone and iPad simulators
 FACTORY_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+# Reserve capacity before any project generation or Xcode work. The default
+# profile is derived from the measured 2.4 GiB XCTest peak with build/archive
+# margin and remains configurable during qualification.
+if ! STORAGE_RESERVATION=$(python3 "$FACTORY_ROOT/scripts/factory_storage.py" reserve \
+  --path / \
+  --owner "factory-verify:$APP_NAME" \
+  --holder-pid "$$" \
+  --reserve-bytes "$((VERIFY_MAX_GIB * GIB))" \
+  --recovery-floor-bytes "$((RECOVERY_FLOOR_GIB * GIB))" \
+  --ttl-seconds 14400 \
+  "${OWNED_ROOT_ARGUMENTS[@]}"); then
+  echo "$STORAGE_RESERVATION" | python3 -m json.tool 2>/dev/null || echo "$STORAGE_RESERVATION"
+  echo "$STORAGE_RESERVATION" | python3 -m json.tool > "$EVIDENCE_FILE" 2>/dev/null || echo "$STORAGE_RESERVATION" > "$EVIDENCE_FILE"
+  FINALIZED=true
+  exit 1
+fi
+RESERVATION_ID=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["reservation_id"])' "$STORAGE_RESERVATION")
+mkdir -p "$DERIVED_DATA_PATH"
+
 SIM_INFO=$(python3 "$FACTORY_ROOT/bin/find-simulators.py" 2>/dev/null || echo "IPHONE=
 IPAD=")
 IPHONE_SIM=$(echo "$SIM_INFO" | grep "^IPHONE=" | cut -d= -f2)
 IPAD_SIM=$(echo "$SIM_INFO" | grep "^IPAD=" | cut -d= -f2)
+IPHONE_NAME=$(echo "$SIM_INFO" | grep "^IPHONE_NAME=" | cut -d= -f2)
+IPAD_NAME=$(echo "$SIM_INFO" | grep "^IPAD_NAME=" | cut -d= -f2)
+IPHONE_TYPE=$(echo "$SIM_INFO" | grep "^IPHONE_TYPE=" | cut -d= -f2)
+IPHONE_RUNTIME=$(echo "$SIM_INFO" | grep "^IPHONE_RUNTIME=" | cut -d= -f2)
+IPAD_TYPE=$(echo "$SIM_INFO" | grep "^IPAD_TYPE=" | cut -d= -f2)
+IPAD_RUNTIME=$(echo "$SIM_INFO" | grep "^IPAD_RUNTIME=" | cut -d= -f2)
 
 if [ -z "$IPHONE_SIM" ]; then
-  echo "ERROR: No iPhone simulator available"
+  record "simulators" "fail" "No iPhone simulator available"
+  STORAGE_RECEIPT=$(python3 "$FACTORY_ROOT/scripts/factory_storage.py" finish "$RESERVATION_ID" \
+    --path / \
+    --outcome FAILED \
+    --retained-artifact "$RUN_ROOT")
+  write_result "$STORAGE_RECEIPT"
+  FINALIZED=true
   exit 1
 fi
 if [ -z "$IPAD_SIM" ]; then
   echo "WARNING: No iPad simulator available, skipping iPad build"
 fi
 
-IPHONE_DEST="platform=iOS Simulator,name=$IPHONE_SIM"
-IPAD_DEST="platform=iOS Simulator,name=$IPAD_SIM"
+if ! FACTORY_IPHONE_SIM=$(xcrun simctl create "Factory-$RUN_ID-iPhone" "$IPHONE_TYPE" "$IPHONE_RUNTIME"); then
+  record "simulators" "fail" "Could not create the run-owned iPhone simulator"
+  exit 1
+fi
+IPHONE_SIM="$FACTORY_IPHONE_SIM"
+if [ -n "$IPAD_SIM" ]; then
+  if FACTORY_IPAD_SIM=$(xcrun simctl create "Factory-$RUN_ID-iPad" "$IPAD_TYPE" "$IPAD_RUNTIME"); then
+    IPAD_SIM="$FACTORY_IPAD_SIM"
+  else
+    IPAD_SIM=""
+    record "simulators" "fail" "Could not create the run-owned iPad simulator"
+  fi
+fi
+
+IPHONE_DEST="platform=iOS Simulator,id=$IPHONE_SIM"
+IPAD_DEST="platform=iOS Simulator,id=$IPAD_SIM"
 
 # Generate project if needed
 if [ ! -d "*.xcodeproj" ] && [ ! -f "$APP_NAME.xcodeproj/project.pbxproj" ]; then
   if command -v xcodegen >/dev/null 2>&1; then
     xcodegen generate 2>&1
+    GENERATED_PROJECT=true
     record "xcodegen" "pass" "Project generated"
   else
     record "xcodegen" "fail" "xcodegen not found"
@@ -65,23 +224,27 @@ if xcodebuild build \
   -project "$APP_NAME.xcodeproj" \
   -scheme "$SCHEME" \
   -destination "$IPHONE_DEST" \
+  -derivedDataPath "$DERIVED_DATA_PATH" \
   -quiet 2>&1; then
-  record "build" "pass" "Build succeeded on $IPHONE_SIM"
+  record "build" "pass" "Build succeeded on $IPHONE_NAME ($IPHONE_SIM)"
 else
   record "build" "fail" "Build failed"
 fi
+observe_storage
 
 # Unit tests
 if xcodebuild test \
   -project "$APP_NAME.xcodeproj" \
   -scheme "$SCHEME" \
   -destination "$IPHONE_DEST" \
+  -derivedDataPath "$DERIVED_DATA_PATH" \
   -only-testing:"$SCHEME"Tests \
   -quiet 2>&1; then
   record "unit_tests" "pass" "Unit tests passed"
 else
   record "unit_tests" "fail" "Unit tests failed (may be no tests yet)"
 fi
+observe_storage
 
 # iPad build (universal verification)
 if [ -n "$IPAD_SIM" ]; then
@@ -89,20 +252,23 @@ if [ -n "$IPAD_SIM" ]; then
     -project "$APP_NAME.xcodeproj" \
     -scheme "$SCHEME" \
     -destination "$IPAD_DEST" \
+    -derivedDataPath "$DERIVED_DATA_PATH" \
     -quiet 2>&1; then
-    record "ipad_build" "pass" "Build succeeded on $IPAD_SIM"
+    record "ipad_build" "pass" "Build succeeded on $IPAD_NAME ($IPAD_SIM)"
   else
     record "ipad_build" "fail" "iPad build failed"
   fi
 else
   record "ipad_build" "skip" "No iPad simulator available"
 fi
+observe_storage
 
 # Static analysis (Swift compiler warnings as errors check)
 ANALYZE_RESULT=$(xcodebuild analyze \
   -project "$APP_NAME.xcodeproj" \
   -scheme "$SCHEME" \
   -destination "$IPHONE_DEST" \
+  -derivedDataPath "$DERIVED_DATA_PATH" \
   2>&1 || true)
 if echo "$ANALYZE_RESULT" | grep -q "warning:"; then
   WARNING_COUNT=$(echo "$ANALYZE_RESULT" | grep -c "warning:" || true)
@@ -110,13 +276,14 @@ if echo "$ANALYZE_RESULT" | grep -q "warning:"; then
 else
   record "static_analysis" "pass" "No warnings"
 fi
+observe_storage
 
 # Archive (distribution)
-ARCHIVE_PATH="/tmp/$APP_NAME-$(date +%s).xcarchive"
 if xcodebuild archive \
   -project "$APP_NAME.xcodeproj" \
   -scheme "$SCHEME" \
   -archivePath "$ARCHIVE_PATH" \
+  -derivedDataPath "$DERIVED_DATA_PATH" \
   -destination 'generic/platform=iOS' \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
@@ -125,28 +292,73 @@ if xcodebuild archive \
 else
   record "archive" "fail" "Unsigned verification archive failed"
 fi
+observe_storage
 
-# Output JSON evidence
-RESULT="{"
-RESULT+="  \"schema_version\": 1,"
-RESULT+="  \"command\": \"factory verify\","
-RESULT+="  \"app_name\": \"$APP_NAME\","
-RESULT+="  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
-RESULT+="  \"passed\": $PASS,"
-RESULT+="  \"failed\": $FAIL,"
-RESULT+="  \"steps\": ["
-for i in "${!STEPS[@]}"; do
-  if [ "$i" -lt $((${#STEPS[@]} - 1)) ]; then
-    RESULT+="${STEPS[$i]},"
-  else
-    RESULT+="${STEPS[$i]}"
+if retire_simulators; then
+  record "simulator_cleanup" "pass" "Run-owned simulators retired"
+else
+  record "simulator_cleanup" "fail" "A run-owned simulator could not be retired"
+fi
+observe_storage
+
+OUTCOME="FAILED"
+CLEANUP_RECLAIMED_BYTES=0
+ATTRIBUTED_PERSISTENT_BYTES=0
+FINISH_ARGUMENTS=(--path /)
+if [ "$FAIL" -eq 0 ]; then
+  OUTCOME="PASSED"
+  RUN_SIZE_KIB=$(du -sk "$RUN_ROOT" | awk '{print $1}')
+  if [ "$RETAIN_ARCHIVE" = true ]; then
+    RETAINED_ARCHIVE=".factory/artifacts/archives/${APP_NAME}-${RUN_ID}.xcarchive"
+    mkdir -p "$(dirname "$RETAINED_ARCHIVE")"
+    mv "$ARCHIVE_PATH" "$RETAINED_ARCHIVE"
+    ATTRIBUTED_PERSISTENT_BYTES=$(du -sk "$RETAINED_ARCHIVE" | awk '{print $1 * 1024}')
+    FINISH_ARGUMENTS+=(--retained-artifact "$RETAINED_ARCHIVE")
   fi
-done
-RESULT+="  ]"
-RESULT+="}"
+  rm -rf "$RUN_ROOT"
+  if [ "$GENERATED_PROJECT" = true ]; then
+    rm -rf "$APP_NAME.xcodeproj"
+  fi
+  CLEANUP_RECLAIMED_BYTES=$((RUN_SIZE_KIB * 1024 - ATTRIBUTED_PERSISTENT_BYTES))
+  if [ "$CLEANUP_RECLAIMED_BYTES" -lt 0 ]; then
+    CLEANUP_RECLAIMED_BYTES=0
+  fi
+else
+  FINISH_ARGUMENTS+=(--retained-artifact "$RUN_ROOT")
+  if [ "$GENERATED_PROJECT" = true ]; then
+    FINISH_ARGUMENTS+=(--retained-artifact "$APP_NAME.xcodeproj")
+  fi
+fi
+if [ -n "$FACTORY_IPHONE_SIM" ]; then
+  FINISH_ARGUMENTS+=(--retained-artifact "coresimulator-device:$FACTORY_IPHONE_SIM")
+fi
+if [ -n "$FACTORY_IPAD_SIM" ]; then
+  FINISH_ARGUMENTS+=(--retained-artifact "coresimulator-device:$FACTORY_IPAD_SIM")
+fi
 
-echo "$RESULT" | python3 -m json.tool 2>/dev/null || echo "$RESULT"
-echo "$RESULT" > "$EVIDENCE_FILE"
+# CoreSimulator and APFS can reclaim deleted run-owned state asynchronously.
+# Wait for bounded free-space stability before classifying persistent growth.
+python3 "$FACTORY_ROOT/scripts/factory_storage.py" settle "$RESERVATION_ID" \
+  --path / \
+  --timeout-seconds 60 \
+  --interval-seconds 1 \
+  --stable-samples 3 \
+  --delta-bytes $((4 * 1024 * 1024)) >/dev/null
+
+STORAGE_RECEIPT=$(python3 "$FACTORY_ROOT/scripts/factory_storage.py" finish "$RESERVATION_ID" \
+  --outcome "$OUTCOME" \
+  --cleanup-reclaimed-bytes "$CLEANUP_RECLAIMED_BYTES" \
+  --attributed-persistent-bytes "$ATTRIBUTED_PERSISTENT_BYTES" \
+  --growth-tolerance-bytes "$((GROWTH_TOLERANCE_MIB * 1024 * 1024))" \
+  "${FINISH_ARGUMENTS[@]}")
+FINALIZED=true
+
+STORAGE_POLICY_STATUS=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["storage_policy_status"])' "$STORAGE_RECEIPT")
+if [ "$STORAGE_POLICY_STATUS" != "PASS" ]; then
+  record "storage_policy" "fail" "Unknown persistent growth exceeded the configured measurement tolerance"
+fi
+
+write_result "$STORAGE_RECEIPT"
 
 if [ "$FAIL" -gt 0 ]; then
   exit 1

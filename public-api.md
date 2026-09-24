@@ -13,7 +13,8 @@ release evidence → human-authorized Apple submission
 ### factory doctor
 
 Verify toolchain readiness. Checks Xcode, Swift, Git, xcodegen, simulators,
-and disk space. Produces a JSON evidence receipt on stdout.
+and whether the default verification workload fits above the configured storage
+recovery floor. Produces a JSON evidence receipt on stdout.
 
 ```
 factory doctor
@@ -42,7 +43,7 @@ Creates a new directory with:
 Run build, tests, static analysis, and archive on the current app.
 
 ```
-factory verify
+factory verify [--retain-archive]
 ```
 
 Must be run from the app root directory (where project.yml lives).
@@ -54,7 +55,43 @@ Steps:
 4. Static analysis
 5. Archive (requires development team config)
 
-Produces a JSON evidence receipt (.factory-verify-result.json).
+Before Xcode starts, verification atomically reserves its maximum storage
+budget. Build state and the unsigned archive use a run-scoped
+`.factory/runs/<run-id>/` directory. Verification creates uniquely identified
+run-owned simulators from installed device types and retires those devices
+through `simctl`, avoiding mutation of a developer's existing simulator data.
+A successful ordinary run removes its reproducible state; a failed or
+interrupted run preserves and reports filesystem state for diagnosis while
+still retiring run-owned simulator devices. `--retain-archive` promotes the successful archive to
+`.factory/artifacts/archives/` instead of deleting it.
+
+CoreSimulator and APFS may reclaim deleted state asynchronously. Verification
+waits for a bounded period of free-space stability after cleanup before it
+classifies persistent growth; it never converts a timeout into a cleanup claim.
+
+Produces a JSON evidence receipt (`.factory-verify-result.json`) containing
+starting, minimum, and ending free space; peak and persistent consumption;
+reservation and recovery-floor bytes; reclaimed bytes; owned roots; and
+retained artifacts.
+
+The provisional defaults are an 8 GiB verification reservation and 10 GiB
+recovery floor. They are based on an observed 2.4 GiB single-destination XCTest
+peak plus build/archive margin and remain configurable while qualification
+collects representative peaks:
+
+```bash
+FACTORY_VERIFY_MAX_GIB=8 FACTORY_RECOVERY_FLOOR_GIB=10 factory verify
+```
+
+APFS and Xcode may change shared host state while run-owned paths are removed.
+The receipt therefore reports unknown growth separately and applies a
+provisional 64 MiB measurement tolerance, configurable with
+`FACTORY_STORAGE_GROWTH_TOLERANCE_MIB`. Growth above that bound fails the
+verification storage policy instead of being hidden by cleanup.
+
+The reservation ledger is local, contains no product content, and defaults to
+`~/Library/Application Support/EdoworksFactory/storage`. Override its root with
+`FACTORY_STORAGE_STATE` for isolated CI or testing.
 
 ### factory uninstall
 

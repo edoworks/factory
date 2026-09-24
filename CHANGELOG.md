@@ -5,6 +5,18 @@ All notable changes to Edoworks Factory are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Workload-aware storage admission, atomic reservations, lease reconciliation,
+  scoped Xcode build state, and storage lifecycle receipts (issue #60).
+
+### Changed
+
+- Successful ordinary verification now removes only its run-owned build state
+  and unsigned archive; `--retain-archive` explicitly promotes an archive.
+
 ## [v0.1.0-rc3] - 2026-09-22
 
 ### Fixed

@@ -40,6 +40,7 @@ explicit human authorization.
 
 - SwiftUI universal app template (iPhone + iPad)
 - Lifecycle scripts: `factory doctor`, `factory init`, `factory verify`, `factory uninstall`
+- Storage admission, reservations, scoped build state, and per-run receipts
 - Apple distribution capability registry and validator
 - Privacy manifest template (`PrivacyInfo.xcprivacy`)
 - Release-criteria schema and evidence generator
@@ -54,6 +55,12 @@ explicit human authorization.
 - Git
 
 No AI agent, cloud provider, or external service is required at runtime.
+
+`factory doctor` and `factory verify` preserve a configurable recovery floor
+and reserve capacity for the verification workload before Xcode starts. An
+ordinary successful verification removes only its own reproducible build state
+and unsigned archive. Use `factory verify --retain-archive` only when that
+archive is an intentional retained artifact.
 
 ## Documentation
 
