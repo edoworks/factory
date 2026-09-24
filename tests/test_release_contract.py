@@ -4,9 +4,20 @@ import urllib.request
 import urllib.error
 import re
 import json
+import os
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+
+
+def _github_json(url: str) -> dict:
+    req = urllib.request.Request(url)
+    req.add_header("Accept", "application/vnd.github+json")
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        req.add_header("Authorization", f"Bearer {token}")
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read())
 
 
 def _extract_factory_version(readme: str) -> str:
@@ -63,10 +74,7 @@ class ReleaseContractTests(unittest.TestCase):
             f"v{version}"
         )
         try:
-            req = urllib.request.Request(api_url)
-            req.add_header("Accept", "application/vnd.github+json")
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                release = json.loads(resp.read())
+            release = _github_json(api_url)
         except urllib.error.HTTPError as exc:
             self.fail(f"GitHub release API returned {exc.code} for {version}")
 
@@ -97,14 +105,21 @@ class ReleaseContractTests(unittest.TestCase):
             f"v{version}"
         )
         try:
-            req = urllib.request.Request(ref_url)
-            req.add_header("Accept", "application/vnd.github+json")
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                tag_ref = json.loads(resp.read())
+            tag_ref = _github_json(ref_url)
         except urllib.error.HTTPError as exc:
             self.fail(f"GitHub tag API returned {exc.code} for {version}")
+        tag_object = tag_ref.get("object", {})
+        if tag_object.get("type") == "tag":
+            try:
+                annotated_tag = _github_json(
+                    "https://api.github.com/repos/edoworks/factory/git/tags/"
+                    f"{tag_object.get('sha', '')}"
+                )
+            except urllib.error.HTTPError as exc:
+                self.fail(f"GitHub annotated tag API returned {exc.code} for {version}")
+            tag_object = annotated_tag.get("object", {})
         self.assertEqual(
-            tag_ref.get("object", {}).get("sha"),
+            tag_object.get("sha"),
             _extract_factory_revision(readme),
             "Release tag moved from the documented source revision",
         )
@@ -136,12 +151,13 @@ SOFTWARE.
 """
         self.assertEqual(license_text, expected_license)
 
-        trademark_text = (ROOT / "TRADEMARKS.md").read_text()
-        self.assertIn(
-            'The "edoworks" name and logo are trademarks of the owner.',
-            trademark_text,
-        )
-        self.assertIn("The MIT license in\n`LICENSE` covers the code only.", trademark_text)
+        expected_trademark = """# Trademark Notice
+
+The "edoworks" name and logo are trademarks of the owner. The MIT license in
+`LICENSE` covers the code only. Use of the "edoworks" name, logo, or brand for
+products or services requires written permission from the owner.
+"""
+        self.assertEqual((ROOT / "TRADEMARKS.md").read_text(), expected_trademark)
 
 
 if __name__ == "__main__":

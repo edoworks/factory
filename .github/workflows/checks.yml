@@ -37,6 +37,8 @@ jobs:
         run: python3 -m json.tool doctor-receipt.json >/dev/null
 
       - name: Run Python unit tests
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
       - name: Verify template builds
