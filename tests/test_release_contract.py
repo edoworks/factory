@@ -71,6 +71,28 @@ class ReleaseContractTests(unittest.TestCase):
             release.get("prerelease", True),
             "Release should be marked prerelease for pre-v1.0",
         )
+        self.assertFalse(
+            release.get("immutable", False),
+            "README says the documented release is mutable",
+        )
+        self.assertEqual(
+            release.get("assets"),
+            [],
+            "README says the documented release has no attached assets",
+        )
+
+    def test_license_contains_only_standard_mit_text(self):
+        license_text = (ROOT / "LICENSE").read_text()
+
+        self.assertTrue(license_text.startswith("MIT License\n"))
+        self.assertTrue(
+            license_text.rstrip().endswith(
+                "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER "
+                "DEALINGS IN THE\nSOFTWARE."
+            )
+        )
+        self.assertNotIn("Brand Notice", license_text)
+        self.assertTrue((ROOT / "TRADEMARKS.md").is_file())
 
 
 if __name__ == "__main__":
