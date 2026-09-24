@@ -245,7 +245,7 @@ class ReservationStore:
     def settle(
         self, reservation_id: str, *, path: Path, timeout_seconds: int,
         interval_seconds: float, stable_samples: int, delta_bytes: int,
-        minimum_wait_seconds: int = 0,
+        minimum_wait_seconds: int = 0, minimum_available_bytes: int = 0,
     ) -> dict:
         started = time.monotonic()
         deadline = started + timeout_seconds
@@ -263,7 +263,8 @@ class ReservationStore:
             else:
                 stable = 0
             now = time.monotonic()
-            if (stable >= stable_samples and now - started >= minimum_wait_seconds) or now >= deadline:
+            target_met = available >= minimum_available_bytes
+            if (stable >= stable_samples and now - started >= minimum_wait_seconds and target_met) or now >= deadline:
                 break
             previous = available
             time.sleep(interval_seconds)
@@ -285,6 +286,8 @@ class ReservationStore:
             "minimum_available_bytes": minimum,
             "samples": samples,
             "settled": stable >= stable_samples,
+            "minimum_available_target_bytes": minimum_available_bytes,
+            "target_met": available >= minimum_available_bytes,
         }
 
     def finish(
@@ -376,6 +379,7 @@ def parser() -> argparse.ArgumentParser:
     settle.add_argument("--stable-samples", type=positive_int, default=3)
     settle.add_argument("--delta-bytes", type=positive_int, default=4 * 1024**2)
     settle.add_argument("--minimum-wait-seconds", type=positive_int, default=0)
+    settle.add_argument("--minimum-available-bytes", type=positive_int, default=0)
 
     finish = subparsers.add_parser("finish")
     finish.add_argument("reservation_id")
@@ -419,6 +423,7 @@ def main() -> int:
                 stable_samples=args.stable_samples,
                 delta_bytes=args.delta_bytes,
                 minimum_wait_seconds=args.minimum_wait_seconds,
+                minimum_available_bytes=args.minimum_available_bytes,
             )
         else:
             receipt = store.finish(

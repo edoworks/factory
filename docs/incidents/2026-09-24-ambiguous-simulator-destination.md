@@ -110,3 +110,26 @@ The correction requires both stable samples and a 15-second minimum observation
 window while retaining the 60-second hard timeout and strict 64 MiB policy. A
 deterministic test holds free space stable for the first three samples and proves
 that settlement continues until the minimum window is reached.
+
+## Post-Merge Recovery-Target Follow-Up
+
+The pull-request check passed with the minimum observation window, but the
+merged-main check later failed with 664,276,992 bytes of unknown persistent
+growth after the same 15-second window.
+
+1. Main failed because settlement finalized while free space remained well below
+   the successful-run policy envelope.
+2. It finalized because the samples were stable after the minimum wait.
+3. Stability only proves that free space is not changing at that moment; it does
+   not prove that asynchronous reclamation has reached the required target.
+4. The first correction delayed evaluation but retained stability as the success
+   criterion.
+5. Tests covered an early stable plateau but did not require the plateau to be
+   within the permitted persistent-growth envelope.
+
+The correction derives a minimum available-space target from starting capacity,
+attributed retained bytes, and the declared growth tolerance. Settlement can
+complete before its timeout only when samples are stable, the minimum observation
+window has elapsed, and that target is met. A deterministic test proves that a
+stable plateau below target does not finalize. Timeout remains fail-closed through
+the unchanged finish policy.

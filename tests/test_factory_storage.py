@@ -186,6 +186,35 @@ class ReservationStoreTests(unittest.TestCase):
         self.assertTrue(result["settled"])
         self.assertEqual(sleep.call_count, 3)
 
+    @mock.patch("scripts.factory_storage.time.sleep")
+    @mock.patch("scripts.factory_storage.time.monotonic")
+    @mock.patch("scripts.factory_storage.filesystem_usage")
+    def test_settle_rejects_stability_below_recovery_target(self, usage, monotonic, sleep):
+        usage.side_effect = [
+            mock.Mock(total=100 * GIB, free=40 * GIB),
+            mock.Mock(total=100 * GIB, free=39 * GIB),
+            mock.Mock(total=100 * GIB, free=39 * GIB),
+            mock.Mock(total=100 * GIB, free=39 * GIB),
+            mock.Mock(total=100 * GIB, free=39 * GIB),
+            mock.Mock(total=100 * GIB, free=40 * GIB),
+            mock.Mock(total=100 * GIB, free=40 * GIB),
+            mock.Mock(total=100 * GIB, free=40 * GIB),
+            mock.Mock(total=100 * GIB, free=40 * GIB),
+        ]
+        monotonic.side_effect = [0, 1, 2, 3, 4, 5, 6, 7]
+        with mock.patch("scripts.factory_storage.process_is_same", return_value=True):
+            reserved = self.store.reserve(
+                path=Path("/"), owner="verify", requested_bytes=8 * GIB,
+                recovery_floor_bytes=10 * GIB, ttl_seconds=60, owned_roots=["run"],
+            )
+        result = self.store.settle(
+            reserved["reservation_id"], path=Path("/"), timeout_seconds=60,
+            interval_seconds=1, stable_samples=3, delta_bytes=4 * 1024**2,
+            minimum_available_bytes=40 * GIB,
+        )
+        self.assertTrue(result["target_met"])
+        self.assertEqual(sleep.call_count, 6)
+
 
 class CommandTests(unittest.TestCase):
     def test_invalid_negative_budget_is_rejected(self):
@@ -218,6 +247,7 @@ class LifecycleContractTests(unittest.TestCase):
         self.assertIn('xcrun simctl delete "$FACTORY_IPHONE_SIM"', script)
         self.assertIn('factory_storage.py" settle', script)
         self.assertIn("--minimum-wait-seconds 15", script)
+        self.assertIn('--minimum-available-bytes "$SETTLEMENT_TARGET_BYTES"', script)
         self.assertIn('write_result "$STORAGE_RECEIPT"', script)
 
     def test_verify_cleanup_is_limited_to_owned_paths(self):
