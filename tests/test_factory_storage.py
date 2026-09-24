@@ -270,8 +270,11 @@ class LifecycleContractTests(unittest.TestCase):
         workflow = (ROOT / ".github" / "workflows" / "checks.yml").read_text()
         self.assertIn("FACTORY_STORAGE_GROWTH_TOLERANCE_MIB: 768", workflow)
         self.assertIn("Do not raise this bound again", workflow)
-        self.assertRegex(workflow, r"(?m)^  policy:\n    name: Factory policy gate\n    runs-on: macos-15\n    timeout-minutes: 12$")
+        self.assertRegex(workflow, r"(?m)^  policy:\n    name: Factory policy gate\n    runs-on: macos-15\n    timeout-minutes: 25$")
         self.assertRegex(workflow, r"(?m)^      - name: Verify template builds\n        timeout-minutes: 8$")
+        self.assertRegex(workflow, r"(?m)^      - name: Verify Mews & Woofs reference app\n        timeout-minutes: 12$")
+        self.assertIn("MewsAndWoofs-iPhone.xcresult", workflow)
+        self.assertIn("MewsAndWoofs-iPad.xcresult", workflow)
 
     def test_simulator_creation_failure_writes_combined_receipt(self):
         with tempfile.TemporaryDirectory() as directory:

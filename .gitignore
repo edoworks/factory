@@ -26,6 +26,12 @@ venv/
 .factory/evidence/
 .factory/artifacts/
 .factory/runs/
+/reference-apps/*/*.xcodeproj/
+/reference-apps/*/.factory/
+/reference-apps/*/.factory-verify.json
+/reference-apps/*/.factory-verify-result.json
+*.xcresult/
+/reference-apps/*/screenshots/
 
 # Secrets — never commit
 *.p12
