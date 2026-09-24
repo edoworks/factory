@@ -343,6 +343,7 @@ python3 "$FACTORY_ROOT/scripts/factory_storage.py" settle "$RESERVATION_ID" \
   --timeout-seconds 60 \
   --interval-seconds 1 \
   --stable-samples 3 \
+  --minimum-wait-seconds 15 \
   --delta-bytes $((4 * 1024 * 1024)) >/dev/null
 
 STORAGE_RECEIPT=$(python3 "$FACTORY_ROOT/scripts/factory_storage.py" finish "$RESERVATION_ID" \

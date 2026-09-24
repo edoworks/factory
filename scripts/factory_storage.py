@@ -244,9 +244,11 @@ class ReservationStore:
 
     def settle(
         self, reservation_id: str, *, path: Path, timeout_seconds: int,
-        interval_seconds: float, stable_samples: int, delta_bytes: int
+        interval_seconds: float, stable_samples: int, delta_bytes: int,
+        minimum_wait_seconds: int = 0,
     ) -> dict:
-        deadline = time.monotonic() + timeout_seconds
+        started = time.monotonic()
+        deadline = started + timeout_seconds
         available = filesystem_usage(path).free
         previous = available
         stable = 0
@@ -260,7 +262,8 @@ class ReservationStore:
                 stable += 1
             else:
                 stable = 0
-            if stable >= stable_samples or time.monotonic() >= deadline:
+            now = time.monotonic()
+            if (stable >= stable_samples and now - started >= minimum_wait_seconds) or now >= deadline:
                 break
             previous = available
             time.sleep(interval_seconds)
@@ -372,6 +375,7 @@ def parser() -> argparse.ArgumentParser:
     settle.add_argument("--interval-seconds", type=float, default=1.0)
     settle.add_argument("--stable-samples", type=positive_int, default=3)
     settle.add_argument("--delta-bytes", type=positive_int, default=4 * 1024**2)
+    settle.add_argument("--minimum-wait-seconds", type=positive_int, default=0)
 
     finish = subparsers.add_parser("finish")
     finish.add_argument("reservation_id")
@@ -414,6 +418,7 @@ def main() -> int:
                 interval_seconds=args.interval_seconds,
                 stable_samples=args.stable_samples,
                 delta_bytes=args.delta_bytes,
+                minimum_wait_seconds=args.minimum_wait_seconds,
             )
         else:
             receipt = store.finish(

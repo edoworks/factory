@@ -90,3 +90,23 @@ require retry-safe finalization and failure-path result assembly. Review also
 found that boot state had been used to choose a source simulator even though the
 verifier creates a fresh device; selection now prefers the newest installed iOS
 runtime, with a multi-runtime test.
+
+## CI Reclamation Plateau Follow-Up
+
+The first pull-request run completed all Xcode work and deleted its run-owned
+state, but failed the 64 MiB unknown-growth policy with 129,748,992 bytes still
+pending reclamation.
+
+1. The receipt finalized while shared filesystem free space was on a short
+   stable plateau after simulator deletion.
+2. Settlement treated three samples within 4 MiB as sufficient regardless of
+   elapsed time.
+3. That rule detected momentary stability, not completion of delayed
+   CoreSimulator reclamation.
+4. The delayed-reclamation test modeled changing samples but not an early stable
+   plateau.
+
+The correction requires both stable samples and a 15-second minimum observation
+window while retaining the 60-second hard timeout and strict 64 MiB policy. A
+deterministic test holds free space stable for the first three samples and proves
+that settlement continues until the minimum window is reached.
