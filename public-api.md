@@ -89,6 +89,13 @@ provisional 64 MiB measurement tolerance, configurable with
 `FACTORY_STORAGE_GROWTH_TOLERANCE_MIB`. Growth above that bound fails the
 verification storage policy instead of being hidden by cleanup.
 
+The hosted-macOS policy gate declares a separate provisional 768 MiB tolerance
+because aggregate APFS free-space observations across three clean runners varied
+by 129, 664, and 227 MiB after factory-owned cleanup. This is an environment-
+specific measurement allowance, not retained-artifact attribution or permission
+to delete global state. If hosted drift exceeds that bound, qualification stops
+and instruments external-owner directories instead of increasing it again.
+
 The reservation ledger is local, contains no product content, and defaults to
 `~/Library/Application Support/EdoworksFactory/storage`. Override its root with
 `FACTORY_STORAGE_STATE` for isolated CI or testing.

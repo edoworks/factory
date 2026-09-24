@@ -164,6 +164,7 @@ if ! STORAGE_RESERVATION=$(python3 "$FACTORY_ROOT/scripts/factory_storage.py" re
   exit 1
 fi
 RESERVATION_ID=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["reservation_id"])' "$STORAGE_RESERVATION")
+STARTING_AVAILABLE_BYTES=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["available_bytes"])' "$STORAGE_RESERVATION")
 mkdir -p "$DERIVED_DATA_PATH"
 
 SIM_INFO=$(python3 "$FACTORY_ROOT/bin/find-simulators.py" 2>/dev/null || echo "IPHONE=
@@ -337,13 +338,19 @@ if [ -n "$FACTORY_IPAD_SIM" ]; then
 fi
 
 # CoreSimulator and APFS can reclaim deleted run-owned state asynchronously.
-# Wait for bounded free-space stability before classifying persistent growth.
+# Require both bounded free-space stability and recovery to the policy target
+# before classifying persistent growth.
+SETTLEMENT_TARGET_BYTES=$((STARTING_AVAILABLE_BYTES - ATTRIBUTED_PERSISTENT_BYTES - GROWTH_TOLERANCE_MIB * 1024 * 1024))
+if [ "$SETTLEMENT_TARGET_BYTES" -lt 0 ]; then
+  SETTLEMENT_TARGET_BYTES=0
+fi
 python3 "$FACTORY_ROOT/scripts/factory_storage.py" settle "$RESERVATION_ID" \
   --path / \
   --timeout-seconds 60 \
   --interval-seconds 1 \
   --stable-samples 3 \
   --minimum-wait-seconds 15 \
+  --minimum-available-bytes "$SETTLEMENT_TARGET_BYTES" \
   --delta-bytes $((4 * 1024 * 1024)) >/dev/null
 
 STORAGE_RECEIPT=$(python3 "$FACTORY_ROOT/scripts/factory_storage.py" finish "$RESERVATION_ID" \
