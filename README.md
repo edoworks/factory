@@ -66,6 +66,7 @@ archive is an intentional retained artifact.
 
 - [CHARTER.md](CHARTER.md) — Founding contract, product laws, authority boundaries
 - [CONTRIBUTING.md](CONTRIBUTING.md) — How to contribute
+- [Mews & Woofs MVP PRD](docs/MewsAndWoofs-PRD.md) — Reference App 2 product contract
 - [SECURITY.md](SECURITY.md) — Security policy
 
 ## License

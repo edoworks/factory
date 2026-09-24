@@ -208,16 +208,20 @@ This charter supersedes the sf0.8 constitution's branding reference for all
 Edoworks Factory purposes. The sf0.8 constitution is preserved as historical
 evidence and is not modified.
 
-## Meow-Capture Lane Decision
+## Mews & Woofs Lane Decision
 
-Meow-capture is explicitly preserved as the **second reference app** (Phase 4)
-for the factory. It is not abandoned. The first reference app (Phase 2) is a
-simpler offline utility with no special permissions, used to prove the factory's
-paved road with the lowest App Review friction.
+Reference App 2 is the bounded **Mews & Woofs** local pet-media creation
+experiment (Phase 4), evolved from the narrower meow-capture contract. It is not
+animal-language translation. The first reference app (Phase 2) remains the
+simpler offline utility used to prove the paved road with lower App Review
+friction.
 
-The meow-capture reference app requires owner-authorized public name,
-physical-device validation, and first real-meow fixture before it can proceed.
-These are tracked in [Issue #12](https://github.com/edoworks/factory/issues/12).
+The implementation is incubated in this repository until a dedicated public
+identity and repository are owner-authorized. Product work follows the canonical
+[MVP PRD](docs/MewsAndWoofs-PRD.md) and the child issues linked from
+[Issue #13](https://github.com/edoworks/factory/issues/13). Public identity,
+physical-device and real-pet validation, Apple operations, and release remain
+separately gated by [Issue #12](https://github.com/edoworks/factory/issues/12).
 
 ## Predecessor Disposition
 
