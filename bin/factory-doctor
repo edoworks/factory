@@ -8,6 +8,10 @@ set -euo pipefail
 PASS=0
 FAIL=0
 CHECKS=()
+FACTORY_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+GIB=$((1024 * 1024 * 1024))
+VERIFY_MAX_GIB="${FACTORY_VERIFY_MAX_GIB:-8}"
+RECOVERY_FLOOR_GIB="${FACTORY_RECOVERY_FLOOR_GIB:-10}"
 
 check() {
   local name="$1"
@@ -68,12 +72,21 @@ else
   check "simulators" "fail" "Cannot list simulators"
 fi
 
-# Disk space (need at least 10 GB free)
-DISK_FREE=$(df -g / 2>/dev/null | tail -1 | awk '{print $4}')
-if [ -n "${DISK_FREE:-}" ] && [ "$DISK_FREE" -ge 10 ]; then
-  check "disk_space" "pass" "${DISK_FREE} GB free"
+# Storage admission for the default verification workload. The 8 GiB workload
+# reserve is based on the observed 2.4 GiB single-destination XCTest peak plus
+# build/archive margin; both values remain configurable while qualification
+# collects representative peaks.
+STORAGE_RECEIPT='{"schema_version":1,"decision":"BLOCKED","error":"storage preflight unavailable"}'
+if STORAGE_RECEIPT=$(python3 "$FACTORY_ROOT/scripts/factory_storage.py" inspect \
+  --path / \
+  --reserve-bytes "$((VERIFY_MAX_GIB * GIB))" \
+  --recovery-floor-bytes "$((RECOVERY_FLOOR_GIB * GIB))"); then
+  check "storage_admission" "pass" "${VERIFY_MAX_GIB} GiB workload reserve above ${RECOVERY_FLOOR_GIB} GiB recovery floor"
 else
-  check "disk_space" "fail" "Less than 10 GB free (found ${DISK_FREE:-unknown} GB)"
+  if [ -z "$STORAGE_RECEIPT" ]; then
+    STORAGE_RECEIPT='{"schema_version":1,"decision":"BLOCKED","error":"storage preflight unavailable"}'
+  fi
+  check "storage_admission" "fail" "Default verification workload cannot be reserved safely"
 fi
 
 # Output JSON evidence
@@ -83,6 +96,7 @@ echo "  \"command\": \"factory doctor\","
 echo "  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
 echo "  \"passed\": $PASS,"
 echo "  \"failed\": $FAIL,"
+echo "  \"storage\": $STORAGE_RECEIPT,"
 echo "  \"checks\": ["
 for i in "${!CHECKS[@]}"; do
   if [ "$i" -lt $((${#CHECKS[@]} - 1)) ]; then

@@ -47,6 +47,15 @@ and are explicitly out of scope.
 Every failure must have a machine-readable classification and a documented
 recovery path. If the factory cannot recover, it must fail safely and report.
 
+### Storage Envelope Law
+
+Disk-expensive work declares and reserves its maximum peak above a recovery
+floor before execution. Successful routine work retains no unexplained bytes:
+persistent growth must belong to a named artifact with an owner and retention
+policy. Automatic cleanup is limited to exact factory-owned reproducible paths;
+source, uncommitted work, promoted artifacts, pinned resources, and global
+developer state are never inferred to be disposable.
+
 ## Paved Road
 
 The factory's public API is one opinionated journey:
@@ -62,9 +71,10 @@ release evidence → human-authorized Apple submission
 Package name: `factory`
 
 Commands:
-- `factory doctor` — verify Xcode, simulators, disk space, and dependencies
+- `factory doctor` — verify Xcode, simulators, storage admission, and dependencies
 - `factory init` — scaffold a new iOS app from the factory template
-- `factory verify` — run build, unit tests, UI tests, static analysis, archive
+- `factory verify` — reserve storage, run build, tests, analysis, and archive in
+  factory-scoped paths, then emit a storage receipt
 - `factory uninstall` — remove factory and residual local state
 
 ## Non-Goals
@@ -94,6 +104,7 @@ Track these, not app count:
 | Apple review outcomes | No template/spam/privacy/metadata rejection |
 | Recovery from deliberate failure | Documented and rehearsed |
 | Second-operator execution | Succeeds without oral help |
+| Successful-run persistent disk growth | Zero except named retained artifacts |
 
 ## Authority Boundaries
 

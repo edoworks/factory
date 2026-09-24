@@ -27,6 +27,7 @@ jobs:
         run: |
           bash -n bin/factory-doctor
           bash -n bin/factory-init
+          bash -n bin/factory-storage
           bash -n bin/factory-verify
           bash -n bin/factory-uninstall
 

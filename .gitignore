@@ -25,6 +25,7 @@ venv/
 # Factory evidence (generated, not committed)
 .factory/evidence/
 .factory/artifacts/
+.factory/runs/
 
 # Secrets — never commit
 *.p12
