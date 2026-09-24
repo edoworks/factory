@@ -17,6 +17,7 @@ jobs:
   policy:
     name: Factory policy gate
     runs-on: macos-15
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
 
@@ -43,6 +44,7 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
       - name: Verify template builds
+        timeout-minutes: 8
         env:
           # Hosted CoreSimulator/APFS drift observed at 129, 664, and 227 MiB.
           # Do not raise this bound again without external-owner attribution.
