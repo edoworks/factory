@@ -8,6 +8,7 @@ iOS/iPadOS apps through a deterministic paved road.
 ```bash
 # Download the generated source archive for the exact verified prerelease tag
 FACTORY_VERSION=0.1.0-rc3
+FACTORY_REVISION=a627c88ff9382b4a24887b0a4a5418e8f6c6de7e
 curl -fsSL "https://github.com/edoworks/factory/archive/refs/tags/v${FACTORY_VERSION}.tar.gz" | tar xz
 mv "factory-${FACTORY_VERSION}" factory
 
@@ -73,4 +74,5 @@ two reference apps before any general usability claim is made.
 
 The documented `v0.1.0-rc3` GitHub release is a mutable prerelease with no
 attached assets. Quick Start uses GitHub's generated archive for that exact tag,
-not a separately uploaded release artifact.
+not a separately uploaded release artifact. `FACTORY_REVISION` records the
+source commit expected at the tag so movement is detectable.
