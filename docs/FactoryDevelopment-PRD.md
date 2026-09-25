@@ -60,9 +60,10 @@ unlisted files and symlinked policy paths fail readiness. Broad GitHub issue
 mutations remain denied. Exact repository-first create, comment, and close
 commands for `edoworks/factory` are interactive `ask` operations; auto mode
 cannot supply that human authorization, and trailing repository overrides are
-denied. Ordinary factory PR integration uses
-only explicitly allowed canonical command forms. Rendered Factory documentation
-review may interactively open only `edoworks/factory` GitHub pages and may run
+denied. Ordinary factory PR integration uses only explicitly allowed canonical
+command forms, with trailing repository overrides denied. Rendered Factory
+documentation review may interactively open one `edoworks/factory` GitHub page
+with no additional target and may run
 the screenshot utility at its fixed home-directory installation; neither
 permission grants content mutation.
 

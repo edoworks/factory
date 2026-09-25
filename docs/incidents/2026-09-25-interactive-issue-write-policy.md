@@ -58,7 +58,18 @@ was installed.
 The correction pins the screenshot command to its home-directory installation,
 denies trailing long and short repository overrides, and skips baseline checks
 only when no baseline files are installed. Regression tests require all three
-properties.
+properties. Follow-up review applied the same override denial to allowed PR
+commands and denied extra arguments or targets on the browser-open command.
+
+The first follow-up test edit failed discovery with an indentation error because
+an assertion intended for the issue-command loop landed after the new PR/open
+assertions. It landed there because the patch context crossed the loop boundary;
+that was not noticed because visual diff inspection preceded execution; execution
+then failed because Python could not import the module; the failure could not be
+mistaken for a product failure because discovery named the exact syntax location;
+the root cause was an unverified structural edit. The correction moved the
+assertion back into the loop, and full Python test discovery remains the
+mechanical recurrence guard required before commit.
 
 ## Boundaries
 

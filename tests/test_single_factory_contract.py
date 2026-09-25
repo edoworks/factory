@@ -93,6 +93,15 @@ class SingleFactoryContractTests(unittest.TestCase):
                 permissions[f"gh issue {command} --repo edoworks/factory *-R*"],
                 "deny",
             )
+        self.assertEqual(
+            permissions["gh pr * --repo edoworks/factory *--repo*"], "deny"
+        )
+        self.assertEqual(
+            permissions["gh pr * --repo edoworks/factory *-R*"], "deny"
+        )
+        self.assertEqual(
+            permissions["open https://github.com/edoworks/factory/* *"], "deny"
+        )
 
         prd = (ROOT / "docs" / "FactoryDevelopment-PRD.md").read_text()
         self.assertIn("interactive `ask` operations", prd)
