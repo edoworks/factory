@@ -59,26 +59,6 @@ jobs:
           cd TestApp
           ${{ github.workspace }}/bin/factory-verify
 
-      - name: Verify Mews & Woofs reference app
-        timeout-minutes: 12
-        run: |
-          SIMULATORS="$(python3 ./bin/find-simulators.py)"
-          IPHONE="$(printf '%s\n' "$SIMULATORS" | awk -F= '$1 == "IPHONE" { print $2 }')"
-          IPAD="$(printf '%s\n' "$SIMULATORS" | awk -F= '$1 == "IPAD" { print $2 }')"
-          test -n "$IPHONE"
-          test -n "$IPAD"
-          xcodegen generate --spec reference-apps/MewsAndWoofs/project.yml
-          xcodebuild test \
-            -project reference-apps/MewsAndWoofs/MewsAndWoofs.xcodeproj \
-            -scheme MewsAndWoofs \
-            -destination "platform=iOS Simulator,id=$IPHONE" \
-            -resultBundlePath /tmp/MewsAndWoofs-iPhone.xcresult
-          xcodebuild test \
-            -project reference-apps/MewsAndWoofs/MewsAndWoofs.xcodeproj \
-            -scheme MewsAndWoofs \
-            -destination "platform=iOS Simulator,id=$IPAD" \
-            -resultBundlePath /tmp/MewsAndWoofs-iPad.xcresult
-
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -87,5 +67,41 @@ jobs:
           path: |
             doctor-receipt.json
             /tmp/TestApp/.factory-verify-result.json
-            /tmp/MewsAndWoofs-iPhone.xcresult
-            /tmp/MewsAndWoofs-iPad.xcresult
+
+  reference-app:
+    name: Mews & Woofs (${{ matrix.form_factor }})
+    runs-on: macos-15
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - form_factor: iPhone
+            simulator_key: IPHONE
+          - form_factor: iPad
+            simulator_key: IPAD
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install declared build dependency
+        run: brew install xcodegen
+
+      - name: Verify reference app
+        timeout-minutes: 15
+        run: |
+          SIMULATORS="$(python3 ./bin/find-simulators.py)"
+          DESTINATION="$(printf '%s\n' "$SIMULATORS" | awk -F= '$1 == "${{ matrix.simulator_key }}" { print $2 }')"
+          test -n "$DESTINATION"
+          xcodegen generate --spec reference-apps/MewsAndWoofs/project.yml
+          xcodebuild test \
+            -project reference-apps/MewsAndWoofs/MewsAndWoofs.xcodeproj \
+            -scheme MewsAndWoofs \
+            -destination "platform=iOS Simulator,id=$DESTINATION" \
+            -resultBundlePath "/tmp/MewsAndWoofs-${{ matrix.form_factor }}.xcresult"
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mews-and-woofs-${{ matrix.form_factor }}-evidence
+          path: /tmp/MewsAndWoofs-${{ matrix.form_factor }}.xcresult
