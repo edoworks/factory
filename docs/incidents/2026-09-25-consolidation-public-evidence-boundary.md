@@ -75,3 +75,21 @@ same raw-whitespace assumption in the cutover input. The recurrence guard now
 normalizes both human-facing Markdown documents before checking the
 class-versus-instance boundary. The full suite is required again before
 integration.
+
+## Feature-Push Receipt Mismatch
+
+1. Why did the first documentation-head push fail? The supplied expected commit
+   did not match `HEAD`.
+2. Why was the value wrong? A full commit ID was inferred from the abbreviated
+   commit receipt instead of read from Git.
+3. Why was inference used? The push step was started before mechanically
+   resolving the new documentation commit.
+4. Why did this not alter the remote branch? The pinned push helper compares the
+   exact expected commit with `HEAD` before invoking Git transport.
+5. Root cause supported by the helper receipt: operator input bypassed the
+   mechanical SHA-resolution step, while the existing transport guard failed
+   closed as designed.
+
+The retry used `git show --no-patch --format=%H HEAD` and pushed only the returned
+commit. Future pinned pushes must derive the full expected commit from Git rather
+than expand an abbreviated receipt manually.
