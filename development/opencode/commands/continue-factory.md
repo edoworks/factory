@@ -60,9 +60,19 @@ agent: explore
   admission at `d9113db`; exact feature head `e8a0175` passed 55 Python tests,
   the pinned Node suite, Factory doctor, two independent trust reviews, and
   hosted run `36148707004` across the policy, iPhone, and iPad jobs. Remote
-  readback reports issue #87 `CLOSED`. The exact issue #84 receipt and bounded
-  rendered documentation review remain pending because this loaded session
-  cannot admit the new command or open the exact revision.
+  readback reports issue #87 `CLOSED`. A fresh-session exact closeout receipt
+  returned `CLOSED` for issue #84 on 2026-09-25, completing issue #87 acceptance.
+  The bounded rendered documentation review remains pending because the exact
+  revision has not been opened under applicable authority.
+- The local issue #77 increment defines the private/public evidence contract,
+  pins and validates the complete public classification inventory, rejects
+  duplicate keys and non-schema values, invokes the guard directly in CI, and
+  records in the Factory Development PRD that issue #81 separately owns private
+  instance inventory and preservation evidence. It passed 68 Python tests, 15
+  pinned Node tests, and Factory doctor before its final class-bound approval
+  correction. Final committed-revision review, rendered validation, hosted
+  checks, integration, and closeout remain pending; private preservation storage
+  remains required and unprovisioned.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -71,19 +81,17 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Launch a fresh Factory session, run
-   `{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.mjs verify --repo edoworks/factory --issues 84`,
-   and require exactly `CLOSED` before claiming issue #87 acceptance complete.
-4. If an authorized exact-page open becomes available, complete and record the
+3. If an authorized exact-page open becomes available, complete and record the
    bounded rendered review of PR #76's final PRD without claiming it preceded
    merge.
-5. Continue issue #70 only with an explicitly active product or release workflow
+4. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
-6. Continue the smallest independently verifiable issue #77 privacy and
-   preservation-policy increment before repository provisioning. Do not create
-   the preservation repository until its exact provisioner is reviewed, merged,
-   and launched from a fresh policy-valid session.
-7. Continue issue #81 inventory and
+5. Complete committed-revision review, rendered validation, hosted checks, and
+   integration for the issue #77 privacy and preservation-policy increment
+   before repository provisioning. Do not create the preservation repository
+   until its exact provisioner is reviewed, merged, and launched from a fresh
+   policy-valid session.
+6. Continue issue #81 inventory and
    preservation increment. Do not delete, archive, unarchive, publish, or clean
    any target under that evidence issue.
 

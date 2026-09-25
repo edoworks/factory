@@ -126,6 +126,28 @@ completion, cutover, or deletion-readiness target. Issue #70 contains the
 correction. Exact predecessor remote identities, resolved local target paths,
 explicit exclusions, and separate owner approvals remain outstanding.
 
+## Privacy And Preservation Classification
+
+Tracker: issue #77
+
+`docs/consolidation-evidence-classification.json` classifies repository history,
+hosted metadata, local overlays, obligations, checksums, and recovery receipts.
+Source evidence and unknown material default to the
+`owner_controlled_private` storage class. That storage class is required but not
+provisioned; this record contains no private destination or backup routing.
+
+Public evidence is limited to allowlisted provenance, inventory, checksum, and
+recovery-receipt references with a `public_safe_reference` disposition.
+`docs/consolidation-evidence-public.json` is the complete public classification
+inventory. `scripts/check_consolidation_evidence.py` always validates that file,
+rejects duplicate keys or any field outside the fixed schema, and constrains
+every public value to fixed references. No checksum or recovery receipt is
+approved for public disclosure. This class-level inventory does not replace the
+private instance inventory owned by issue #81 and advances no preservation,
+deletion-readiness, deletion, or cleanup state. The reviewed boundary gaps and
+mechanical recurrence guard are recorded in
+`docs/incidents/2026-09-25-consolidation-public-evidence-boundary.md`.
+
 ## State Claims
 
 | State | Result |

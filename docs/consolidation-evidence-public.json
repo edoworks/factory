@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "evidence_class": "repository_history",
+      "disposition": "public_safe_reference",
+      "provenance_reference": "edoworks/factory#68",
+      "inventory_reference": "EVIDENCE-REPOSITORY-HISTORY"
+    },
+    {
+      "evidence_class": "hosted_metadata",
+      "disposition": "public_safe_reference",
+      "provenance_reference": "edoworks/factory#68",
+      "inventory_reference": "EVIDENCE-HOSTED-METADATA"
+    },
+    {
+      "evidence_class": "local_overlays",
+      "disposition": "public_safe_reference",
+      "provenance_reference": "edoworks/factory#68",
+      "inventory_reference": "EVIDENCE-LOCAL-OVERLAYS"
+    },
+    {
+      "evidence_class": "obligations",
+      "disposition": "public_safe_reference",
+      "provenance_reference": "edoworks/factory#68",
+      "inventory_reference": "EVIDENCE-OBLIGATIONS"
+    },
+    {
+      "evidence_class": "checksums",
+      "disposition": "public_safe_reference",
+      "provenance_reference": "edoworks/factory#68",
+      "inventory_reference": "EVIDENCE-CHECKSUMS"
+    },
+    {
+      "evidence_class": "recovery_receipts",
+      "disposition": "public_safe_reference",
+      "provenance_reference": "edoworks/factory#68",
+      "inventory_reference": "EVIDENCE-RECOVERY-RECEIPTS"
+    }
+  ]
+}
