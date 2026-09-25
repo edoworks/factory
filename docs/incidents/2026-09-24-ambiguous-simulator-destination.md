@@ -155,3 +155,74 @@ the observed 664 MiB maximum with bounded margin while preserving the local
 64 MiB default. The receipt continues to expose all unknown growth. A workflow
 test pins the bound and its stopping rule: another exceedance requires external-
 owner directory instrumentation, not another tolerance increase.
+
+## 2026-09-25 Hosted Storage Recurrence
+
+PR #92 run `36171964484` passed public-evidence validation, 68 Python tests,
+build, unit tests, iPad build, analysis, archive, and run-owned simulator cleanup.
+The Factory policy gate then failed closed because `908771328` bytes of unknown
+persistent growth exceeded the unchanged `805306368`-byte hosted tolerance. The
+independent iPhone and iPad jobs passed.
+
+1. Why did the policy gate fail? Aggregate filesystem free space remained
+   `908771328` bytes below its starting value after cleanup and bounded
+   settlement.
+2. Why was the growth classified unknown? The receipt attributes only exact
+   factory-owned retained artifacts; this successful run retained none.
+3. Why could the prior 768 MiB bound not accept it? The new observation exceeded
+   the bound by `103464960` bytes, and the existing recurrence contract forbids
+   another increase without attribution.
+4. Why was attribution unavailable in the failed run? CI retained the aggregate
+   receipt but did not capture before and after allocated bytes for external
+   Xcode and CoreSimulator directory classes.
+5. Root cause supported by runs `36171964484` and the earlier observations:
+   aggregate APFS drift can exceed the provisional hosted measurement bound, but
+   the policy job lacked bounded external-owner measurements needed to separate
+   known directory-class growth from unexplained filesystem change.
+
+Issue #93 adds read-only before and after measurements for fixed user Xcode,
+user CoreSimulator, and system CoreSimulator classes. Public artifacts contain
+only fixed identifiers, state, and byte counts. The comparison reports signed
+and positive deltas but does not convert them into approved persistent bytes,
+delete global state, or change either storage tolerance.
+
+### Attribution Trust Review Correction
+
+1. Why could the first instrumentation draft measure outside its fixed class?
+   It rejected a symlink only at the final root component.
+2. Why was that insufficient? A parent component could be a symlink, and a root
+   could be replaced between the check and `du` traversal.
+3. Why did initial tests not detect this? They mocked measurement and asserted
+   output redaction without exercising component containment.
+4. Why is a byte count still a trust concern? Publishing it under a fixed class
+   would falsely claim that an unallowlisted target belonged to that class, even
+   though no names or contents were emitted.
+5. Root cause supported by the independent review: output redaction was treated
+   as sufficient without binding traversal to stable, non-symlinked components.
+
+The correction opens every path component relative to the previously bound
+directory descriptor with `O_NOFOLLOW`, then counts allocated blocks through
+descriptor-relative traversal. Child identity must match the entry inspected
+before traversal; symlinks are counted but never followed. Tests cover exact
+roots, ancestor symlinks, descriptor traversal, schema typing, and redacted OS
+and parse failures. Attribution has a dedicated artifact upload that fails closed
+when the comparison file is missing.
+
+### Attribution Boundedness Review Correction
+
+1. Why could the first descriptor-relative traversal fail on a wide tree? It
+   opened every discovered child before processing the traversal frontier.
+2. Why did that threaten the evidence artifact? Open descriptors scaled with
+   sibling count and could reach the process limit before comparison completed.
+3. Why did initial containment tests not detect it? They exercised a small tree
+   and checked containment rather than descriptor pressure.
+4. Why was cleanup alone insufficient? Closing the frontier after failure avoids
+   a leak but still leaves the required attribution unavailable.
+5. Root cause supported by the independent review: descriptor binding solved the
+   path race without initially preserving the bounded-resource behavior of a
+   depth-first filesystem walk.
+
+The correction processes one child subtree at a time, so open descriptors scale
+with depth rather than width. A deterministic 100-sibling test tracks opens and
+closes, requires zero retained descriptors, and caps concurrent descriptors at
+two for that one-level tree.
