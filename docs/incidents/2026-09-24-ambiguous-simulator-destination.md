@@ -226,3 +226,66 @@ The correction processes one child subtree at a time, so open descriptors scale
 with depth rather than width. A deterministic 100-sibling test tracks opens and
 closes, requires zero retained descriptors, and caps concurrent descriptors at
 two for that one-level tree.
+
+### Hosted Attribution Capture Failure
+
+Run `36176741252` failed both external-storage snapshot steps before template
+verification. The dedicated upload then failed because no comparison artifact
+existed; the separate device jobs were unaffected.
+
+1. Why was no attribution artifact produced? Baseline and after-snapshot commands
+   each exited when at least one allowlisted external class could not be measured.
+2. Why did one class prevent the whole receipt? Measurement access and live-tree
+   traversal errors were treated as command-fatal rather than class state.
+3. Why was that too strict for external-owner roots? The Factory intentionally
+   has no authority to normalize permissions or stop concurrent Xcode and
+   CoreSimulator mutation in those directories.
+4. Why must the job not silently accept those errors? Missing measurements are
+   actionable evidence and must not be converted into zero growth or approved
+   persistent bytes.
+5. Root cause supported by the two failed capture steps and missing-file upload
+   annotation: expected external-root unavailability was conflated with a
+   malformed attribution receipt.
+
+The correction emits `unavailable` with one of two fixed, path-free reasons and
+`null` allocated bytes for that class. Comparison reports a `null` delta and
+excludes the class from aggregate measured growth. Unknown schema, identifiers,
+states, reasons, and values still fail closed, while the existing aggregate
+storage policy remains unchanged and authoritative.
+
+### Unavailable-State Test Correction
+
+1. Why did the first local suite after this correction fail? The ancestor-
+   symlink test still expected measurement to raise an exception.
+2. Why was that assertion stale? Symlink rejection now maps to the same explicit
+   unavailable class state as other unsafe root-open failures.
+3. Why was the stale assertion not updated with the implementation? The initial
+   edit updated generic open/traversal error coverage but missed the earlier
+   dedicated ancestor-symlink case.
+4. Why did this not reach another hosted run? The full local suite failed before
+   commit and push.
+5. Root cause supported by the single failed assertion: the contract migration
+   from command-fatal to class-unavailable was not applied to every existing
+   test case in one edit.
+
+The ancestor-symlink test now requires the exact fixed `root_open_failed` state,
+`null` bytes, and no path-bearing value. The full-suite gate remains the
+mechanical recurrence guard before publication.
+
+### Malformed-Type Review Correction
+
+1. Why could a malformed receipt print a source-bearing traceback? Array or
+   object `state` and `reason` values reached set membership before type checks.
+2. Why did that bypass fixed validation errors? Python raises `TypeError` for an
+   unhashable membership operand, while the CLI catches only expected parse,
+   validation, and filesystem errors.
+3. Why did existing malformed tests not detect it? They covered unknown strings,
+   duplicate keys, and boolean schema versions but not unhashable field types.
+4. Why is this relevant when CI creates the snapshots? Comparison accepts files
+   as inputs, so malformed or replaced evidence must remain privacy-safe.
+5. Root cause supported by the review: value-domain validation was performed
+   before primitive-type validation for two enum fields.
+
+The validator now requires string enum values before membership checks. Tests
+cover unhashable state and reason values and an all-unavailable comparison whose
+zero aggregates remain qualified by `measured_class_count: 0` and null deltas.

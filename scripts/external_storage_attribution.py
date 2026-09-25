@@ -14,7 +14,8 @@ ROOTS = {
     "coresimulator_user": pathlib.Path.home() / "Library/Developer/CoreSimulator",
     "xcode_user": pathlib.Path.home() / "Library/Developer/Xcode",
 }
-MEASUREMENT_FIELDS = {"state", "allocated_bytes"}
+MEASUREMENT_FIELDS = {"state", "allocated_bytes", "reason"}
+UNAVAILABLE_REASONS = {"root_open_failed", "traversal_failed"}
 
 
 def reject_duplicate_keys(pairs):
@@ -107,14 +108,22 @@ def measure_root(identifier, path):
     try:
         descriptor = open_root(path)
     except ValueError:
-        raise ValueError(f"{identifier}: root cannot be opened safely") from None
+        return {
+            "state": "unavailable",
+            "allocated_bytes": None,
+            "reason": "root_open_failed",
+        }
     if descriptor is None:
-        return {"state": "absent", "allocated_bytes": 0}
+        return {"state": "absent", "allocated_bytes": 0, "reason": None}
     try:
         allocated = allocated_bytes(descriptor)
     except OSError:
-        raise ValueError(f"{identifier}: allocated-byte measurement failed") from None
-    return {"state": "present", "allocated_bytes": allocated}
+        return {
+            "state": "unavailable",
+            "allocated_bytes": None,
+            "reason": "traversal_failed",
+        }
+    return {"state": "present", "allocated_bytes": allocated, "reason": None}
 
 
 def snapshot():
@@ -147,12 +156,24 @@ def validate_snapshot(value):
     for identifier, measurement in measurements.items():
         if not isinstance(measurement, dict) or set(measurement) != MEASUREMENT_FIELDS:
             raise ValueError(f"{identifier}: measurement fields are invalid")
-        if measurement["state"] not in {"absent", "present"}:
+        state = measurement["state"]
+        if not isinstance(state, str) or state not in {"absent", "present", "unavailable"}:
             raise ValueError(f"{identifier}: measurement state is invalid")
         allocated = measurement["allocated_bytes"]
+        reason = measurement["reason"]
+        if state == "unavailable":
+            if (
+                allocated is not None
+                or not isinstance(reason, str)
+                or reason not in UNAVAILABLE_REASONS
+            ):
+                raise ValueError(f"{identifier}: unavailable measurement is invalid")
+            continue
+        if reason is not None:
+            raise ValueError(f"{identifier}: measured roots cannot report a reason")
         if not isinstance(allocated, int) or isinstance(allocated, bool) or allocated < 0:
             raise ValueError(f"{identifier}: allocated_bytes is invalid")
-        if measurement["state"] == "absent" and allocated != 0:
+        if state == "absent" and allocated != 0:
             raise ValueError(f"{identifier}: absent roots must report zero bytes")
 
 
@@ -162,17 +183,26 @@ def compare(before, after):
     measurements = {}
     signed_total = 0
     positive_total = 0
+    measured_class_count = 0
     for identifier in ROOTS:
         before_measurement = before["measurements"][identifier]
         after_measurement = after["measurements"][identifier]
-        delta = after_measurement["allocated_bytes"] - before_measurement["allocated_bytes"]
-        signed_total += delta
-        positive_total += max(0, delta)
+        before_allocated = before_measurement["allocated_bytes"]
+        after_allocated = after_measurement["allocated_bytes"]
+        if before_allocated is None or after_allocated is None:
+            delta = None
+        else:
+            delta = after_allocated - before_allocated
+            signed_total += delta
+            positive_total += max(0, delta)
+            measured_class_count += 1
         measurements[identifier] = {
             "before_state": before_measurement["state"],
             "after_state": after_measurement["state"],
-            "before_allocated_bytes": before_measurement["allocated_bytes"],
-            "after_allocated_bytes": after_measurement["allocated_bytes"],
+            "before_allocated_bytes": before_allocated,
+            "after_allocated_bytes": after_allocated,
+            "before_reason": before_measurement["reason"],
+            "after_reason": after_measurement["reason"],
             "delta_bytes": delta,
         }
     return {
@@ -181,6 +211,7 @@ def compare(before, after):
         "measurements": measurements,
         "aggregate_signed_delta_bytes": signed_total,
         "aggregate_positive_growth_bytes": positive_total,
+        "measured_class_count": measured_class_count,
         "claim": "bounded_external_owner_measurement_not_full_apfs_attribution",
     }
 
