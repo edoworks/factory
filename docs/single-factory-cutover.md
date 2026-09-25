@@ -148,6 +148,16 @@ deletion-readiness, deletion, or cleanup state. The reviewed boundary gaps and
 mechanical recurrence guard are recorded in
 `docs/incidents/2026-09-25-consolidation-public-evidence-boundary.md`.
 
+PR #90 merged this classification boundary at
+`2a20e8193e77b11f07b4b39e43b0e5c977f4ed8`. Exact feature head
+`ae22cd1dbbe90eb110a8f694096bc842896f3c8e` passed 68 Python tests,
+15 pinned Node tests, launch-ready Factory doctor, independent review, and
+hosted run `36167964354` across the Factory policy, iPhone, and iPad jobs. A
+bounded rendered review of the exact PRD, this cutover section, PR #90, and
+issue #77 found no overlap, clipping, unreadable wrapping, private payload, or
+later-state overclaim. Preservation storage remains unprovisioned and issue #81
+still owns private instance inventory and restore evidence.
+
 ## State Claims
 
 | State | Result |
