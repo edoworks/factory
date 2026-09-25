@@ -280,15 +280,31 @@ class LifecycleContractTests(unittest.TestCase):
         job_timeout = int(re.search(r"(?m)^  policy:\n(?:.*\n){2}    timeout-minutes: (\d+)$", workflow).group(1))
         step_timeout = int(re.search(r"(?m)^      - name: Verify template builds\n(?:        #.*\n){2}        timeout-minutes: (\d+)$", workflow).group(1))
         self.assertLess(step_timeout, job_timeout)
-        self.assertRegex(workflow, r"(?m)^  reference-app:\n    name: Mews & Woofs \(\$\{\{ matrix\.form_factor \}\}\)\n    runs-on: macos-15\n    timeout-minutes: 20$")
+        self.assertRegex(workflow, r"(?m)^  reference-app:\n    name: Mews & Woofs \(\$\{\{ matrix\.form_factor \}\}\)\n    runs-on: macos-15\n    timeout-minutes: 30$")
         self.assertIn("fail-fast: false", workflow)
         self.assertIn("simulator_key: IPHONE", workflow)
         self.assertIn("simulator_key: IPAD", workflow)
-        self.assertRegex(workflow, r"(?m)^      - name: Verify reference app\n        timeout-minutes: 15$")
+        self.assertIn("Run 36184422124 reached the former 15-minute bound", workflow)
+        self.assertRegex(
+            workflow,
+            r"(?m)^      - name: Verify reference app\n        #.*\n        timeout-minutes: 20$",
+        )
         self.assertIn('form_factor: iPhone', workflow)
         self.assertIn('form_factor: iPad', workflow)
-        self.assertIn('MewsAndWoofs-${{ matrix.form_factor }}.xcresult', workflow)
+        package = workflow.index("- name: Package evidence")
+        upload = workflow.index("- name: Upload evidence", package)
+        package_block = workflow[package:upload]
+        upload_block = workflow[upload:]
+        self.assertLess(package, upload)
+        self.assertRegex(package_block, r"(?m)^- name: Package evidence\n        if: always\(\)$")
+        self.assertIn('RESULT="/tmp/MewsAndWoofs-${{ matrix.form_factor }}.xcresult"', package_block)
+        self.assertIn('ARCHIVE="/tmp/MewsAndWoofs-${{ matrix.form_factor }}.xcresult.zip"', package_block)
+        self.assertIn('ditto -c -k --sequesterRsrc --keepParent "$RESULT" "$ARCHIVE"', package_block)
         self.assertIn('mews-and-woofs-${{ matrix.form_factor }}-evidence', workflow)
+        self.assertRegex(upload_block, r"(?m)^- name: Upload evidence\n        if: always\(\)$")
+        self.assertIn("if-no-files-found: error", upload_block)
+        self.assertIn('path: /tmp/MewsAndWoofs-${{ matrix.form_factor }}.xcresult.zip', upload_block)
+        self.assertNotRegex(upload_block, r"(?m)^\s+path: .*\.xcresult$")
 
     def test_simulator_creation_failure_writes_combined_receipt(self):
         with tempfile.TemporaryDirectory() as directory:

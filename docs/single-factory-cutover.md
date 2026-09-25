@@ -186,6 +186,16 @@ duplicate ownership, missing records, and private paths. Hosted-state
 contradictions require a fresh timestamp-bound source inspection before the
 closed approved mappings are updated.
 
+The PR #98 portfolio diff, this cutover section, the Factory PRD section, and
+issue #78 received bounded rendered review at exact head
+`f2c6c1d3625b9eaeda222d1d6d0f2df168fcb82b` with no layout, wrapping, privacy,
+or lifecycle-claim defect. Hosted run `36184422124` passed the Factory policy
+and iPad jobs, but its iPhone job reached the 15-minute verification bound while
+tests were still passing and then failed while zipping the live result bundle.
+Issue #99 owns that separate CI evidence correction. PR #98, issue #78, and this
+portfolio state remain open until the corrected exact head passes all required
+hosted checks.
+
 ## State Claims
 
 | State | Result |

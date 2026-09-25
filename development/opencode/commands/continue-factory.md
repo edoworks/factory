@@ -29,6 +29,8 @@ agent: explore
 - PR #80 merged those frozen intent records at `0cc1d5e`; its Factory policy,
   iPhone, and iPad hosted checks passed.
 - Issue #70 tracks product and release-workflow decoupling.
+- Issue #99 is the P0 hosted iPhone verification-evidence correction derived
+  from issue #70. Its frozen intent and remote readback match.
 - Vorynce lifecycle admission in `docs/product-lifecycle-admissions.json` is
   `PAUSED` and `UNINTEGRATED`; only `preserve_local_evidence` and
   `read_only_audit` are admitted. Retain local evidence `f47cab8`. No other
@@ -94,11 +96,15 @@ agent: explore
   lifecycle or release state is advanced. Exact local verification passed 91
   Python tests, 15 pinned Node tests, launch-ready Factory doctor, and independent
   trust review with no material findings. PR #98 is open at exact head
-  `080aa891d7e9aec8d25abdf99a281da656b5b0ac`; all three required hosted jobs
-  remained pending after more than 120 seconds of bounded observation, so merge
-  is paused for runner readiness. Exact rendered-page inspection is also pending
-  because active command policy denied navigation to the PR URL. Issue #78 comment
-  `5838886784` records both blockers without a visual-pass or completion claim.
+  `f2c6c1d3625b9eaeda222d1d6d0f2df168fcb82b`. Bounded rendered review of the PR
+  diff, Factory PRD section, cutover section, and issue #78 found no layout,
+  wrapping, privacy, or lifecycle-claim defect. Hosted run `36184422124` passed
+  policy and iPad, but iPhone verification reached its 15-minute bound while UI
+  tests were still passing; upload then raced the live result bundle and failed
+  with `ENOENT`. Local issue #99 changes increase only the independent reference
+  bounds, package an immutable result archive, and retain fail-closed upload.
+  Merge and issue #78 closeout remain blocked on corrected local and hosted
+  verification.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -112,8 +118,9 @@ agent: explore
    merge.
 4. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
-5. Continue issue #78's portfolio index under the issue #77 privacy boundary,
-   then continue issue #79's product-repository contract using that index.
+5. Complete issue #99's bounded hosted verification-evidence correction, then
+   complete issue #78's portfolio index under the issue #77 privacy boundary and
+   continue issue #79's product-repository contract using that index.
 6. Keep issue #81 preservation and deletion-readiness work blocked on issues #78
    and #79. Do not delete, archive, unarchive, publish, or clean any target. Do
    not create the preservation repository until its exact provisioner is

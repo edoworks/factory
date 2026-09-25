@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Stabilize hosted iPhone verification evidence",
+  "body_file": "iphone-hosted-evidence-body.md",
+  "body_sha256": "b891d850341dbe299f34bba5ca4976ae4c5129f64f0aa12da3d186edaa873f19",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["PR #98 run 36184422124", "Issue #70 independent form-factor contract"],
+  "authority_constraints": ["Repository-local workflow and evidence changes only", "No product test removal", "No unlimited timeout", "No storage tolerance increase", "No private path publication"],
+  "source_provenance": ["PR #98 run 36184422124", "iPhone job 108234873235", ".github/workflows/checks.yml", "tests/test_factory_storage.py"],
+  "duplicate_review": ["Issue #70 does not cover the newly evidenced independent timeout insufficiency or live-result upload race", "Issue #78 owns the portfolio index rather than reference-app CI packaging"],
+  "reprioritization_review": ["Required because PR #98 cannot merge with a failed required hosted check"]
+}
