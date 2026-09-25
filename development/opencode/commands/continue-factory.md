@@ -37,6 +37,12 @@ agent: explore
   remote readback match. The 2026-09-25 read-only audit found divergent or
   unclassified state across predecessor roots and no verified off-machine
   preservation or restore receipt, so no deletion target is ready.
+- PR #82 merged the lifecycle-admission and deletion-readiness evidence contract
+  at `3050a74`. Final head `bb9a6f1` passed 53 Python tests, 7 Node tests,
+  Factory doctor, independent review, bounded rendered PRD and audit review, and
+  hosted run `36120411239` across the policy, iPhone, and iPad jobs. Issue #81
+  remains open for private inventory, preservation, restore, and exact-target
+  evidence.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -45,16 +51,12 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Integrate the lifecycle-admission and deletion-readiness corrections through a
-   reviewed Factory pull request; do not recreate issue #81.
-4. Complete a bounded rendered review of the exact final Factory Development
-   PRD and deletion-readiness record before integration.
-5. If an authorized exact-page open becomes available, complete and record the
+3. If an authorized exact-page open becomes available, complete and record the
    bounded rendered review of PR #76's final PRD without claiming it preceded
    merge.
-6. Continue issue #70 only with an explicitly active product or release workflow
+4. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
-7. Continue the smallest independently verifiable issue #81 inventory and
+5. Continue the smallest independently verifiable issue #81 inventory and
    preservation increment. Do not delete, archive, unarchive, publish, or clean
    any target under that evidence issue.
 
