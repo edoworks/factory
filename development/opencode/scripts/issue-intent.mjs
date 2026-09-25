@@ -42,7 +42,12 @@ export function verifyReadback(validated, remote) {
 
 function main(argv) {
   const [command, intentPath, issueNumber, ...extra] = argv;
-  if (extra.length || !intentPath || !["validate", "verify-remote"].includes(command)) fail("usage: issue-intent.mjs validate INTENT.json | verify-remote INTENT.json ISSUE_NUMBER");
+  if (command === "hash") {
+    if (extra.length || !intentPath || issueNumber) fail("usage: issue-intent.mjs hash BODY.md");
+    process.stdout.write(`${sha256(readFileSync(realpathSync(intentPath), "utf8"))}\n`);
+    return;
+  }
+  if (extra.length || !intentPath || !["validate", "verify-remote"].includes(command)) fail("usage: issue-intent.mjs hash BODY.md | validate INTENT.json | verify-remote INTENT.json ISSUE_NUMBER");
   const validated = validateIssueIntent(intentPath);
   if (command === "verify-remote") {
     if (!/^\d+$/.test(issueNumber ?? "")) fail("issue number must be numeric");

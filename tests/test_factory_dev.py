@@ -219,6 +219,7 @@ class FactoryDevTests(unittest.TestCase):
                 "OPENCODE_PURE": "1",
                 "OPENCODE_FUTURE_FLAG": "untrusted",
                 "XDG_CONFIG_HOME": "/tmp/user-config",
+                "GH_CONFIG_DIR": "",
             },
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

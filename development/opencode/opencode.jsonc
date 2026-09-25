@@ -33,6 +33,7 @@
       "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git show*": "allow",
       "git add *": "allow", "git commit -m *": "allow",
       "python3 -m unittest*": "allow", "node --test*": "allow", "./bin/factory-dev doctor*": "allow",
+      "node development/opencode/scripts/issue-intent.mjs hash *": "allow", "node development/opencode/scripts/issue-intent.mjs validate *": "allow", "node development/opencode/scripts/issue-intent.mjs verify-remote *": "allow",
       "python3 ~/.agents/skills/macos-screenshot/scripts/screenshot.py *": "allow",
       "gh issue view --repo edoworks/factory *": "allow", "gh issue list --repo edoworks/factory *": "allow",
       "gh pr view * --repo edoworks/factory *": "allow", "gh pr checks * --repo edoworks/factory *": "allow",

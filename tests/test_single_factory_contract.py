@@ -1,5 +1,7 @@
+import hashlib
 import json
 import pathlib
+import subprocess
 import unittest
 
 
@@ -80,6 +82,11 @@ class SingleFactoryContractTests(unittest.TestCase):
             permissions["python3 ~/.agents/skills/macos-screenshot/scripts/screenshot.py *"],
             "allow",
         )
+        for command in ("hash *", "validate *", "verify-remote *"):
+            self.assertEqual(
+                permissions[f"node development/opencode/scripts/issue-intent.mjs {command}"],
+                "allow",
+            )
         self.assertNotIn(
             "python3 */.agents/skills/macos-screenshot/scripts/screenshot.py *",
             permissions,
@@ -107,6 +114,48 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertIn("interactive `ask` operations", prd)
         self.assertIn("auto mode", prd)
         self.assertIn("fixed home-directory installation", prd)
+
+    def test_issue_intent_hash_command_is_deterministic(self):
+        body = ROOT / "docs" / "FactoryDevelopment-PRD.md"
+        result = subprocess.run(
+            [
+                "node",
+                str(
+                    ROOT
+                    / "development"
+                    / "opencode"
+                    / "scripts"
+                    / "issue-intent.mjs"
+                ),
+                "hash",
+                str(body),
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), hashlib.sha256(body.read_bytes()).hexdigest())
+        rejected = subprocess.run(
+            [
+                "node",
+                str(
+                    ROOT
+                    / "development"
+                    / "opencode"
+                    / "scripts"
+                    / "issue-intent.mjs"
+                ),
+                "hash",
+                str(body),
+                "extra",
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertNotEqual(rejected.returncode, 0)
+        self.assertIn("usage: issue-intent.mjs hash BODY.md", rejected.stderr)
 
     def test_later_cutover_states_remain_unclaimed(self):
         record = (ROOT / "docs" / "single-factory-cutover.md").read_text()

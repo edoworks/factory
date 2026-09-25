@@ -93,6 +93,31 @@ passes that path to the launched process while continuing to isolate OpenCode.
 The launcher test records both paths and requires GitHub CLI to retain the user
 configuration root. No credential value is copied, logged, or committed.
 
+## Issue-Intent Preparation Gap
+
+After PR #74 merged, child issue creation remained noncompliant because the
+required issue-intent preparation commands were not executable under the same
+policy.
+
+1. A child issue could not be frozen and validated because the shell allowlist
+   admitted issue transport commands but not `issue-intent.mjs`.
+2. The correction focused on interactive GitHub mutations and omitted the
+   read-only preparation and remote-readback stages that make those mutations
+   trustworthy.
+3. The permission contract test asserted create, comment, and close patterns but
+   not the complete issue lifecycle.
+4. The issue-tracking skill and runtime permission policy were reviewed as
+   separate artifacts rather than one executable workflow.
+5. The root cause was an incomplete end-to-end trust model: transport authority
+   was restored without mechanically proving that intent freezing and readback
+   remained possible.
+
+The correction adds a deterministic body-hash operation to the repository-owned
+script and allows only its fixed `hash`, `validate`, and `verify-remote` command
+forms. Script argument checks reject extra operands, the shell policy still
+denies compound commands, and contract tests require the complete read-only
+preparation surface.
+
 ## Boundaries
 
 This change does not auto-approve a write, permit another repository, weaken the
