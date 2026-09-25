@@ -11,11 +11,12 @@ agent: explore
 - Issue #68 is the active consolidation map. PR #74 restores explicitly
   approved Factory issue writes and bounded visual-review commands while
   retaining fail-closed repository and argument guards.
-- PR #74 HEAD is `e441160`. Local verification passes 46 Python tests, 6 Node
-  tests, Factory doctor, policy integrity, installed-policy comparison, and an
-  independent review with no remaining findings.
-- GitHub Actions run `36100779734` is pending with zero jobs after the bounded
-  observation window, so runner readiness is blocked. Do not claim CI success.
+- PR #74's current feature branch passes 46 Python tests, 6 Node tests, Factory
+  doctor, policy integrity, installed-policy comparison, and an independent
+  review with no remaining findings.
+- GitHub Actions run `36100779734` was observed pending with zero jobs after the
+  bounded window. Check the latest PR run; do not claim CI success while it has
+  no jobs or required checks have not passed.
 - The current OpenCode process predates the corrected policy. A fresh
   `bin/factory-dev` session is required before visual review or issue writes.
 - Issue #70 tracks product and release-workflow decoupling.
@@ -35,8 +36,8 @@ agent: explore
    without changing provider budgets or fallback semantics without authority.
 3. Open PR #74's rendered PRD in the bounded browser path, capture it with the
    pinned screenshot utility, and verify readability before integration.
-4. Recheck run `36100779734`; if it still has no jobs, retain the runner blocker.
-   Merge PR #74 only after required checks and visual review pass.
+4. Recheck PR #74's latest run; if it has no jobs after 60 seconds, retain the
+   runner blocker. Merge only after required checks and visual review pass.
 5. Use the newly interactive, repository-first issue workflow to update map #68
    and create only the owner-approved private-public, portfolio-index, and
    product-repository child issues after body readback.
