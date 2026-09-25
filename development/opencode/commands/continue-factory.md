@@ -31,6 +31,9 @@ agent: explore
 - Issue #70 tracks product and release-workflow decoupling.
 - Issue #99 is the P0 hosted iPhone verification-evidence correction derived
   from issue #70. Its frozen intent and remote readback match.
+- Issue #100 is the P0 bounded concurrent-traversal correction derived from issue
+  #93. Its frozen intent and remote readback match; storage tolerances and global
+  state remain unchanged.
 - Vorynce lifecycle admission in `docs/product-lifecycle-admissions.json` is
   `PAUSED` and `UNINTEGRATED`; only `preserve_local_evidence` and
   `read_only_audit` are admitted. Retain local evidence `f47cab8`. No other
@@ -96,15 +99,18 @@ agent: explore
   lifecycle or release state is advanced. Exact local verification passed 91
   Python tests, 15 pinned Node tests, launch-ready Factory doctor, and independent
   trust review with no material findings. PR #98 is open at exact head
-  `f2c6c1d3625b9eaeda222d1d6d0f2df168fcb82b`. Bounded rendered review of the PR
-  diff, Factory PRD section, cutover section, and issue #78 found no layout,
-  wrapping, privacy, or lifecycle-claim defect. Hosted run `36184422124` passed
-  policy and iPad, but iPhone verification reached its 15-minute bound while UI
-  tests were still passing; upload then raced the live result bundle and failed
-  with `ENOENT`. Local issue #99 changes increase only the independent reference
-  bounds, package an immutable result archive, and retain fail-closed upload.
-  Merge and issue #78 closeout remain blocked on corrected local and hosted
-  verification.
+  `e34236788525e2d04d99b5e6ce23473014535d79`. Bounded rendered review of the PR
+  diff, workflow correction, Factory and Mews & Woofs PRD sections, cutover
+  section, and issues #78 and #99 found no layout, wrapping, privacy, or
+  lifecycle-claim defect. Hosted run `36189352038` passed independent iPhone and
+  iPad jobs, proving issue #99's timeout and immutable-archive correction, but the
+  policy gate failed on `865488896` unknown persistent bytes against the unchanged
+  `805306368`-byte tolerance. Available attribution classes measured zero growth;
+  `coresimulator_system` was unavailable with `traversal_failed`. Local issue
+  #100 changes retry a complete fresh-root descriptor traversal at most three
+  times and retain fail-closed unavailable state. The updated 93-test Python suite
+  passes. Merge and issues #78/#99/#100 closeout remain blocked on final local
+  review, rendered review, and corrected hosted verification.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -118,9 +124,10 @@ agent: explore
    merge.
 4. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
-5. Complete issue #99's bounded hosted verification-evidence correction, then
-   complete issue #78's portfolio index under the issue #77 privacy boundary and
-   continue issue #79's product-repository contract using that index.
+5. Complete issue #100's bounded storage-attribution traversal correction, then
+   close out issue #99's hosted verification-evidence correction and issue #78's
+   portfolio index under the issue #77 privacy boundary; continue issue #79's
+   product-repository contract using that index.
 6. Keep issue #81 preservation and deletion-readiness work blocked on issues #78
    and #79. Do not delete, archive, unarchive, publish, or clean any target. Do
    not create the preservation repository until its exact provisioner is

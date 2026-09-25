@@ -289,3 +289,35 @@ mechanical recurrence guard before publication.
 The validator now requires string enum values before membership checks. Tests
 cover unhashable state and reason values and an all-unavailable comparison whose
 zero aggregates remain qualified by `measured_class_count: 0` and null deltas.
+
+### Hosted Concurrent-Traversal Recurrence
+
+PR #98 run `36189352038` passed portfolio validation, Python tests, all template
+build/test/archive steps, and independent iPhone and iPad jobs. The policy gate
+failed closed on `865488896` unknown persistent bytes against the unchanged
+`805306368`-byte tolerance. Its attribution receipt measured zero growth in the
+available classes, but `coresimulator_system` was unavailable with
+`traversal_failed` before and after.
+
+1. Why did the policy gate fail? Unknown persistent growth exceeded the unchanged
+   hosted tolerance after successful run-owned cleanup and settlement.
+2. Why did attribution not classify the excess? The system CoreSimulator class
+   did not produce a complete before or after measurement.
+3. Why was that class unavailable? A descriptor-bound traversal raised an
+   `OSError` and failed the entire class safely; the path-free receipt does not
+   distinguish concurrent mutation, permissions, I/O, or another traversal cause.
+4. Why could a potentially transient traversal error blind the full class?
+   Measurement attempted one complete traversal and had no bounded fresh-root
+   retry.
+5. Root cause supported by run `36189352038`: fail-closed unavailable-state
+   handling preserved trust, but the read-only measurement contract had no
+   bounded way to recover from a potentially transient error while still
+   requiring a complete stable sample.
+
+Issue #100 retries the complete traversal at most three times, reopening the
+exact allowlisted root for each attempt and retaining all descriptor and
+`O_NOFOLLOW` containment. A failed partial traversal is never counted. Exhausted
+attempts, or disappearance after a failed traversal, remain path-free
+`traversal_failed` evidence. Tests pin retry success, exhaustion, disappearance,
+and the unchanged unavailable-state semantics. Storage tolerances, global state,
+and automatic approval of measured bytes remain unchanged.

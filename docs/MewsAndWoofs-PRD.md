@@ -220,6 +220,8 @@ reached the former iPhone step bound while tests were still passing and then
 failed to upload the live result directory. Hosted evidence must be packaged as
 an immutable archive before upload; a missing or unpackageable archive fails the
 job and cannot be reported as product qualification evidence.
+The corrected iPhone and iPad jobs passed in PR #98 run `36189352038`; the PR
+remains unqualified because its separate Factory storage policy gate failed.
 
 ## Usability Protocol
 

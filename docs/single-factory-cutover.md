@@ -196,6 +196,16 @@ Issue #99 owns that separate CI evidence correction. PR #98, issue #78, and this
 portfolio state remain open until the corrected exact head passes all required
 hosted checks.
 
+At corrected head `e34236788525e2d04d99b5e6ce23473014535d79`, hosted run
+`36189352038` passed both independent Mews & Woofs jobs, proving the issue #99
+timeout and immutable-archive correction. The Factory policy gate still failed
+closed on `865488896` unknown persistent bytes against the unchanged
+`805306368`-byte tolerance. Available attribution classes measured zero growth,
+while `coresimulator_system` remained unavailable after a path-free traversal
+failure whose underlying `OSError` class is not identified. Issue #100 owns the
+bounded fresh-root retry for a potentially transient failure; no tolerance,
+lifecycle, or portfolio claim is changed.
+
 ## State Claims
 
 | State | Result |
