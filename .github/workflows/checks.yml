@@ -50,6 +50,9 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
+      - name: Capture external storage baseline
+        run: python3 scripts/external_storage_attribution.py snapshot --output /tmp/external-storage-before.json
+
       - name: Verify template builds
         # Run 36117730389 reached the former 8-minute bound during the first
         # cold hosted xcodebuild. Keep this within the 25-minute job bound.
@@ -63,6 +66,23 @@ jobs:
           ${{ github.workspace }}/bin/factory-init TestApp --bundle-id com.example.testapp
           cd TestApp
           ${{ github.workspace }}/bin/factory-verify
+
+      - name: Capture external storage attribution
+        if: always()
+        run: |
+          python3 scripts/external_storage_attribution.py snapshot --output /tmp/external-storage-after.json
+          python3 scripts/external_storage_attribution.py compare \
+            --before /tmp/external-storage-before.json \
+            --after /tmp/external-storage-after.json \
+            --output external-storage-attribution.json
+
+      - name: Upload external storage attribution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: external-storage-attribution
+          if-no-files-found: error
+          path: external-storage-attribution.json
 
       - name: Upload evidence
         if: always()
