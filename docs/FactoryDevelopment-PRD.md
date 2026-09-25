@@ -46,9 +46,12 @@ The supported development entry path is `bin/factory-dev`. It must:
 
 The versioned source is `development/opencode`. `bin/factory-dev` sets a
 dedicated `XDG_CONFIG_HOME` for the fresh process, leaving credentials and data
-untouched while isolating local user configuration. There is no install or sync
-command: doctor compares active user controls with the captured source baseline,
-while launch uses the checksum-bound repository source.
+untouched while isolating local user configuration. Before that isolation,
+the launcher resolves and pins GitHub CLI's user configuration through
+`GH_CONFIG_DIR`; it does not copy credentials into Factory source or receipts.
+There is no install or sync command: doctor compares active user controls with
+the captured source baseline, while launch uses the checksum-bound repository
+source.
 
 Launch removes every inherited `OPENCODE_*` variable, rejects project
 configuration in the target or its ancestors, and rejects local managed
@@ -56,10 +59,16 @@ configuration that could override repository policy. Authenticated
 organization `.well-known` policy is not suppressible by this launcher; any
 future enrollment requires a separate effective-config review before readiness
 may be claimed. The policy inventory is closed-world outside generated `node_modules`:
-unlisted files and symlinked policy paths fail readiness. GitHub issue mutations
-are denied because OpenCode auto mode cannot prove human authorization;
-ordinary factory PR integration uses only explicitly allowed canonical command
-forms.
+unlisted files and symlinked policy paths fail readiness. Broad GitHub issue
+mutations remain denied. Exact repository-first create, comment, and close
+commands for `edoworks/factory` are interactive `ask` operations; auto mode
+cannot supply that human authorization, and trailing repository overrides are
+denied. Ordinary factory PR integration uses only explicitly allowed canonical
+command forms, with trailing repository overrides denied. Rendered Factory
+documentation review may interactively open one `edoworks/factory` GitHub page
+with no additional target and may run
+the screenshot utility at its fixed home-directory installation; neither
+permission grants content mutation.
 
 Doctor emits one JSON object containing `factory_version`, `git_revision`,
 `dirty`, `opencode_version`, `policy_digest`, `active_installation`,

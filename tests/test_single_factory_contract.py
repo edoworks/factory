@@ -66,7 +66,47 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertEqual(permissions["*"], "deny")
         for mutation in ("gh issue create*", "gh issue comment*", "gh issue close*"):
             self.assertEqual(permissions[mutation], "deny")
-        self.assertNotIn("ask", permissions.values())
+        interactive = {
+            "gh issue create --repo edoworks/factory *",
+            "gh issue comment --repo edoworks/factory *",
+            "gh issue close --repo edoworks/factory *",
+            "open https://github.com/edoworks/factory/*",
+        }
+        self.assertEqual(
+            {pattern for pattern, action in permissions.items() if action == "ask"},
+            interactive,
+        )
+        self.assertEqual(
+            permissions["python3 ~/.agents/skills/macos-screenshot/scripts/screenshot.py *"],
+            "allow",
+        )
+        self.assertNotIn(
+            "python3 */.agents/skills/macos-screenshot/scripts/screenshot.py *",
+            permissions,
+        )
+        for command in ("create", "comment", "close"):
+            self.assertEqual(
+                permissions[f"gh issue {command} --repo edoworks/factory *--repo*"],
+                "deny",
+            )
+            self.assertEqual(
+                permissions[f"gh issue {command} --repo edoworks/factory *-R*"],
+                "deny",
+            )
+        self.assertEqual(
+            permissions["gh pr * --repo edoworks/factory *--repo*"], "deny"
+        )
+        self.assertEqual(
+            permissions["gh pr * --repo edoworks/factory *-R*"], "deny"
+        )
+        self.assertEqual(
+            permissions["open https://github.com/edoworks/factory/* *"], "deny"
+        )
+
+        prd = (ROOT / "docs" / "FactoryDevelopment-PRD.md").read_text()
+        self.assertIn("interactive `ask` operations", prd)
+        self.assertIn("auto mode", prd)
+        self.assertIn("fixed home-directory installation", prd)
 
     def test_later_cutover_states_remain_unclaimed(self):
         record = (ROOT / "docs" / "single-factory-cutover.md").read_text()

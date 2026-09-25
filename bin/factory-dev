@@ -218,12 +218,17 @@ def main(argv):
 
     source = root / "development" / "opencode"
     environment = os.environ.copy()
+    github_config = environment.get("GH_CONFIG_DIR")
+    if not github_config:
+        user_config = Path(environment.get("XDG_CONFIG_HOME", Path.home() / ".config")).expanduser()
+        github_config = str(user_config / "gh")
     for name in tuple(environment):
         if name.startswith("OPENCODE_"):
             environment.pop(name)
     environment["OPENCODE_DISABLE_AUTOUPDATE"] = "1"
     environment["OPENCODE_DISABLE_MODELS_FETCH"] = "1"
     environment["XDG_CONFIG_HOME"] = str(root / "development")
+    environment["GH_CONFIG_DIR"] = github_config
     environment["FACTORY_DEV_OPENCODE_ROOT"] = str(source)
     environment["FACTORY_CANONICAL_REPO"] = CANONICAL_REPO
     opencode = environment.get("FACTORY_DEV_OPENCODE", "opencode")

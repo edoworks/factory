@@ -8,6 +8,16 @@ agent: explore
 - `edoworks/factory` is the sole canonical factory.
 - Issue #69 and PR #71 completed the repository-owned OpenCode development
   environment and `CANONICAL_FOR_NEW_WORK` state.
+- Issue #68 is the active consolidation map. PR #74 restores explicitly
+  approved Factory issue writes and bounded visual-review commands while
+  retaining fail-closed repository and argument guards.
+- PR #74's current feature branch passes 46 Python tests, 6 Node tests, Factory
+  doctor, policy integrity, installed-policy comparison, and an independent
+  review with no remaining findings.
+- PR #74's latest completed hosted run passed the Factory policy gate and the
+  independent iPhone and iPad reference-app jobs; recheck the current head.
+- The current OpenCode process predates the corrected policy. A fresh
+  `bin/factory-dev` session is required before visual review or issue writes.
 - Issue #70 tracks product and release-workflow decoupling.
 - The Vorynce ownership chunk is implemented and verified locally at commit
   `f47cab8` on `feature/vorynce-prd-70` in the isolated worktree
@@ -23,11 +33,18 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Use an approved repository-setting path to unarchive exactly
+3. Open PR #74's rendered PRD in the bounded browser path, capture it with the
+   pinned screenshot utility, and verify readability before integration.
+4. Recheck PR #74's required checks at the current head. Merge only while they
+   remain passed and the visual review has no unresolved findings.
+5. Use the newly interactive, repository-first issue workflow to update map #68
+   and create only the owner-approved private-public, portfolio-index, and
+   product-repository child issues after body readback.
+6. Use an approved repository-setting path to unarchive exactly
    `foculoom/vorynce`; do not use an alternate remote or bypass policy.
-4. Reassert the `hellofoculoom` GitHub identity, push the exact Vorynce feature
+7. Reassert the `hellofoculoom` GitHub identity, push the exact Vorynce feature
    ref, open and merge the reviewed PR, and safely clean the merged branch.
-5. Continue the smallest independently verifiable issue #70 increment without
+8. Continue the smallest independently verifiable issue #70 increment without
    modifying unrelated product branches.
 
 ## Boundaries
