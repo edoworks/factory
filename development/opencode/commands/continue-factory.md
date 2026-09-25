@@ -93,8 +93,12 @@ agent: explore
   identities remain opaque, private completeness remains `UNKNOWN`, and no
   lifecycle or release state is advanced. Exact local verification passed 91
   Python tests, 15 pinned Node tests, launch-ready Factory doctor, and independent
-  trust review with no material findings. Hosted and rendered review remain
-  pending.
+  trust review with no material findings. PR #98 is open at exact head
+  `080aa891d7e9aec8d25abdf99a281da656b5b0ac`; all three required hosted jobs
+  remained pending after more than 120 seconds of bounded observation, so merge
+  is paused for runner readiness. Exact rendered-page inspection is also pending
+  because active command policy denied navigation to the PR URL. Issue #78 comment
+  `5838886784` records both blockers without a visual-pass or completion claim.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
