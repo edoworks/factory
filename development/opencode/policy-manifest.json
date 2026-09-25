@@ -11,13 +11,13 @@
     "model-routing/instructions.md": "55669db893a2bf3b15e9e39c11d5cbb1d7307f7501410be40ef1e72dfba66465",
     "model-routing/policy.json": "871b49adfb2535c8eba4a78150fabee96556051bd8635d6791f858803e9368d7",
     "model-routing/routing-lib.mjs": "1b4545ba0909ca96b2509ea227fff1a3c97316b583c8dfb67f1e0ee900610034",
-    "opencode.jsonc": "84ad8afd3dcf5a2b596099fe96cc694b3ffb2e1f801de5e7c8018dc192811cfb",
+    "opencode.jsonc": "1fb17fbeef00e9cfe987b2cbeda76d67aedf5f004240095230a3ce414d3ad9c5",
     "package-lock.json": "2d18f04401921bc0670e41c3f6d95a9d5f7935b3271bb1bfa85587338b7cb6bf",
     "package.json": "b4dd5ac6d6e3cdf91f1ff9f20c987f2086ab318abb80dcc2d348cee3040991df",
     "plugins/cost-router-lib.mjs": "f0a745caad2a544e8f5566575c89febf68abb44b17a0a00a42fa7099db7436e1",
     "plugins/cost-router.test.mjs": "4cc1966e360abf71459e134145e3e0c23e31f0a64d20148c11c1cd05cf1bbee3",
     "plugins/cost-router.mjs": "fa9ed6b36438117165bd5985aaaea60ce301f18310ecf1eb763931362dd8587d",
-    "policies/factory-progress.md": "c84b99c7edc7ec250460040850cf5334163e4dee167838bf29262d90a55934f6",
+    "policies/factory-progress.md": "8e1b6d497f7e117de1905b86736cfaeed17bb0c6889c6002369ae923bdd5c40f",
     "scripts/issue-closeout.mjs": "0edf8cf799ee53916f701eec9664f3f1a2f38d7d54d6ae10f725b7cf616e75f3",
     "scripts/continuation-command.test.mjs": "29d2b7946138ce102a91fec1f66922a4b70271669500cd3115d0db82621a9499",
     "scripts/git-push.mjs": "8d46818629b4f0cacd9cf4584758ffb5d6c037c70dbd8226efacdc6180cc42b7",
@@ -25,7 +25,7 @@
     "scripts/issue-intent.mjs": "4a91aa474c04591ec7bc812f23c5685e8730f0387b9fdbf7e147b919c064d8b5",
     "scripts/notify-completion.mjs": "7148026e0e6b2eb1e64de0da0b49d49d59120759ece6291665bb5ae97b0cef59",
     "scripts/routing-ready.mjs": "bb3f2f2eed39218f5956c7ef3387748fe5955b68f7362db4907bf24dc6cec689",
-    "skills/issue-tracking/SKILL.md": "9bb94b6a2073d8d1831094c2279021ca4dfe9c588b2386c1585f1ee0ea56a422",
+    "skills/issue-tracking/SKILL.md": "8065fc729d0841a1d02a536b439ce9c9a4be1dbd5112786eb946063c9537e64e",
     "skills/model-routing/SKILL.md": "e6aa12725ff4a42bdfeadbb7286abe4e71d971ea148947252f462d48938b56a5"
   }
 }

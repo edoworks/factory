@@ -229,6 +229,33 @@ The correction resolves approved roots and expected body paths before comparison
 The full Python suite, rather than a platform-specific skip or relaxed string
 comparison, remains the mechanical recurrence guard.
 
+## Node Runtime Provenance Gap
+
+A fresh restart found policy integrity valid but routing readiness blocked because
+the first `node` on the inherited path could not load its linked simdjson ABI.
+
+1. Factory development could not launch because the routing-readiness subprocess
+   terminated before evaluating the tracked routing evidence.
+2. The subprocess terminated because Homebrew Node 25 referenced simdjson ABI 29
+   while the installed simdjson package supplied ABI 33.
+3. The launcher selected that binary because it resolved `node` from inherited
+   `PATH` without checking provenance or execution readiness.
+4. This remained after GitHub CLI hardening because privileged transport
+   provenance was tested, but the interpreter for repository-owned policy tools
+   was still treated as an ambient development dependency.
+5. The root cause was an incomplete executable-provenance boundary: the launcher
+   isolated its child path but did not first bind a runnable Node executable.
+
+The correction selects Node only from explicit system and package-manager roots,
+rejects group/world-writable or non-runnable candidates, reports the selected
+real path, removes inherited Node runtime overrides, and exposes that exact path
+as `FACTORY_DEV_NODE` without widening the isolated session path. Tests require
+a broken trusted candidate to be skipped, a writable candidate to be rejected,
+and direct issue-intent tests to bind a runnable executable. The first test edit
+also failed import because a starred conditional expression was malformed; full
+test discovery exposed it immediately, and the corrected explicit candidate
+tuple plus full discovery remain the structural recurrence guard.
+
 ## Boundaries
 
 This change does not auto-approve a write, permit another repository, weaken the

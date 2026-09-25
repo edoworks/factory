@@ -25,6 +25,23 @@ TRUSTED_GITHUB_CLI_ROOTS = {
     Path("/usr/local/Cellar/gh"),
     Path("/home/linuxbrew/.linuxbrew/Cellar/gh"),
 }
+TRUSTED_NODE_PATHS = (
+    Path("/opt/homebrew/opt/node@22/bin/node"),
+    Path("/opt/homebrew/bin/node"),
+    Path("/usr/local/opt/node@22/bin/node"),
+    Path("/usr/local/bin/node"),
+    Path("/usr/bin/node"),
+    Path("/home/linuxbrew/.linuxbrew/opt/node@22/bin/node"),
+    Path("/home/linuxbrew/.linuxbrew/bin/node"),
+)
+TRUSTED_NODE_ROOTS = {
+    Path("/opt/homebrew/Cellar/node"),
+    Path("/opt/homebrew/Cellar/node@22"),
+    Path("/usr/local/Cellar/node"),
+    Path("/usr/local/Cellar/node@22"),
+    Path("/home/linuxbrew/.linuxbrew/Cellar/node"),
+    Path("/home/linuxbrew/.linuxbrew/Cellar/node@22"),
+}
 TRUSTED_PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/home/linuxbrew/.linuxbrew/bin"
 
 
@@ -69,9 +86,13 @@ def sha256(path):
     return digest.hexdigest()
 
 
-def command_output(args, cwd):
-    result = subprocess.run(args, cwd=cwd, text=True, capture_output=True, check=False)
+def command_output(args, cwd, environment=None):
+    result = subprocess.run(args, cwd=cwd, text=True, capture_output=True, check=False, env=environment)
     return result.stdout.strip() if result.returncode == 0 else None
+
+
+def without_node_overrides(environment):
+    return {name: value for name, value in environment.items() if not name.startswith("NODE_")}
 
 
 def trusted_github_cli():
@@ -84,6 +105,30 @@ def trusted_github_cli():
             if resolved.is_file() and os.access(resolved, os.X_OK) and not mode & (stat.S_IWGRP | stat.S_IWOTH) and (package_root or system_binary):
                 return resolved
         except OSError:
+            continue
+    return None
+
+
+def trusted_node():
+    for candidate in TRUSTED_NODE_PATHS:
+        try:
+            resolved = candidate.resolve(strict=True)
+            package_root = next((root.resolve() for root in TRUSTED_NODE_ROOTS if resolved.is_relative_to(root.resolve())), None)
+            system_binary = candidate == Path("/usr/bin/node") and resolved == candidate
+            mode = resolved.stat().st_mode
+            if not (resolved.is_file() and os.access(resolved, os.X_OK) and not mode & (stat.S_IWGRP | stat.S_IWOTH) and (package_root or system_binary)):
+                continue
+            if package_root:
+                ancestors = [resolved.parent]
+                while ancestors[-1] != package_root:
+                    ancestors.append(ancestors[-1].parent)
+                if any(path.stat().st_mode & (stat.S_IWGRP | stat.S_IWOTH) for path in ancestors):
+                    continue
+            clean_environment = without_node_overrides(os.environ)
+            probe = subprocess.run([resolved, "--version"], text=True, capture_output=True, timeout=10, check=False, env=clean_environment)
+            if probe.returncode == 0 and re.fullmatch(r"v\d+\.\d+\.\d+", probe.stdout.strip()):
+                return resolved
+        except (OSError, subprocess.SubprocessError):
             continue
     return None
 
@@ -175,7 +220,7 @@ def inspect(root, target):
     revision = command_output(["git", "rev-parse", "HEAD"], root) or "UNKNOWN"
     status = command_output(["git", "status", "--porcelain"], root)
     opencode = os.environ.get("FACTORY_DEV_OPENCODE", "opencode")
-    opencode_version = command_output([opencode, "--version"], root) if shutil.which(opencode) or Path(opencode).is_file() else None
+    opencode_version = command_output([opencode, "--version"], root, without_node_overrides(os.environ)) if shutil.which(opencode) or Path(opencode).is_file() else None
     if not opencode_version:
         errors.append("OpenCode is unavailable")
     github_cli = trusted_github_cli()
@@ -186,20 +231,22 @@ def inspect(root, target):
         errors.append("system Git is unavailable")
 
     contradictions = []
-    node = shutil.which("node")
+    node = trusted_node()
     if errors:
         contradictions.append("routing readiness skipped until policy integrity is valid")
     elif not node:
         contradictions.append("Node.js is unavailable for routing readiness validation")
     else:
+        node_environment = without_node_overrides(os.environ)
         readiness = subprocess.run(
             [node, str(source / "scripts" / "routing-ready.mjs")],
             cwd=root,
             text=True,
             capture_output=True,
             check=False,
+            env=node_environment,
         )
-        if readiness.returncode != 0:
+        if readiness.returncode != 0 or readiness.stdout.strip() != '{"routing_ready":true}':
             detail = readiness.stderr.strip() or readiness.stdout.strip() or "unknown error"
             contradictions.append(f"cost-router is not launch-ready: {detail}")
 
@@ -218,6 +265,7 @@ def inspect(root, target):
         "dirty": bool(status),
         "opencode_version": opencode_version,
         "github_cli": str(github_cli) if github_cli else None,
+        "node_cli": str(node) if node else None,
         "git_cli": str(git_cli),
         "policy_digest": policy_digest,
         "policy_status": "valid" if not errors else "invalid",
@@ -258,7 +306,7 @@ def main(argv):
         user_config = Path(environment.get("XDG_CONFIG_HOME", Path.home() / ".config")).expanduser()
         github_config = str(user_config / "gh")
     for name in tuple(environment):
-        if name.startswith("OPENCODE_") or name.startswith("GH_") or name.startswith("GITHUB_"):
+        if name.startswith("OPENCODE_") or name.startswith("GH_") or name.startswith("GITHUB_") or name.startswith("NODE_"):
             environment.pop(name)
     environment["OPENCODE_DISABLE_AUTOUPDATE"] = "1"
     environment["OPENCODE_DISABLE_MODELS_FETCH"] = "1"
@@ -268,6 +316,7 @@ def main(argv):
     environment["FACTORY_DEV_OPENCODE_ROOT"] = str(source)
     environment["FACTORY_DEV_GH"] = receipt["github_cli"]
     environment["FACTORY_DEV_GIT"] = receipt["git_cli"]
+    environment["FACTORY_DEV_NODE"] = receipt["node_cli"]
     environment["FACTORY_CANONICAL_REPO"] = CANONICAL_REPO
     opencode = environment.get("FACTORY_DEV_OPENCODE", "opencode")
     os.execvpe(opencode, [opencode, str(target)], environment)
