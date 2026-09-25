@@ -14,23 +14,18 @@ agent: explore
 - PR #75 merged the repository-owned issue-intent workflow at `dfbc416` after
   its three hosted checks passed. Its bounded rendered PRD review at the final
   feature head found no overlap, clipping, or readability defect.
-- Post-merge independent review found that wildcard test runners, initial `gh`
-  selection from inherited `PATH`, and inherited GitHub host/token overrides
-  still weakened the issue-write trust boundary. The correction is committed
-  locally at `a3bb760`; 49 Python tests, 6 Node tests, Factory doctor, diff checks,
-  and independent rereview pass with no finding. Hosted integration is blocked
-  because the unsafe Git credential-helper push exception was removed. The pinned
-  repository-owned push transport is committed at `150decd`; 49 Python tests,
-  7 Node tests, Factory doctor, diff checks, and independent review pass. A fresh
-  session is required before using it. No child issue creation is permitted until
-  the correction is pushed, merged, freshly launched, and verified.
-- Fresh restart validation then found that inherited `node` selected a broken
-  Homebrew runtime and still weakened interpreter provenance. Commit `b7d0cbd`
-  pins a runnable Node from trusted package roots, removes Node runtime overrides,
-  binds policy commands through `FACTORY_DEV_NODE`, and records the 5-Whys.
-  Fifty-two Python tests (including the three Node policy suites), Factory
-  doctor, diff checks, and independent trust rereview pass. A fresh session
-  containing this commit is required before push.
+- PR #76 merged the issue-transport trust correction at `cf1ac7a`. Its exact
+  feature head was `97e17b0`; Factory policy gate and independent iPhone and iPad
+  hosted checks passed. A fresh Factory doctor reports valid policy, the captured
+  active installation matching its baseline, pinned Node and GitHub CLIs, and no
+  routing contradiction; it does not install this edited continuation source.
+- The available Safari page rendered an older 142-line feature revision rather
+  than PR #76's 159-line PRD. Opening the exact revision was denied by active
+  command permission, so no final rendered-review claim is made for PR #76.
+- The owner-approved consolidation child intents are frozen under
+  `docs/issue-intents/68`. Pinned identity-checked creation produced issues #77,
+  #78, and #79, and remote readback matches all three frozen titles, bodies, and
+  labels.
 - Issue #70 tracks product and release-workflow decoupling.
 - The Vorynce ownership chunk is implemented and verified locally at commit
   `f47cab8` on `feature/vorynce-prd-70` in the isolated worktree
@@ -46,20 +41,16 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Start a fresh Factory session containing commit `b7d0cbd`, obtain the full
-   current commit with `git log -1 --format=%H`, and run the interactive pinned
-   push transport for branch `feature/issue-transport-trust-68` and that exact
-   expected commit.
-4. Run hosted checks and bounded rendered PRD review before integration.
-5. Start a fresh `bin/factory-dev` session after that integration and use the repository-owned intent
-   workflow to freeze, validate, create, and remotely read back only the
-   owner-approved private-public, portfolio-index, and product-repository child
-   issues.
-6. Use an approved repository-setting path to unarchive exactly
+3. Integrate the frozen intent evidence for issues #77, #78, and #79 through a
+   reviewed Factory pull request; do not recreate those issues.
+4. If an authorized exact-page open becomes available, complete and record the
+   bounded rendered review of PR #76's final PRD without claiming it preceded
+   merge.
+5. Use an approved repository-setting path to unarchive exactly
    `foculoom/vorynce`; do not use an alternate remote or bypass policy.
-7. Reassert the `hellofoculoom` GitHub identity, push the exact Vorynce feature
+6. Reassert the `hellofoculoom` GitHub identity, push the exact Vorynce feature
    ref, open and merge the reviewed PR, and safely clean the merged branch.
-8. Continue the smallest independently verifiable issue #70 increment without
+7. Continue the smallest independently verifiable issue #70 increment without
    modifying unrelated product branches.
 
 ## Boundaries

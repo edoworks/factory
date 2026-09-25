@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Classify private and public consolidation evidence",
+  "body_file": "private-public-body.md",
+  "body_sha256": "e5c64c7a9512579d40d9ae66f4d899a0a61c7ecde82861d00b9ea4425887e284",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["Parent consolidation map issue #68", "Owner-controlled private preservation destination"],
+  "authority_constraints": ["No publication or visibility change", "No credential broadening", "No remote deletion or local cleanup", "No release action"],
+  "source_provenance": ["edoworks/factory issue #68", "docs/single-factory-cutover.md", "PR #76 feature head 97e17b0883c6fdacd6ab2fd85ad3dfc70a7f8719"],
+  "duplicate_review": ["Issue #17 archives only after recovery proof; this issue defines the evidence classification boundary"],
+  "reprioritization_review": ["Required before preservation and retirement state advancement"]
+}

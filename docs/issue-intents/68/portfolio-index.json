@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Establish the canonical product portfolio index",
+  "body_file": "portfolio-index-body.md",
+  "body_sha256": "ba209e7e56a407fda00f50d4fc642b8f1a397b731795c5798414675c48ccb9f5",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["Parent consolidation map issue #68", "Private/public evidence classification chunk"],
+  "authority_constraints": ["No publication or visibility change", "No repository transfer or deletion", "No product release", "No disclosure of private repository metadata"],
+  "source_provenance": ["edoworks/factory issue #68", "docs/single-factory-cutover.md", "PR #76 feature head 97e17b0883c6fdacd6ab2fd85ad3dfc70a7f8719"],
+  "duplicate_review": ["Issue #48 is a prior point-in-time reconciliation rather than the canonical continuing portfolio index"],
+  "reprioritization_review": ["Required before repository retirement and ownership decisions"]
+}

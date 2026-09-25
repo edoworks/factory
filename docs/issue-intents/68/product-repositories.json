@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Reconcile product repository ownership and boundaries",
+  "body_file": "product-repositories-body.md",
+  "body_sha256": "d8653270803778654ae42e29b6a9404c14f53a2af1b3673d2bc75e9668a58632",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["Parent consolidation map issue #68", "Issue #70", "Canonical portfolio index", "Private/public evidence classification"],
+  "authority_constraints": ["No repository setting change, transfer, or unarchive", "No publication or release", "No remote deletion or local cleanup", "No credential broadening"],
+  "source_provenance": ["edoworks/factory issues #68 and #70", "docs/single-factory-cutover.md", "PR #76 feature head 97e17b0883c6fdacd6ab2fd85ad3dfc70a7f8719"],
+  "duplicate_review": ["Issue #70 owns active dependency removal; this issue owns repository ownership and authority disposition"],
+  "reprioritization_review": ["Required before repository-setting, preservation, or retirement decisions"]
+}
