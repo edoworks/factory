@@ -119,6 +119,15 @@ factory or an editable policy source.
 No later state is inferred from an earlier one. Product qualification and
 release status remain separate.
 
+Deletion readiness requires a revision-bound manifest of exact remote identities
+and resolved local paths. For each proposed target it records lifecycle state,
+ownership, Git divergence, local overlays, hosted metadata, obligations,
+preservation and restore receipts, dependency-scan results, and an explicit
+include or exclude disposition. A clean or dirty `git status` is evidence to
+classify, not a deletion decision. Product repositories, paused products,
+secrets, preservation artifacts, runner definitions needed for recovery, and
+targets with unknown ownership or lifecycle state are excluded.
+
 ## Required Controls
 
 - Routine work uses the lowest-cost qualified route; premium escalation is
@@ -127,6 +136,11 @@ release status remain separate.
   unapproved paid fallback or retry loop.
 - Issue state, implementation evidence, and release state are independently
   verified.
+- Product-repository work requires a current lifecycle admission record. A
+  paused product is ineligible for implementation, unarchive, push, merge, or
+  release until a separate owner reactivation decision is recorded. Current
+  machine-readable admissions are tracked in
+  `docs/product-lifecycle-admissions.json`.
 - Configuration changes require a fresh process because OpenCode does not
   hot-reload startup policy.
 - Secrets remain in approved external secret storage and never enter receipts,
@@ -155,5 +169,8 @@ release status remain separate.
 - Factory runtime tests pass when development tooling is unavailable.
 - A targeted guard rejects predecessor operational references outside an
   explicit historical/provenance allowlist.
+- A deletion-readiness record fails closed until exact targets, local divergence,
+  tested off-machine preservation, hosted metadata, current dependency scans,
+  and separate owner approvals are verified.
 - A clean-room check performs doctor, init, verify, checkpoint, and safe failure
   without predecessor access.

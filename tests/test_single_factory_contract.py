@@ -306,6 +306,54 @@ class SingleFactoryContractTests(unittest.TestCase):
             matching = [line for line in record.splitlines() if f"`{state}`" in line]
             self.assertEqual(matching, [f"| `{state}` | {result} |"])
 
+    def test_paused_products_and_deletion_readiness_fail_closed(self):
+        continuation = (ROOT / "development" / "opencode" / "commands" / "continue-factory.md").read_text()
+        prd = (ROOT / "docs" / "FactoryDevelopment-PRD.md").read_text()
+        record = (ROOT / "docs" / "single-factory-cutover.md").read_text()
+        incident = (ROOT / "docs" / "incidents" / "2026-09-25-product-lifecycle-admission.md").read_text()
+        intent = json.loads((ROOT / "docs" / "issue-intents" / "68" / "deletion-readiness.json").read_text())
+        admissions = json.loads((ROOT / "docs" / "product-lifecycle-admissions.json").read_text())
+        vorynce = admissions["products"]["foculoom/vorynce"]
+        normalized_prd = " ".join(prd.split())
+        restart = continuation.split("## Restart", 1)[1].split("## Boundaries", 1)[0]
+        bullets = []
+        current = None
+        for line in continuation.splitlines():
+            if line.startswith("- "):
+                if current:
+                    bullets.append(" ".join(current))
+                current = [line[2:]]
+            elif current is not None and line.startswith("  "):
+                current.append(line.strip())
+            elif current:
+                bullets.append(" ".join(current))
+                current = None
+        if current:
+            bullets.append(" ".join(current))
+        expected_vorynce = (
+            "Vorynce lifecycle admission in `docs/product-lifecycle-admissions.json` is "
+            f"`{vorynce['state']}` and `{vorynce['integration_state']}`; only "
+            f"`{vorynce['allowed_actions'][0]}` and `{vorynce['allowed_actions'][1]}` are admitted. "
+            f"Retain local evidence `{vorynce['local_evidence']}`. No other Vorynce action is admitted."
+        )
+
+        self.assertEqual([bullet for bullet in bullets if "Vorynce" in bullet], [expected_vorynce])
+        self.assertNotIn("Vorynce", restart)
+        self.assertNotIn("foculoom/vorynce", restart)
+        self.assertEqual(vorynce["state"], "PAUSED")
+        self.assertEqual(vorynce["allowed_actions"], ["preserve_local_evidence", "read_only_audit"])
+        self.assertEqual(vorynce["denied_actions"], ["unarchive", "push", "merge", "release"])
+        self.assertEqual(vorynce["integration_state"], "UNINTEGRATED")
+        self.assertIn("A paused product is ineligible", normalized_prd)
+        self.assertIn("A clean or dirty `git status` is evidence to", normalized_prd)
+        self.assertIn("Tracker: issue #81", record)
+        self.assertIn("Vorynce as paused", record)
+        self.assertIn("No remote deletion or local cleanup", intent["authority_constraints"])
+        self.assertIn("Separate exact owner approval remains required", intent["authority_constraints"])
+        self.assertIn("no deletion target is ready", continuation)
+        self.assertIn("fail-closed lifecycle admission contract", incident)
+        self.assertIn("continuation no longer directs unarchive, push, or merge", incident)
+
 
 if __name__ == "__main__":
     unittest.main()

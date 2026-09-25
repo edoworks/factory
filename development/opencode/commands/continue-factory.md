@@ -26,13 +26,17 @@ agent: explore
   `docs/issue-intents/68`. Pinned identity-checked creation produced issues #77,
   #78, and #79, and remote readback matches all three frozen titles, bodies, and
   labels.
+- PR #80 merged those frozen intent records at `0cc1d5e`; its Factory policy,
+  iPhone, and iPad hosted checks passed.
 - Issue #70 tracks product and release-workflow decoupling.
-- The Vorynce ownership chunk is implemented and verified locally at commit
-  `f47cab8` on `feature/vorynce-prd-70` in the isolated worktree
-  `/var/folders/m6/j69tcnk52059qvy0_6hnxk5r0000gq/T/opencode/vorynce-prd-70`.
-- Integration is blocked because `foculoom/vorynce` is archived and the
-  owner-authenticated push was rejected read-only. The blocker is recorded on
-  issue #70.
+- Vorynce lifecycle admission in `docs/product-lifecycle-admissions.json` is
+  `PAUSED` and `UNINTEGRATED`; only `preserve_local_evidence` and
+  `read_only_audit` are admitted. Retain local evidence `f47cab8`. No other
+  Vorynce action is admitted.
+- Issue #81 is the deletion-readiness evidence chunk. Its frozen intent and
+  remote readback match. The 2026-09-25 read-only audit found divergent or
+  unclassified state across predecessor roots and no verified off-machine
+  preservation or restore receipt, so no deletion target is ready.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -41,17 +45,18 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Integrate the frozen intent evidence for issues #77, #78, and #79 through a
-   reviewed Factory pull request; do not recreate those issues.
-4. If an authorized exact-page open becomes available, complete and record the
+3. Integrate the lifecycle-admission and deletion-readiness corrections through a
+   reviewed Factory pull request; do not recreate issue #81.
+4. Complete a bounded rendered review of the exact final Factory Development
+   PRD and deletion-readiness record before integration.
+5. If an authorized exact-page open becomes available, complete and record the
    bounded rendered review of PR #76's final PRD without claiming it preceded
    merge.
-5. Use an approved repository-setting path to unarchive exactly
-   `foculoom/vorynce`; do not use an alternate remote or bypass policy.
-6. Reassert the `hellofoculoom` GitHub identity, push the exact Vorynce feature
-   ref, open and merge the reviewed PR, and safely clean the merged branch.
-7. Continue the smallest independently verifiable issue #70 increment without
-   modifying unrelated product branches.
+6. Continue issue #70 only with an explicitly active product or release workflow
+   after current lifecycle admission is recorded.
+7. Continue the smallest independently verifiable issue #81 inventory and
+   preservation increment. Do not delete, archive, unarchive, publish, or clean
+   any target under that evidence issue.
 
 ## Boundaries
 

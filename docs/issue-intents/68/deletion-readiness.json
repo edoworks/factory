@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Establish predecessor deletion-readiness evidence",
+  "body_file": "deletion-readiness-body.md",
+  "body_sha256": "c4cd0214422463083ca1bbba033aa08934bc7b6d2abb46072185627f9ebce168",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["Parent consolidation map issue #68", "Issues #70, #77, #78, and #79", "Approved off-machine preservation destination"],
+  "authority_constraints": ["No remote deletion or local cleanup", "No publication or repository setting change", "No credential broadening", "Separate exact owner approval remains required"],
+  "source_provenance": ["edoworks/factory issue #68", "docs/single-factory-cutover.md", "Factory feature head 20fd8c1fa65872921479e55031161f273b14b901", "Owner Vorynce lifecycle clarification on 2026-09-25"],
+  "duplicate_review": ["Issue #17 is an older archive-only contract; this issue implements issue #68 deletion-readiness evidence"],
+  "reprioritization_review": ["Required before any predecessor deletion or cleanup decision"]
+}
