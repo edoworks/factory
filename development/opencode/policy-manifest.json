@@ -2,8 +2,8 @@
   "schema_version": 1,
   "files": {
     ".gitignore": "4d56952b0fb13bf8f9b6c13a6d4c34a075bac3af447636a1df4335d7576e2f97",
-    "active-baseline.json": "d807b9506d9972116c69725833edec556c0f736ff3af9f3fbe41915a2f6211ea",
-    "commands/continue-factory.md": "795a6580b9cd67641de7c10c47288a1ec0aa95ab45c06b07ff02e61c9ba020c3",
+    "active-baseline.json": "7671adaab4cab61e1863a92cd96b4ab7bb5554adf6d0c7cd21444c9e1ac07cf3",
+    "commands/continue-factory.md": "2680d38fa6b961a9e851a0a4c7f0ceb652c4a0b8158dabd217f54dd066411944",
     "model-routing/approved.json": "9d908dfb868cec573954e0741e67385ab56a5f2c7f596e4e07f57b04f5e0a985",
     "model-routing/benchmark-suite.mjs": "0739dd72655c56cdf74839f0c6f5335abb26a5363215f73e71477567ae83cd7d",
     "model-routing/benchmarks.json": "52ef7d8fb950453337c690a04437e9307ad467f65bd3748bc3f4446e9fb9d0d3",
