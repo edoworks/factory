@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Attribute hosted verification storage drift",
+  "body_file": "hosted-storage-attribution-body.md",
+  "body_sha256": "bdf3ed9bf4a1849caef55c8f0607ea9e8dfca07f0f7957594d02fd31df7c0259",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["PR #92 run 36171964484", "Existing storage-drift recurrence contract"],
+  "authority_constraints": ["Repository-local instrumentation only", "No tolerance increase", "No global state cleanup", "No private path or content publication"],
+  "source_provenance": ["edoworks/factory PR #92", "Hosted run 36171964484", "docs/incidents/2026-09-24-ambiguous-simulator-destination.md"],
+  "duplicate_review": ["Issue #60 and issue #81 do not implement external-owner storage attribution"],
+  "reprioritization_review": ["Required before PR #92 can satisfy its policy gate without weakening storage controls"]
+}

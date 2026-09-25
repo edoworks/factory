@@ -158,6 +158,12 @@ issue #77 found no overlap, clipping, unreadable wrapping, private payload, or
 later-state overclaim. Preservation storage remains unprovisioned and issue #81
 still owns private instance inventory and restore evidence.
 
+PR #91 merged the repository integration record at
+`bfbe70e1dd0a667b4ab0c8ced4a58149bcd579d4` after hosted run `36170102428`
+passed all three jobs and its exact integration diff received bounded rendered
+review with no layout or privacy defect. Remote readback reports issue #77
+closed, and the pinned closeout verifier returned exactly `CLOSED`.
+
 ## State Claims
 
 | State | Result |

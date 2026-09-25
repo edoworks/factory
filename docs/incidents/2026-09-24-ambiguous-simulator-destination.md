@@ -155,3 +155,137 @@ the observed 664 MiB maximum with bounded margin while preserving the local
 64 MiB default. The receipt continues to expose all unknown growth. A workflow
 test pins the bound and its stopping rule: another exceedance requires external-
 owner directory instrumentation, not another tolerance increase.
+
+## 2026-09-25 Hosted Storage Recurrence
+
+PR #92 run `36171964484` passed public-evidence validation, 68 Python tests,
+build, unit tests, iPad build, analysis, archive, and run-owned simulator cleanup.
+The Factory policy gate then failed closed because `908771328` bytes of unknown
+persistent growth exceeded the unchanged `805306368`-byte hosted tolerance. The
+independent iPhone and iPad jobs passed.
+
+1. Why did the policy gate fail? Aggregate filesystem free space remained
+   `908771328` bytes below its starting value after cleanup and bounded
+   settlement.
+2. Why was the growth classified unknown? The receipt attributes only exact
+   factory-owned retained artifacts; this successful run retained none.
+3. Why could the prior 768 MiB bound not accept it? The new observation exceeded
+   the bound by `103464960` bytes, and the existing recurrence contract forbids
+   another increase without attribution.
+4. Why was attribution unavailable in the failed run? CI retained the aggregate
+   receipt but did not capture before and after allocated bytes for external
+   Xcode and CoreSimulator directory classes.
+5. Root cause supported by runs `36171964484` and the earlier observations:
+   aggregate APFS drift can exceed the provisional hosted measurement bound, but
+   the policy job lacked bounded external-owner measurements needed to separate
+   known directory-class growth from unexplained filesystem change.
+
+Issue #93 adds read-only before and after measurements for fixed user Xcode,
+user CoreSimulator, and system CoreSimulator classes. Public artifacts contain
+only fixed identifiers, state, and byte counts. The comparison reports signed
+and positive deltas but does not convert them into approved persistent bytes,
+delete global state, or change either storage tolerance.
+
+### Attribution Trust Review Correction
+
+1. Why could the first instrumentation draft measure outside its fixed class?
+   It rejected a symlink only at the final root component.
+2. Why was that insufficient? A parent component could be a symlink, and a root
+   could be replaced between the check and `du` traversal.
+3. Why did initial tests not detect this? They mocked measurement and asserted
+   output redaction without exercising component containment.
+4. Why is a byte count still a trust concern? Publishing it under a fixed class
+   would falsely claim that an unallowlisted target belonged to that class, even
+   though no names or contents were emitted.
+5. Root cause supported by the independent review: output redaction was treated
+   as sufficient without binding traversal to stable, non-symlinked components.
+
+The correction opens every path component relative to the previously bound
+directory descriptor with `O_NOFOLLOW`, then counts allocated blocks through
+descriptor-relative traversal. Child identity must match the entry inspected
+before traversal; symlinks are counted but never followed. Tests cover exact
+roots, ancestor symlinks, descriptor traversal, schema typing, and redacted OS
+and parse failures. Attribution has a dedicated artifact upload that fails closed
+when the comparison file is missing.
+
+### Attribution Boundedness Review Correction
+
+1. Why could the first descriptor-relative traversal fail on a wide tree? It
+   opened every discovered child before processing the traversal frontier.
+2. Why did that threaten the evidence artifact? Open descriptors scaled with
+   sibling count and could reach the process limit before comparison completed.
+3. Why did initial containment tests not detect it? They exercised a small tree
+   and checked containment rather than descriptor pressure.
+4. Why was cleanup alone insufficient? Closing the frontier after failure avoids
+   a leak but still leaves the required attribution unavailable.
+5. Root cause supported by the independent review: descriptor binding solved the
+   path race without initially preserving the bounded-resource behavior of a
+   depth-first filesystem walk.
+
+The correction processes one child subtree at a time, so open descriptors scale
+with depth rather than width. A deterministic 100-sibling test tracks opens and
+closes, requires zero retained descriptors, and caps concurrent descriptors at
+two for that one-level tree.
+
+### Hosted Attribution Capture Failure
+
+Run `36176741252` failed both external-storage snapshot steps before template
+verification. The dedicated upload then failed because no comparison artifact
+existed; the separate device jobs were unaffected.
+
+1. Why was no attribution artifact produced? Baseline and after-snapshot commands
+   each exited when at least one allowlisted external class could not be measured.
+2. Why did one class prevent the whole receipt? Measurement access and live-tree
+   traversal errors were treated as command-fatal rather than class state.
+3. Why was that too strict for external-owner roots? The Factory intentionally
+   has no authority to normalize permissions or stop concurrent Xcode and
+   CoreSimulator mutation in those directories.
+4. Why must the job not silently accept those errors? Missing measurements are
+   actionable evidence and must not be converted into zero growth or approved
+   persistent bytes.
+5. Root cause supported by the two failed capture steps and missing-file upload
+   annotation: expected external-root unavailability was conflated with a
+   malformed attribution receipt.
+
+The correction emits `unavailable` with one of two fixed, path-free reasons and
+`null` allocated bytes for that class. Comparison reports a `null` delta and
+excludes the class from aggregate measured growth. Unknown schema, identifiers,
+states, reasons, and values still fail closed, while the existing aggregate
+storage policy remains unchanged and authoritative.
+
+### Unavailable-State Test Correction
+
+1. Why did the first local suite after this correction fail? The ancestor-
+   symlink test still expected measurement to raise an exception.
+2. Why was that assertion stale? Symlink rejection now maps to the same explicit
+   unavailable class state as other unsafe root-open failures.
+3. Why was the stale assertion not updated with the implementation? The initial
+   edit updated generic open/traversal error coverage but missed the earlier
+   dedicated ancestor-symlink case.
+4. Why did this not reach another hosted run? The full local suite failed before
+   commit and push.
+5. Root cause supported by the single failed assertion: the contract migration
+   from command-fatal to class-unavailable was not applied to every existing
+   test case in one edit.
+
+The ancestor-symlink test now requires the exact fixed `root_open_failed` state,
+`null` bytes, and no path-bearing value. The full-suite gate remains the
+mechanical recurrence guard before publication.
+
+### Malformed-Type Review Correction
+
+1. Why could a malformed receipt print a source-bearing traceback? Array or
+   object `state` and `reason` values reached set membership before type checks.
+2. Why did that bypass fixed validation errors? Python raises `TypeError` for an
+   unhashable membership operand, while the CLI catches only expected parse,
+   validation, and filesystem errors.
+3. Why did existing malformed tests not detect it? They covered unknown strings,
+   duplicate keys, and boolean schema versions but not unhashable field types.
+4. Why is this relevant when CI creates the snapshots? Comparison accepts files
+   as inputs, so malformed or replaced evidence must remain privacy-safe.
+5. Root cause supported by the review: value-domain validation was performed
+   before primitive-type validation for two enum fields.
+
+The validator now requires string enum values before membership checks. Tests
+cover unhashable state and reason values and an all-unavailable comparison whose
+zero aggregates remain qualified by `measured_class_count: 0` and null deltas.
