@@ -3,7 +3,7 @@
 Date: 2026-09-24
 Tracker: `edoworks/factory` issues #68 and #69
 Inspected factory revision: `7ff54762c7c853055202a2d048b62a02714b6933`
-Status: `CANONICAL_FOR_NEW_WORK` in progress; later states not claimed
+Status: `CANONICAL_FOR_NEW_WORK` verified; later states not claimed
 
 ## Verified Current State
 
@@ -95,7 +95,7 @@ The independent development-policy review and corrections are recorded in
 
 | State | Result |
 |---|---|
-| `CANONICAL_FOR_NEW_WORK` | IN PROGRESS until this governance change is merged and continuation is installed |
+| `CANONICAL_FOR_NEW_WORK` | VERIFIED by merged PR #71 and the matching installed continuation |
 | `OPERATIONALLY_CUT_OVER` | NOT VERIFIED |
 | `PRESERVATION_VERIFIED` | NOT VERIFIED |
 | `READY_FOR_OWNER_DELETION_APPROVAL` | NOT VERIFIED |

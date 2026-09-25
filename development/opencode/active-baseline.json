@@ -3,7 +3,7 @@
   "captured_from": "active user OpenCode controls on 2026-09-24",
   "files": {
     "opencode.jsonc": "63e5dca71d588e1a68ec84318b77f83447803e22a8f7572882180961f63b98a7",
-    "commands/continue-factory.md": "8242fd38405fd6219fe996087b569935a89f1dd97777228715a51868611cb0c8",
+    "commands/continue-factory.md": "7887a3863c5f2839c625c20bce5508fc700e6236585a19d93c184d4dcae99583",
     "scripts/continuation-command.test.mjs": "f38a87e89f21dec531dad2977a7baa61d1e5a7df07dd0dfc41c4f086afe16f21"
   }
 }
