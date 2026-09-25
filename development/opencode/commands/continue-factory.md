@@ -8,16 +8,22 @@ agent: explore
 - `edoworks/factory` is the sole canonical factory.
 - Issue #69 and PR #71 completed the repository-owned OpenCode development
   environment and `CANONICAL_FOR_NEW_WORK` state.
-- Issue #68 is the active consolidation map. PR #74 restores explicitly
-  approved Factory issue writes and bounded visual-review commands while
-  retaining fail-closed repository and argument guards.
-- PR #74's current feature branch passes 46 Python tests, 6 Node tests, Factory
-  doctor, policy integrity, installed-policy comparison, and an independent
-  review with no remaining findings.
-- PR #74's latest completed hosted run passed the Factory policy gate and the
-  independent iPhone and iPad reference-app jobs; recheck the current head.
-- The current OpenCode process predates the corrected policy. A fresh
-  `bin/factory-dev` session is required before visual review or issue writes.
+- Issue #68 is the active consolidation map. PR #74 merged interactive Factory
+  issue writes, bounded visual review, and GitHub authentication preservation at
+  `1536ba6`; its local and hosted verification and rendered PRD review passed.
+- PR #75 restores the fixed repository-owned issue-intent hash, validation, and
+  remote-readback commands required before approved child issue creation.
+  Independent review then found a shadowable relative script path and unbound
+  raw create command. The correction anchors the script to the trusted
+  environment root, routes interactive creation through validated intent, and
+  pins its GitHub CLI child transport to the launcher's resolved executable.
+  It passes 48 Python tests, 6 Node tests, Factory doctor, policy integrity,
+  installed-policy comparison, and diff checks locally. Fresh hosted checks,
+  independent rereview, and rendered PRD review remain required at the next
+  pushed head.
+- The current OpenCode process predates PR #75's policy. A fresh
+  `bin/factory-dev` session is required after integration before intent commands
+  or child issue creation.
 - Issue #70 tracks product and release-workflow decoupling.
 - The Vorynce ownership chunk is implemented and verified locally at commit
   `f47cab8` on `feature/vorynce-prd-70` in the isolated worktree
@@ -33,13 +39,14 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Open PR #74's rendered PRD in the bounded browser path, capture it with the
+3. Open PR #75's rendered PRD in the bounded browser path, capture it with the
    pinned screenshot utility, and verify readability before integration.
-4. Recheck PR #74's required checks at the current head. Merge only while they
+4. Recheck PR #75's required checks at the current head. Merge only while they
    remain passed and the visual review has no unresolved findings.
-5. Use the newly interactive, repository-first issue workflow to update map #68
-   and create only the owner-approved private-public, portfolio-index, and
-   product-repository child issues after body readback.
+5. Start a fresh `bin/factory-dev` session and use the repository-owned intent
+   workflow to freeze, validate, create, and remotely read back only the
+   owner-approved private-public, portfolio-index, and product-repository child
+   issues.
 6. Use an approved repository-setting path to unarchive exactly
    `foculoom/vorynce`; do not use an alternate remote or bypass policy.
 7. Reassert the `hellofoculoom` GitHub identity, push the exact Vorynce feature

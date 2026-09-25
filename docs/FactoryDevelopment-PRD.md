@@ -60,11 +60,19 @@ organization `.well-known` policy is not suppressible by this launcher; any
 future enrollment requires a separate effective-config review before readiness
 may be claimed. The policy inventory is closed-world outside generated `node_modules`:
 unlisted files and symlinked policy paths fail readiness. Broad GitHub issue
-mutations remain denied. Exact repository-first create, comment, and close
-commands for `edoworks/factory` are interactive `ask` operations; auto mode
-cannot supply that human authorization, and trailing repository overrides are
-denied. Ordinary factory PR integration uses only explicitly allowed canonical
-command forms, with trailing repository overrides denied. Rendered Factory
+mutations remain denied. Issue creation is an interactive `ask` operation routed
+through the environment-rooted repository script, which validates and transports
+the frozen intent without accepting inline issue content. The launcher pins the
+GitHub CLI to an absolute executable path before the script can transport or
+read back that intent. Exact repository-first
+comment and close commands for `edoworks/factory` are also interactive `ask` operations;
+auto mode cannot supply that human authorization, and trailing
+repository overrides are denied. Repository-owned issue-intent hashing, local
+validation, and remote readback commands are read-only allowed operations; their
+fixed script path and argument validation prevent them from becoming alternate
+mutation transports.
+Ordinary factory PR integration uses only explicitly allowed canonical command
+forms, with trailing repository overrides denied. Rendered Factory
 documentation review may interactively open one `edoworks/factory` GitHub page
 with no additional target and may run
 the screenshot utility at its fixed home-directory installation; neither

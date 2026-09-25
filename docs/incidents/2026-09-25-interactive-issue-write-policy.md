@@ -93,6 +93,73 @@ passes that path to the launched process while continuing to isolate OpenCode.
 The launcher test records both paths and requires GitHub CLI to retain the user
 configuration root. No credential value is copied, logged, or committed.
 
+## Issue-Intent Preparation Gap
+
+After PR #74 merged, child issue creation remained noncompliant because the
+required issue-intent preparation commands were not executable under the same
+policy.
+
+1. A child issue could not be frozen and validated because the shell allowlist
+   admitted issue transport commands but not `issue-intent.mjs`.
+2. The correction focused on interactive GitHub mutations and omitted the
+   read-only preparation and remote-readback stages that make those mutations
+   trustworthy.
+3. The permission contract test asserted create, comment, and close patterns but
+   not the complete issue lifecycle.
+4. The issue-tracking skill and runtime permission policy were reviewed as
+   separate artifacts rather than one executable workflow.
+5. The root cause was an incomplete end-to-end trust model: transport authority
+   was restored without mechanically proving that intent freezing and readback
+   remained possible.
+
+The correction adds a deterministic body-hash operation to the repository-owned
+script and allows only its fixed `hash`, `validate`, and `verify-remote` command
+forms. Script argument checks reject extra operands, the shell policy still
+denies compound commands, and contract tests require the complete read-only
+preparation surface.
+
+## Intent-Binding Review Gap
+
+Independent review of PR #75 found that the initial correction still trusted a
+working-directory-relative script path and left raw issue creation separately
+approvable from the validated intent.
+
+1. A product target could shadow the relative script path because permission
+   matching constrained the typed command but not the resolved executable file.
+2. The allowlist described the script as repository-owned without anchoring it
+   to the launcher's trusted `FACTORY_DEV_OPENCODE_ROOT`.
+3. Raw `gh issue create` remained an interactive operation, so approval did not
+   prove that its title and body came from the validated intent.
+4. Contract tests checked the presence of command patterns but did not exercise
+   a non-repository target or the complete validate-create-readback data flow.
+5. The root cause was treating human authorization and content integrity as one
+   gate rather than independent gates that must both pass.
+
+The correction anchors all intent commands to `FACTORY_DEV_OPENCODE_ROOT`,
+removes direct issue creation from the interactive surface, and adds an
+interactive script command that validates the intent before passing the exact
+validated title, body bytes, and labels to GitHub. Tests reject the relative
+shadowable pattern and exercise valid, hash-mismatched, created, and remote
+readback states through a fake GitHub transport.
+
+Rereview found that the trusted script still spawned `gh` by name:
+
+1. Validated intent could reach a substituted executable because child-process
+   transport resolved `gh` from inherited `PATH`.
+2. Anchoring the script protected its own code but did not anchor its external
+   transport dependency.
+3. The launcher preserved the user environment without resolving the allowed
+   GitHub CLI before entering a product target.
+4. The transport test intentionally injected a fake `gh` through `PATH` to
+   observe arguments, so it proved construction while normalizing substitution.
+5. The root cause was applying executable provenance to the validator but not
+   recursively to the validator's privileged child process.
+
+The launcher now resolves `gh` once, passes its absolute real path as
+`FACTORY_DEV_GH`, and refuses readiness when GitHub CLI is unavailable. The
+script requires that pinned absolute path for creation and readback. A regression
+test prepends a hostile executable after pinning and proves it is not selected.
+
 ## Boundaries
 
 This change does not auto-approve a write, permit another repository, weaken the
