@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Record hosted storage attribution integration",
+  "body_file": "storage-attribution-integration-body.md",
+  "body_sha256": "fa4c1b06a1f1e4154f2bd43bb0cf5e0a7699300cae732dfa2219f5a862904ac7",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["PR #92 merge 5492a406fd78a2c073f907037c29ef03483fa7b5", "Hosted run 36177899841", "Closed issue #93"],
+  "authority_constraints": ["Repository-local integration evidence only", "No tolerance or cleanup change", "No private evidence publication"],
+  "source_provenance": ["edoworks/factory PR #92", "Hosted run 36177899841", "edoworks/factory issue #93"],
+  "duplicate_review": ["Issue #93 owns implementation; this issue owns only post-merge state accuracy"],
+  "reprioritization_review": ["Canonical continuation wording is stale after PR #92 merge"]
+}
