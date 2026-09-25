@@ -48,7 +48,9 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
       - name: Verify template builds
-        timeout-minutes: 8
+        # Run 36117730389 reached the former 8-minute bound during the first
+        # cold hosted xcodebuild. Keep this within the 25-minute job bound.
+        timeout-minutes: 15
         env:
           # Hosted CoreSimulator/APFS drift observed at 129, 664, and 227 MiB.
           # Do not raise this bound again without external-owner attribution.

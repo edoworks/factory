@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+import re
 import sqlite3
 import subprocess
 import sys
@@ -271,7 +272,14 @@ class LifecycleContractTests(unittest.TestCase):
         self.assertIn("FACTORY_STORAGE_GROWTH_TOLERANCE_MIB: 768", workflow)
         self.assertIn("Do not raise this bound again", workflow)
         self.assertRegex(workflow, r"(?m)^  policy:\n    name: Factory policy gate\n    runs-on: macos-15\n    timeout-minutes: 25$")
-        self.assertRegex(workflow, r"(?m)^      - name: Verify template builds\n        timeout-minutes: 8$")
+        self.assertIn("Run 36117730389 reached the former 8-minute bound", workflow)
+        self.assertRegex(
+            workflow,
+            r"(?m)^      - name: Verify template builds\n(?:        #.*\n){2}        timeout-minutes: 15$",
+        )
+        job_timeout = int(re.search(r"(?m)^  policy:\n(?:.*\n){2}    timeout-minutes: (\d+)$", workflow).group(1))
+        step_timeout = int(re.search(r"(?m)^      - name: Verify template builds\n(?:        #.*\n){2}        timeout-minutes: (\d+)$", workflow).group(1))
+        self.assertLess(step_timeout, job_timeout)
         self.assertRegex(workflow, r"(?m)^  reference-app:\n    name: Mews & Woofs \(\$\{\{ matrix\.form_factor \}\}\)\n    runs-on: macos-15\n    timeout-minutes: 20$")
         self.assertIn("fail-fast: false", workflow)
         self.assertIn("simulator_key: IPHONE", workflow)

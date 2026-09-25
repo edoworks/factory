@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-09-25",
+  "products": {
+    "foculoom/vorynce": {
+      "state": "PAUSED",
+      "authority": "Owner clarification recorded on edoworks/factory issue #70",
+      "allowed_actions": [
+        "preserve_local_evidence",
+        "read_only_audit"
+      ],
+      "denied_actions": [
+        "unarchive",
+        "push",
+        "merge",
+        "release"
+      ],
+      "local_evidence": "f47cab8",
+      "integration_state": "UNINTEGRATED"
+    }
+  }
+}

@@ -91,6 +91,41 @@ The independent development-policy review and corrections are recorded in
   boundary has been verified.
 - No remote or local predecessor target is ready for deletion approval.
 
+## Deletion-Readiness Audit
+
+Read-only audit date: 2026-09-25
+
+Factory feature head: `20fd8c1fa65872921479e55031161f273b14b901`
+
+Tracker: issue #81
+
+Observed worktree state is an admission input, not a disposal decision:
+
+| Predecessor identifier | Observed state | Deletion disposition |
+|---|---|---|
+| `sf0.1` | non-clean | BLOCKED pending private classification and preservation |
+| `sf0.2` | local divergence | BLOCKED pending private ref preservation and disposition |
+| `sf0.3` | non-clean | BLOCKED pending private classification and preservation |
+| `sf0.4` | clean at inspected revision | BLOCKED pending the remaining shared gates |
+| `sf0.5` | non-clean | BLOCKED pending private classification and preservation |
+| `sf0.6` | no committed history | BLOCKED pending private ownership and intent classification |
+| `sf0.7` | non-clean | BLOCKED pending private classification and preservation |
+| `sf0.8` | remote and local divergence | BLOCKED pending private comparison, classification, and preservation |
+
+One same-machine encrypted archive predating this audit was observed. No current
+private inventory, integrity receipt, isolated restore result, or approved
+preservation destination outside this machine's failure boundary was verified
+for it. It therefore establishes no deletion-readiness state. Exact paths,
+filenames, backup routing, and payload details newly collected for deletion
+targets remain outside public evidence; the earlier service-source paths above
+remain historical cutover evidence.
+
+Owner clarification records Vorynce as paused. Its local commit `f47cab8` is
+retained as unintegrated paused-product work and is not an unarchive, push,
+completion, cutover, or deletion-readiness target. Issue #70 contains the
+correction. Exact predecessor remote identities, resolved local target paths,
+explicit exclusions, and separate owner approvals remain outstanding.
+
 ## State Claims
 
 | State | Result |
