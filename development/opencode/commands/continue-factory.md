@@ -87,6 +87,14 @@ agent: explore
   Remote readback reports issue #93 closed, and the pinned closeout verifier
   returned exactly `CLOSED`. Storage tolerances and global-state ownership remain
   unchanged.
+- The local issue #78 increment adds a public-safe canonical portfolio index,
+  closed per-product ownership bindings, a 30-day freshness gate, direct CI
+  validation, and matching Factory PRD and cutover records. Private repository
+  identities remain opaque, private completeness remains `UNKNOWN`, and no
+  lifecycle or release state is advanced. Exact local verification passed 91
+  Python tests, 15 pinned Node tests, launch-ready Factory doctor, and independent
+  trust review with no material findings. Hosted and rendered review remain
+  pending.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 

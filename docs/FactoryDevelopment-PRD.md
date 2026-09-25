@@ -156,6 +156,39 @@ separate private instance inventory, preservation destination, payload integrity
 and restore evidence, so this classification alone cannot establish
 `PRESERVATION_VERIFIED` or deletion readiness.
 
+## Canonical Portfolio Index
+
+`docs/product-portfolio-index.json` is the sole Factory-owned portfolio ownership
+index. It records public-safe product identity, one canonical repository or opaque
+private repository reference, lifecycle state, owning tracker, revision-bound
+evidence, and product-PRD disposition. It is an inventory and contradiction
+guard, not a dashboard, dispatcher, release authority, or product control plane.
+
+The index publishes no organization-wide hosted metadata snapshot. It retains
+only the issue #77 opaque hosted-metadata reference plus canonical identities
+that were already public and approved in exact record bindings. Every product ID
+is mechanically bound to its repository reference, visibility class, lifecycle,
+owning tracker, evidence source and revision, PRD disposition, and public claim.
+Any change to one of those claims requires a reviewed validator change rather
+than free-form data editing. Duplicate product IDs, duplicate canonical
+repository ownership, missing known records, stale evidence, and schema
+expansion all fail closed.
+
+Private repository identities and metadata remain in owner-controlled private
+evidence. The public index uses fixed opaque repository references and reports
+private-inventory completeness as `UNKNOWN`. An unknown product cannot carry an
+active lifecycle or public claim. Vorynce remains `PAUSED` under the separate
+machine-readable lifecycle admission. The Mews & Woofs entry is an internal
+Factory reference fixture scoped below `reference-apps/MewsAndWoofs`; it does not
+make Factory the owner of an independent product repository or authorize a public
+identity. Issue #79 owns the later product-repository authority reconciliation.
+
+The index expires after 30 days. Refresh requires timestamp-bound public source
+inspection, revision evidence for supported claims, privacy review, and an
+ordinary reviewed Factory change. `scripts/check_product_portfolio.py` validates
+the index directly in CI and never queries or publishes private repository state
+or raw hosted repository metadata.
+
 ## Required Controls
 
 - Routine work uses the lowest-cost qualified route; premium escalation is

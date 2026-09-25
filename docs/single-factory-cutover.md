@@ -164,6 +164,28 @@ passed all three jobs and its exact integration diff received bounded rendered
 review with no layout or privacy defect. Remote readback reports issue #77
 closed, and the pinned closeout verifier returned exactly `CLOSED`.
 
+## Canonical Portfolio Index
+
+Tracker: issue #78
+
+The public-safe index at `docs/product-portfolio-index.json` records nine known
+portfolio entries. It publishes no organization-wide repository snapshot;
+hosted inventory remains behind the issue #77 opaque evidence reference. Public
+products bind to approved, already-public canonical identities and evidence
+revisions. Mews & Woofs remains an internal reference fixture. Vorynce remains
+paused under its lifecycle admission. Three issue-disclosed private products
+remain `UNKNOWN`, with opaque repository references and no public or active
+claim. Edglex and Noraze remain archived historical public surfaces.
+
+Private repository identities, completeness, and metadata remain in the
+owner-controlled private evidence class. The public index does not replace that
+inventory and does not establish preservation or deletion readiness, change a
+product's lifecycle, authorize release, or make Factory the owner of
+product-specific PRDs. The direct CI validator rejects stale observations,
+duplicate ownership, missing records, and private paths. Hosted-state
+contradictions require a fresh timestamp-bound source inspection before the
+closed approved mappings are updated.
+
 ## State Claims
 
 | State | Result |

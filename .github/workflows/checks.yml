@@ -45,6 +45,9 @@ jobs:
       - name: Validate public consolidation evidence
         run: python3 scripts/check_consolidation_evidence.py
 
+      - name: Validate canonical product portfolio
+        run: python3 scripts/check_product_portfolio.py
+
       - name: Run Python unit tests
         env:
           GITHUB_TOKEN: ${{ github.token }}
