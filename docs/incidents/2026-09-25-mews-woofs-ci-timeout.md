@@ -3,7 +3,7 @@
 Date: 2026-09-25
 Issue: [#70](https://github.com/edoworks/factory/issues/70)
 Run: `36092353434`
-Status: correction pending hosted verification
+Status: correction verified in hosted CI
 
 ## Observation
 
@@ -46,3 +46,6 @@ start, so no deeper infrastructure cause is claimed.
 - Six unit tests and five UI tests passed with zero failures on iPhone.
 - The iPad invocation began at 04:11:00 UTC; the shared step timed out at
   04:12:52 UTC while still building its test runner.
+- Correction run `36093828287` passed all three jobs. iPhone verification
+  completed in 5 minutes 28 seconds and iPad verification completed in 9
+  minutes 36 seconds, each within its independent 15-minute step bound.
