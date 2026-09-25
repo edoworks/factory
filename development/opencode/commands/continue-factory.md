@@ -56,9 +56,13 @@ agent: explore
   readback reports issue #84 `CLOSED`; the exact closeout helper remains
   unexecuted because this loaded session does not admit that command.
 - Issue #87 tracks the missing exact read-only issue-closeout permission and
-  ambient GitHub CLI lookup. Its frozen intent and remote title, body, and label
-  match; implementation, fresh-session verification, integration, and closeout
-  remain pending.
+  ambient GitHub CLI lookup. PR #88 merged the pinned verifier and exact policy
+  admission at `d9113db`; exact feature head `e8a0175` passed 55 Python tests,
+  the pinned Node suite, Factory doctor, two independent trust reviews, and
+  hosted run `36148707004` across the policy, iPhone, and iPad jobs. Remote
+  readback reports issue #87 `CLOSED`. The exact issue #84 receipt and bounded
+  rendered documentation review remain pending because this loaded session
+  cannot admit the new command or open the exact revision.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -67,9 +71,9 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Complete issue #87 implementation and integration, launch a fresh session,
-   then run the exact issue #84 closeout verifier and require `CLOSED` before
-   claiming tracked completion.
+3. Launch a fresh Factory session, run
+   `{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.mjs verify --repo edoworks/factory --issues 84`,
+   and require exactly `CLOSED` before claiming issue #87 acceptance complete.
 4. If an authorized exact-page open becomes available, complete and record the
    bounded rendered review of PR #76's final PRD without claiming it preceded
    merge.

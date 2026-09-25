@@ -4,7 +4,7 @@ Date: 2026-09-25
 
 Tracker: `edoworks/factory#87`
 
-Status: corrected pending verification and integration
+Status: integrated pending fresh-session verification
 
 ## Evidence
 
@@ -60,3 +60,12 @@ read-only verification step to the pinned runtime and deny-by-default policy.
   tracked Node test list.
 - Fresh-session verification must produce `CLOSED` for issue #84 before its
   closeout blocker is removed from continuation evidence.
+
+## Integration
+
+PR #88 merged as `d9113dbe46addfee678715564824b4705d223291` after the
+Factory policy gate and independent iPhone and iPad jobs passed in hosted run
+`36148707004`. GitHub then closed issue #87 as completed. The loaded pre-change
+OpenCode session cannot admit the new helper command, so its exact issue #84
+`CLOSED` receipt remains a fresh-session acceptance requirement rather than a
+completed claim.
