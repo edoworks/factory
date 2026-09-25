@@ -3,7 +3,7 @@
   "files": {
     ".gitignore": "4d56952b0fb13bf8f9b6c13a6d4c34a075bac3af447636a1df4335d7576e2f97",
     "active-baseline.json": "78699eb688fa55b3cc0531ce7e030ab5d93668dda0c0fc64c90d0dd5ded7ecad",
-    "commands/continue-factory.md": "5d6444936fb9cad242618b55b38c5691e5ad3b2e02a987d00c23c02efc4102f0",
+    "commands/continue-factory.md": "966deb3e9cee637aa86fe8e52a8b80f94a5145d374a3f1b7a63c71a88beef5bf",
     "model-routing/approved.json": "9d908dfb868cec573954e0741e67385ab56a5f2c7f596e4e07f57b04f5e0a985",
     "model-routing/benchmark-suite.mjs": "0739dd72655c56cdf74839f0c6f5335abb26a5363215f73e71477567ae83cd7d",
     "model-routing/benchmarks.json": "52ef7d8fb950453337c690a04437e9307ad467f65bd3748bc3f4446e9fb9d0d3",
