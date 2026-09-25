@@ -21,6 +21,7 @@ def snapshot(values):
             identifier: {
                 "state": "present" if value else "absent",
                 "allocated_bytes": value,
+                "reason": None,
             }
             for identifier, value in values.items()
         },
@@ -35,6 +36,7 @@ class ExternalStorageAttributionTests(unittest.TestCase):
             side_effect=lambda identifier, path: {
                 "state": "present",
                 "allocated_bytes": len(identifier),
+                "reason": None,
             },
         ):
             value = ATTRIBUTION.snapshot()
@@ -70,6 +72,7 @@ class ExternalStorageAttributionTests(unittest.TestCase):
         value["measurements"]["private_path"] = {
             "state": "present",
             "allocated_bytes": 1,
+            "reason": None,
         }
         with self.assertRaisesRegex(ValueError, "fixed allowlist"):
             ATTRIBUTION.validate_snapshot(value)
@@ -85,6 +88,21 @@ class ExternalStorageAttributionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "identity is invalid"):
             ATTRIBUTION.validate_snapshot(value)
 
+    def test_snapshot_rejects_unhashable_state_and_reason(self):
+        identifiers = list(ATTRIBUTION.ROOTS)
+        value = snapshot({identifier: 0 for identifier in identifiers})
+        value["measurements"][identifiers[0]]["state"] = ["absent"]
+        with self.assertRaisesRegex(ValueError, "state is invalid"):
+            ATTRIBUTION.validate_snapshot(value)
+        value = snapshot({identifier: 0 for identifier in identifiers})
+        value["measurements"][identifiers[0]] = {
+            "state": "unavailable",
+            "allocated_bytes": None,
+            "reason": {"private": "value"},
+        }
+        with self.assertRaisesRegex(ValueError, "unavailable measurement is invalid"):
+            ATTRIBUTION.validate_snapshot(value)
+
     def test_measurement_rejects_symlinked_ancestor(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = pathlib.Path(temporary).resolve()
@@ -94,8 +112,15 @@ class ExternalStorageAttributionTests(unittest.TestCase):
             child.mkdir()
             alias = directory / "alias"
             alias.symlink_to(real, target_is_directory=True)
-            with self.assertRaisesRegex(ValueError, "cannot be opened safely"):
-                ATTRIBUTION.measure_root("test_root", alias / "child")
+            value = ATTRIBUTION.measure_root("test_root", alias / "child")
+        self.assertEqual(
+            value,
+            {
+                "state": "unavailable",
+                "allocated_bytes": None,
+                "reason": "root_open_failed",
+            },
+        )
 
     def test_measurement_counts_allocated_blocks_without_following_symlinks(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -141,18 +166,60 @@ class ExternalStorageAttributionTests(unittest.TestCase):
             "open_root",
             side_effect=ValueError(f"cannot inspect {private_path}"),
         ):
-            with self.assertRaises(ValueError) as context:
-                ATTRIBUTION.measure_root("test_root", private_path)
-        self.assertEqual(str(context.exception), "test_root: root cannot be opened safely")
+            value = ATTRIBUTION.measure_root("test_root", private_path)
+        self.assertEqual(
+            value,
+            {
+                "state": "unavailable",
+                "allocated_bytes": None,
+                "reason": "root_open_failed",
+            },
+        )
         with mock.patch.object(ATTRIBUTION, "open_root", return_value=10):
             with mock.patch.object(
                 ATTRIBUTION,
                 "allocated_bytes",
                 side_effect=OSError(f"cannot inspect {private_path}"),
             ):
-                with self.assertRaises(ValueError) as context:
-                    ATTRIBUTION.measure_root("test_root", private_path)
-        self.assertEqual(str(context.exception), "test_root: allocated-byte measurement failed")
+                value = ATTRIBUTION.measure_root("test_root", private_path)
+        self.assertEqual(
+            value,
+            {
+                "state": "unavailable",
+                "allocated_bytes": None,
+                "reason": "traversal_failed",
+            },
+        )
+
+    def test_compare_omits_unavailable_class_from_aggregates(self):
+        identifiers = list(ATTRIBUTION.ROOTS)
+        before = snapshot(dict(zip(identifiers, (100, 200, 300))))
+        after = snapshot(dict(zip(identifiers, (150, 250, 350))))
+        before["measurements"][identifiers[1]] = {
+            "state": "unavailable",
+            "allocated_bytes": None,
+            "reason": "root_open_failed",
+        }
+        value = ATTRIBUTION.compare(before, after)
+        self.assertIsNone(value["measurements"][identifiers[1]]["delta_bytes"])
+        self.assertEqual(value["aggregate_signed_delta_bytes"], 100)
+        self.assertEqual(value["aggregate_positive_growth_bytes"], 100)
+        self.assertEqual(value["measured_class_count"], 2)
+
+    def test_compare_exposes_when_all_classes_are_unavailable(self):
+        values = snapshot({identifier: 0 for identifier in ATTRIBUTION.ROOTS})
+        for identifier in ATTRIBUTION.ROOTS:
+            values["measurements"][identifier] = {
+                "state": "unavailable",
+                "allocated_bytes": None,
+                "reason": "traversal_failed",
+            }
+        value = ATTRIBUTION.compare(values, values)
+        self.assertEqual(value["measured_class_count"], 0)
+        self.assertEqual(value["aggregate_signed_delta_bytes"], 0)
+        self.assertTrue(
+            all(item["delta_bytes"] is None for item in value["measurements"].values())
+        )
 
     def test_cli_comparison_contains_no_source_paths(self):
         values = {identifier: 0 for identifier in ATTRIBUTION.ROOTS}
