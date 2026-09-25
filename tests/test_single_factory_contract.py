@@ -71,6 +71,10 @@ class SingleFactoryContractTests(unittest.TestCase):
     def test_later_cutover_states_remain_unclaimed(self):
         record = (ROOT / "docs" / "single-factory-cutover.md").read_text()
 
+        self.assertIn(
+            "| `CANONICAL_FOR_NEW_WORK` | VERIFIED by merged PR #71 and the matching installed continuation |",
+            record,
+        )
         expected = {
             "OPERATIONALLY_CUT_OVER": "NOT VERIFIED",
             "PRESERVATION_VERIFIED": "NOT VERIFIED",
