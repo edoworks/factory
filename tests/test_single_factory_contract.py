@@ -1,7 +1,10 @@
 import hashlib
 import json
+import os
 import pathlib
+import stat
 import subprocess
+import tempfile
 import unittest
 
 
@@ -69,9 +72,9 @@ class SingleFactoryContractTests(unittest.TestCase):
         for mutation in ("gh issue create*", "gh issue comment*", "gh issue close*"):
             self.assertEqual(permissions[mutation], "deny")
         interactive = {
-            "gh issue create --repo edoworks/factory *",
             "gh issue comment --repo edoworks/factory *",
             "gh issue close --repo edoworks/factory *",
+            "node {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs create *",
             "open https://github.com/edoworks/factory/*",
         }
         self.assertEqual(
@@ -84,9 +87,13 @@ class SingleFactoryContractTests(unittest.TestCase):
         )
         for command in ("hash *", "validate *", "verify-remote *"):
             self.assertEqual(
-                permissions[f"node development/opencode/scripts/issue-intent.mjs {command}"],
+                permissions[f"node {{env:FACTORY_DEV_OPENCODE_ROOT}}/scripts/issue-intent.mjs {command}"],
                 "allow",
             )
+        self.assertNotIn(
+            "node development/opencode/scripts/issue-intent.mjs validate *",
+            permissions,
+        )
         self.assertNotIn(
             "python3 */.agents/skills/macos-screenshot/scripts/screenshot.py *",
             permissions,
@@ -156,6 +163,72 @@ class SingleFactoryContractTests(unittest.TestCase):
         )
         self.assertNotEqual(rejected.returncode, 0)
         self.assertIn("usage: issue-intent.mjs hash BODY.md", rejected.stderr)
+
+    def test_issue_intent_validation_creation_and_readback_are_bound(self):
+        script = ROOT / "development" / "opencode" / "scripts" / "issue-intent.mjs"
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = pathlib.Path(temporary)
+            body = "".join(
+                f"# {section}\n\nEvidence for {section}.\n\n"
+                for section in (
+                    "Outcome", "Scope", "Out of scope", "Acceptance criteria",
+                    "Verification", "Dependencies", "Authority and privacy",
+                    "Source provenance", "Classification", "Priority", "Triage review",
+                )
+            )
+            (directory / "body.md").write_text(body)
+            intent = {
+                "schema_version": 1,
+                "repo": "edoworks/factory",
+                "title": "Bound intent",
+                "body_file": "body.md",
+                "body_sha256": hashlib.sha256(body.encode()).hexdigest(),
+                "classification": "enhancement",
+                "priority": "P1",
+                "labels": ["enhancement"],
+                "dependencies": ["none"],
+                "authority_constraints": ["owner approval"],
+                "source_provenance": ["test fixture"],
+                "duplicate_review": ["none found"],
+                "reprioritization_review": ["bounded test"],
+            }
+            intent_path = directory / "intent.json"
+            intent_path.write_text(json.dumps(intent))
+            remote = directory / "remote.json"
+            remote.write_text(json.dumps({"title": intent["title"], "body": body, "labels": [{"name": "enhancement"}]}))
+            capture = directory / "captured.json"
+            fake_gh = directory / "gh"
+            fake_gh.write_text(
+                "#!/bin/sh\n"
+                "if [ \"$1\" = issue ] && [ \"$2\" = view ]; then cat \"$FAKE_REMOTE\"; exit 0; fi\n"
+                "python3 -c 'import json, os, sys; open(os.environ[\"FAKE_CAPTURE\"], \"w\").write(json.dumps(sys.argv[1:]))' \"$@\"\n"
+                "printf 'https://github.com/edoworks/factory/issues/999\\n'\n"
+            )
+            fake_gh.chmod(fake_gh.stat().st_mode | stat.S_IXUSR)
+            environment = os.environ | {
+                "PATH": f"{directory}:{os.environ['PATH']}",
+                "FAKE_REMOTE": str(remote),
+                "FAKE_CAPTURE": str(capture),
+            }
+
+            validated = subprocess.run(["node", str(script), "validate", str(intent_path)], text=True, capture_output=True, env=environment, check=False)
+            self.assertEqual(validated.returncode, 0, validated.stderr)
+            self.assertEqual(validated.stdout, "VALID\n")
+            created = subprocess.run(["node", str(script), "create", str(intent_path)], text=True, capture_output=True, env=environment, check=False)
+            self.assertEqual(created.returncode, 0, created.stderr)
+            args = json.loads(capture.read_text())
+            self.assertEqual(args[:4], ["issue", "create", "--repo", "edoworks/factory"])
+            self.assertEqual(args[args.index("--title") + 1], intent["title"])
+            self.assertEqual(args[args.index("--body") + 1], body)
+            readback = subprocess.run(["node", str(script), "verify-remote", str(intent_path), "999"], text=True, capture_output=True, env=environment, check=False)
+            self.assertEqual(readback.returncode, 0, readback.stderr)
+            self.assertEqual(readback.stdout, "MATCH\n")
+
+            intent["body_sha256"] = "0" * 64
+            intent_path.write_text(json.dumps(intent))
+            rejected = subprocess.run(["node", str(script), "validate", str(intent_path)], text=True, capture_output=True, env=environment, check=False)
+            self.assertNotEqual(rejected.returncode, 0)
+            self.assertIn("body_sha256 does not match", rejected.stderr)
 
     def test_later_cutover_states_remain_unclaimed(self):
         record = (ROOT / "docs" / "single-factory-cutover.md").read_text()

@@ -118,6 +118,30 @@ forms. Script argument checks reject extra operands, the shell policy still
 denies compound commands, and contract tests require the complete read-only
 preparation surface.
 
+## Intent-Binding Review Gap
+
+Independent review of PR #75 found that the initial correction still trusted a
+working-directory-relative script path and left raw issue creation separately
+approvable from the validated intent.
+
+1. A product target could shadow the relative script path because permission
+   matching constrained the typed command but not the resolved executable file.
+2. The allowlist described the script as repository-owned without anchoring it
+   to the launcher's trusted `FACTORY_DEV_OPENCODE_ROOT`.
+3. Raw `gh issue create` remained an interactive operation, so approval did not
+   prove that its title and body came from the validated intent.
+4. Contract tests checked the presence of command patterns but did not exercise
+   a non-repository target or the complete validate-create-readback data flow.
+5. The root cause was treating human authorization and content integrity as one
+   gate rather than independent gates that must both pass.
+
+The correction anchors all intent commands to `FACTORY_DEV_OPENCODE_ROOT`,
+removes direct issue creation from the interactive surface, and adds an
+interactive script command that validates the intent before passing the exact
+validated title, body bytes, and labels to GitHub. Tests reject the relative
+shadowable pattern and exercise valid, hash-mismatched, created, and remote
+readback states through a fake GitHub transport.
+
 ## Boundaries
 
 This change does not auto-approve a write, permit another repository, weaken the

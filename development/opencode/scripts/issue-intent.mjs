@@ -47,9 +47,17 @@ function main(argv) {
     process.stdout.write(`${sha256(readFileSync(realpathSync(intentPath), "utf8"))}\n`);
     return;
   }
-  if (extra.length || !intentPath || !["validate", "verify-remote"].includes(command)) fail("usage: issue-intent.mjs hash BODY.md | validate INTENT.json | verify-remote INTENT.json ISSUE_NUMBER");
+  if (extra.length || !intentPath || !["validate", "create", "verify-remote"].includes(command)) fail("usage: issue-intent.mjs hash BODY.md | validate INTENT.json | create INTENT.json | verify-remote INTENT.json ISSUE_NUMBER");
   const validated = validateIssueIntent(intentPath);
-  if (command === "verify-remote") {
+  if (command === "create") {
+    if (issueNumber) fail("unexpected issue number");
+    const args = ["issue", "create", "--repo", validated.intent.repo, "--title", validated.intent.title, "--body", validated.body];
+    for (const label of validated.intent.labels) args.push("--label", label);
+    const result = spawnSync("gh", args, { encoding: "utf8" });
+    if (result.status !== 0) fail(result.stderr.trim() || "gh issue create failed");
+    process.stdout.write(result.stdout);
+    return;
+  } else if (command === "verify-remote") {
     if (!/^\d+$/.test(issueNumber ?? "")) fail("issue number must be numeric");
     const result = spawnSync("gh", ["issue", "view", "--repo", "edoworks/factory", issueNumber, "--json", "title,body,labels"], { encoding: "utf8" });
     if (result.status !== 0) fail(result.stderr.trim() || "gh issue view failed");

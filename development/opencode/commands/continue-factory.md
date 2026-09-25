@@ -12,9 +12,14 @@ agent: explore
   issue writes, bounded visual review, and GitHub authentication preservation at
   `1536ba6`; its local and hosted verification and rendered PRD review passed.
 - PR #75 restores the fixed repository-owned issue-intent hash, validation, and
-  remote-readback commands required before approved child issue creation. Its
-  local 47 Python tests, 6 Node tests, Factory doctor, policy integrity,
-  installed-policy comparison, and diff checks pass.
+  remote-readback commands required before approved child issue creation.
+  Independent review then found a shadowable relative script path and unbound
+  raw create command. The correction anchors the script to the trusted
+  environment root, routes interactive creation through validated intent, and
+  passes 48 Python tests, 6 Node tests, Factory doctor, policy integrity,
+  installed-policy comparison, and diff checks locally. Fresh hosted checks,
+  independent rereview, and rendered PRD review remain required at the pushed
+  head.
 - The current OpenCode process predates PR #75's policy. A fresh
   `bin/factory-dev` session is required after integration before intent commands
   or child issue creation.
