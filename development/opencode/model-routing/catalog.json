@@ -1,19 +1,218 @@
 {
   "schema_version": 1,
-  "generation": "1790162435514-97108",
-  "refreshed_at": "2026-09-23T11:20:35.512Z",
-  "providers": ["openai", "opencode", "opencode-go", "ollama-cloud", "ollama", "github-copilot"],
+  "generation": "1790335243580-66796",
+  "refreshed_at": "2026-09-25T11:20:43.573Z",
+  "providers": [
+    "openai",
+    "opencode",
+    "opencode-go",
+    "ollama-cloud",
+    "ollama",
+    "github-copilot"
+  ],
   "failures": [],
   "models": [
-    {"full_name":"ollama/granite4.1:3b","provider":"ollama","model":"granite4.1:3b","status":"active","capabilities":{"reasoning":false,"attachment":false,"toolcall":true,"input":{"text":true,"image":false},"output":{"text":true}},"variants":[]},
-    {"full_name":"ollama/qwen3.5:4b","provider":"ollama","model":"qwen3.5:4b","status":"active","capabilities":{"reasoning":true,"attachment":true,"toolcall":true,"input":{"text":true,"image":true},"output":{"text":true}},"variants":[]},
-    {"full_name":"openai/gpt-5.6-luna","provider":"openai","model":"gpt-5.6-luna","status":"active","capabilities":{"reasoning":true,"attachment":true,"toolcall":true,"input":{"text":true,"image":true},"output":{"text":true}},"variants":["low","medium","high","xhigh","max"]},
-    {"full_name":"openai/gpt-5.6-sol","provider":"openai","model":"gpt-5.6-sol","status":"active","capabilities":{"reasoning":true,"attachment":true,"toolcall":true,"input":{"text":true,"image":true},"output":{"text":true}},"variants":["medium"]},
-    {"full_name":"openai/gpt-5.6-terra","provider":"openai","model":"gpt-5.6-terra","status":"active","capabilities":{"reasoning":true,"attachment":true,"toolcall":true,"input":{"text":true,"image":true},"output":{"text":true}},"variants":["medium"]},
-    {"full_name":"opencode/x-preview-f-free","provider":"opencode","model":"x-preview-f-free","status":"active","capabilities":{"reasoning":true,"attachment":true,"toolcall":true,"input":{"text":true,"image":true},"output":{"text":true}},"variants":[]},
-    {"full_name":"opencode/gpt-5.6-sol","provider":"opencode","model":"gpt-5.6-sol","status":"active","capabilities":{"reasoning":true,"attachment":true,"toolcall":true,"input":{"text":true,"image":true},"output":{"text":true}},"variants":["medium"]},
-    {"full_name":"opencode-go/hy3","provider":"opencode-go","model":"hy3","status":"active","capabilities":{"reasoning":true,"attachment":false,"toolcall":true,"input":{"text":true,"image":false},"output":{"text":true}},"variants":["low"]},
-    {"full_name":"ollama-cloud/glm-5.3-flash","provider":"ollama-cloud","model":"glm-5.3-flash","status":"active","capabilities":{"reasoning":true,"attachment":true,"toolcall":true,"input":{"text":true,"image":true},"output":{"text":true}},"variants":[]},
-    {"full_name":"ollama-cloud/gemma4:31b","provider":"ollama-cloud","model":"gemma4:31b","status":"active","capabilities":{"reasoning":true,"attachment":true,"toolcall":true,"input":{"text":true,"image":true},"output":{"text":true}},"variants":["medium"]}
+    {
+      "full_name": "ollama-cloud/gemma4:31b",
+      "provider": "ollama-cloud",
+      "model": "gemma4:31b",
+      "status": "active",
+      "capabilities": {
+        "reasoning": true,
+        "attachment": true,
+        "toolcall": true,
+        "input": {
+          "text": true,
+          "image": true
+        },
+        "output": {
+          "text": true
+        }
+      },
+      "variants": [
+        "medium"
+      ]
+    },
+    {
+      "full_name": "ollama-cloud/glm-5.3-flash",
+      "provider": "ollama-cloud",
+      "model": "glm-5.3-flash",
+      "status": "active",
+      "capabilities": {
+        "reasoning": true,
+        "attachment": true,
+        "toolcall": true,
+        "input": {
+          "text": true,
+          "image": true
+        },
+        "output": {
+          "text": true
+        }
+      },
+      "variants": []
+    },
+    {
+      "full_name": "ollama/granite4.1:3b",
+      "provider": "ollama",
+      "model": "granite4.1:3b",
+      "status": "active",
+      "capabilities": {
+        "reasoning": false,
+        "attachment": false,
+        "toolcall": true,
+        "input": {
+          "text": true,
+          "image": false
+        },
+        "output": {
+          "text": true
+        }
+      },
+      "variants": []
+    },
+    {
+      "full_name": "ollama/qwen3.5:4b",
+      "provider": "ollama",
+      "model": "qwen3.5:4b",
+      "status": "active",
+      "capabilities": {
+        "reasoning": true,
+        "attachment": true,
+        "toolcall": true,
+        "input": {
+          "text": true,
+          "image": true
+        },
+        "output": {
+          "text": true
+        }
+      },
+      "variants": []
+    },
+    {
+      "full_name": "openai/gpt-5.6-luna",
+      "provider": "openai",
+      "model": "gpt-5.6-luna",
+      "status": "active",
+      "capabilities": {
+        "reasoning": true,
+        "attachment": true,
+        "toolcall": true,
+        "input": {
+          "text": true,
+          "image": true
+        },
+        "output": {
+          "text": true
+        }
+      },
+      "variants": [
+        "low"
+      ]
+    },
+    {
+      "full_name": "openai/gpt-5.6-sol",
+      "provider": "openai",
+      "model": "gpt-5.6-sol",
+      "status": "active",
+      "capabilities": {
+        "reasoning": true,
+        "attachment": true,
+        "toolcall": true,
+        "input": {
+          "text": true,
+          "image": true
+        },
+        "output": {
+          "text": true
+        }
+      },
+      "variants": [
+        "medium"
+      ]
+    },
+    {
+      "full_name": "openai/gpt-5.6-terra",
+      "provider": "openai",
+      "model": "gpt-5.6-terra",
+      "status": "active",
+      "capabilities": {
+        "reasoning": true,
+        "attachment": true,
+        "toolcall": true,
+        "input": {
+          "text": true,
+          "image": true
+        },
+        "output": {
+          "text": true
+        }
+      },
+      "variants": [
+        "medium"
+      ]
+    },
+    {
+      "full_name": "opencode-go/hy3",
+      "provider": "opencode-go",
+      "model": "hy3",
+      "status": "active",
+      "capabilities": {
+        "reasoning": true,
+        "attachment": false,
+        "toolcall": true,
+        "input": {
+          "text": true,
+          "image": false
+        },
+        "output": {
+          "text": true
+        }
+      },
+      "variants": [
+        "low"
+      ]
+    },
+    {
+      "full_name": "opencode/gpt-5.6-sol",
+      "provider": "opencode",
+      "model": "gpt-5.6-sol",
+      "status": "active",
+      "capabilities": {
+        "reasoning": true,
+        "attachment": true,
+        "toolcall": true,
+        "input": {
+          "text": true,
+          "image": true
+        },
+        "output": {
+          "text": true
+        }
+      },
+      "variants": [
+        "medium"
+      ]
+    },
+    {
+      "full_name": "opencode/x-preview-f-free",
+      "provider": "opencode",
+      "model": "x-preview-f-free",
+      "status": "missing",
+      "capabilities": {
+        "reasoning": false,
+        "attachment": false,
+        "toolcall": false,
+        "input": {
+          "text": false,
+          "image": false
+        },
+        "output": {
+          "text": false
+        }
+      },
+      "variants": []
+    }
   ]
 }

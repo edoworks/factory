@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Add a repository-owned routing catalog refresh path",
+  "body_file": "routing-catalog-refresh-body.md",
+  "body_sha256": "0ab3c6742ee03520a6694f1cf16a246f94ffd6787761e7c14ec97bee629c807b",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["Parent canonical-development issue #69", "Consolidation map issue #68", "Approved generated OpenCode catalog"],
+  "authority_constraints": ["No paid model calls or benchmarks", "No route, provider, budget, or fallback changes", "No credential access", "Repository-local tooling and evidence only"],
+  "source_provenance": ["Factory head 2f1a5ecd04344957f794b949f5e215b5d37e4b44", "Generated catalog 1790335243580-66796 at 2026-09-25T11:20:43.573Z", "Repository model-routing policy and skill"],
+  "duplicate_review": ["Issue #69 lacks a post-expiry repository-owned catalog refresh path; no duplicate found"],
+  "reprioritization_review": ["Launch-readiness blocker precedes preservation work under issues #77 and #81"]
+}

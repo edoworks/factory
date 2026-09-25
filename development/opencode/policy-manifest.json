@@ -3,15 +3,15 @@
   "files": {
     ".gitignore": "4d56952b0fb13bf8f9b6c13a6d4c34a075bac3af447636a1df4335d7576e2f97",
     "active-baseline.json": "78699eb688fa55b3cc0531ce7e030ab5d93668dda0c0fc64c90d0dd5ded7ecad",
-    "commands/continue-factory.md": "4023af5713cfc37494ac629acc68d7799287601240e57c64a8d1283003df7985",
+    "commands/continue-factory.md": "f897f216f1582efd4dac16574438828819f5f56cecae338dbad7b003215f5218",
     "model-routing/approved.json": "9d908dfb868cec573954e0741e67385ab56a5f2c7f596e4e07f57b04f5e0a985",
     "model-routing/benchmark-suite.mjs": "0739dd72655c56cdf74839f0c6f5335abb26a5363215f73e71477567ae83cd7d",
     "model-routing/benchmarks.json": "52ef7d8fb950453337c690a04437e9307ad467f65bd3748bc3f4446e9fb9d0d3",
-    "model-routing/catalog.json": "faf13cc95f774e4c15bb15f72611eee55f8f6696f4cb88f4dd83ff38dc74d834",
-    "model-routing/instructions.md": "55669db893a2bf3b15e9e39c11d5cbb1d7307f7501410be40ef1e72dfba66465",
+    "model-routing/catalog.json": "3706305eedd6a5a970ec545634dfcebb04fa3497e45b5e14791863141c728923",
+    "model-routing/instructions.md": "3d413a6569441f4e6f5b84af287733d7deb4118fce7d289a865879bf562abd32",
     "model-routing/policy.json": "871b49adfb2535c8eba4a78150fabee96556051bd8635d6791f858803e9368d7",
     "model-routing/routing-lib.mjs": "1b4545ba0909ca96b2509ea227fff1a3c97316b583c8dfb67f1e0ee900610034",
-    "opencode.jsonc": "1fb17fbeef00e9cfe987b2cbeda76d67aedf5f004240095230a3ce414d3ad9c5",
+    "opencode.jsonc": "a9329e18bf985a5f6d37154219f6b6413b03ef36f98121de5c187c3434705963",
     "package-lock.json": "2d18f04401921bc0670e41c3f6d95a9d5f7935b3271bb1bfa85587338b7cb6bf",
     "package.json": "b4dd5ac6d6e3cdf91f1ff9f20c987f2086ab318abb80dcc2d348cee3040991df",
     "plugins/cost-router-lib.mjs": "f0a745caad2a544e8f5566575c89febf68abb44b17a0a00a42fa7099db7436e1",
@@ -22,10 +22,12 @@
     "scripts/continuation-command.test.mjs": "29d2b7946138ce102a91fec1f66922a4b70271669500cd3115d0db82621a9499",
     "scripts/git-push.mjs": "8d46818629b4f0cacd9cf4584758ffb5d6c037c70dbd8226efacdc6180cc42b7",
     "scripts/git-push.test.mjs": "d13a95eab14587c8774acdf16684dde4ed2cc789943cd9224a7a9aaf191e5427",
+    "scripts/import-routing-catalog.mjs": "042d243ee1ab04c074975d032d47d491c46ca59daebd599edf0c6a24c1c2638a",
+    "scripts/import-routing-catalog.test.mjs": "535d89189f1f87ba17d76ce12ba1ae2d871e873876114969f69822a560a25a07",
     "scripts/issue-intent.mjs": "4a91aa474c04591ec7bc812f23c5685e8730f0387b9fdbf7e147b919c064d8b5",
     "scripts/notify-completion.mjs": "7148026e0e6b2eb1e64de0da0b49d49d59120759ece6291665bb5ae97b0cef59",
     "scripts/routing-ready.mjs": "bb3f2f2eed39218f5956c7ef3387748fe5955b68f7362db4907bf24dc6cec689",
     "skills/issue-tracking/SKILL.md": "8065fc729d0841a1d02a536b439ce9c9a4be1dbd5112786eb946063c9537e64e",
-    "skills/model-routing/SKILL.md": "e6aa12725ff4a42bdfeadbb7286abe4e71d971ea148947252f462d48938b56a5"
+    "skills/model-routing/SKILL.md": "8c117e5f2b074b040ffa985929d282b38999bb96708b13c20e07be453b228350"
   }
 }

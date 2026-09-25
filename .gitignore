@@ -32,6 +32,7 @@ venv/
 /reference-apps/*/.factory-verify-result.json
 *.xcresult/
 /reference-apps/*/screenshots/
+/development/.opencode-catalog-import-v2/
 
 # Secrets — never commit
 *.p12
