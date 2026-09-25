@@ -33,8 +33,9 @@
       "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git show*": "allow",
       "git add *": "allow", "git commit -m *": "allow",
       "python3 -m unittest*": "deny", "node --test*": "deny", "{env:FACTORY_DEV_NODE} --test*": "deny",
-      "python3 -m unittest discover -s {env:FACTORY_DEV_OPENCODE_ROOT}/../../tests": "allow", "{env:FACTORY_DEV_NODE} --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/import-routing-catalog.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs": "allow", "{env:FACTORY_DEV_OPENCODE_ROOT}/../../bin/factory-dev doctor*": "allow",
+      "python3 -m unittest discover -s {env:FACTORY_DEV_OPENCODE_ROOT}/../../tests": "allow", "{env:FACTORY_DEV_NODE} --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/import-routing-catalog.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs": "allow", "{env:FACTORY_DEV_OPENCODE_ROOT}/../../bin/factory-dev doctor*": "allow",
       "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs hash *": "allow", "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs validate *": "allow", "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs verify-remote *": "allow",
+      "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.mjs verify --repo edoworks/factory --issues *": "allow",
       "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs create *": "ask", "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs comment *": "ask", "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs close *": "ask",
       "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.mjs feature/* *": "ask",
       "{env:FACTORY_DEV_OPENCODE_ROOT}/../../bin/factory-dev refresh-catalog": "ask",
@@ -55,7 +56,7 @@
       "{env:FACTORY_DEV_GH} pr *https://*": "deny", "{env:FACTORY_DEV_GH} pr *http://*": "deny",
       "open https://github.com/edoworks/factory/* *": "deny",
       "{env:FACTORY_DEV_GH} pr merge*--admin*": "deny", "{env:FACTORY_DEV_GH} repo *": "deny", "{env:FACTORY_DEV_GH} api *": "deny", "{env:FACTORY_DEV_GH} api --hostname github.com user --jq .login": "allow",
-      "*;*": "deny", "*&&*": "deny", "*||*": "deny", "*|*": "deny", "*\n*": "deny"
+      "*;*": "deny", "*&*": "deny", "*||*": "deny", "*|*": "deny", "*>*": "deny", "*<*": "deny", "*$(*": "deny", "*`*": "deny", "*\n*": "deny"
     }
   }
 }

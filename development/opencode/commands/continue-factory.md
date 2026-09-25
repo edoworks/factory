@@ -55,6 +55,10 @@ agent: explore
   and hosted run `36141758339` across the policy, iPhone, and iPad jobs. Remote
   readback reports issue #84 `CLOSED`; the exact closeout helper remains
   unexecuted because this loaded session does not admit that command.
+- Issue #87 tracks the missing exact read-only issue-closeout permission and
+  ambient GitHub CLI lookup. Its frozen intent and remote title, body, and label
+  match; implementation, fresh-session verification, integration, and closeout
+  remain pending.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -63,9 +67,9 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. From a policy-valid session that admits the exact closeout helper, run its
-   issue #84 verification and require `CLOSED` before claiming tracked
-   completion.
+3. Complete issue #87 implementation and integration, launch a fresh session,
+   then run the exact issue #84 closeout verifier and require `CLOSED` before
+   claiming tracked completion.
 4. If an authorized exact-page open becomes available, complete and record the
    bounded rendered review of PR #76's final PRD without claiming it preceded
    merge.

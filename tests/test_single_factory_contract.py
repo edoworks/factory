@@ -88,9 +88,15 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertEqual(permissions["{env:FACTORY_DEV_NODE} --test*"], "deny")
         self.assertEqual(permissions["python3 -m unittest discover -s {env:FACTORY_DEV_OPENCODE_ROOT}/../../tests"], "allow")
         self.assertEqual(
-            permissions["{env:FACTORY_DEV_NODE} --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/import-routing-catalog.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs"],
+            permissions["{env:FACTORY_DEV_NODE} --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/import-routing-catalog.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs"],
             "allow",
         )
+        self.assertEqual(
+            permissions["{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.mjs verify --repo edoworks/factory --issues *"],
+            "allow",
+        )
+        for shell_control in ("*;*", "*&*", "*||*", "*|*", "*>*", "*<*", "*$(*", "*`*", "*\n*"):
+            self.assertEqual(permissions[shell_control], "deny")
         for mutation in ("gh issue create*", "gh issue comment*", "gh issue close*"):
             self.assertEqual(permissions[mutation], "deny")
         interactive = {

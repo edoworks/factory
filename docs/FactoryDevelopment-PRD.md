@@ -83,7 +83,14 @@ repository overrides are denied. Issue comments and closeout are routed through
 the same pinned host, executable, and identity check. Repository-owned issue-intent hashing, local
 validation, and remote readback commands are read-only allowed operations; their
 fixed script path and argument validation prevent them from becoming alternate
-mutation transports.
+mutation transports. Completion verification is a separate exact read-only
+command: it accepts only unique positive issue numbers, fixes
+`github.com/edoworks/factory`, invokes the pinned GitHub CLI with host, token, and
+proxy overrides removed, requires the authenticated `hellofoculoom` identity,
+binds each response number to its request, reads only issue number, title, and
+state, and returns `CLOSED` only when every requested issue is closed. Shell
+control, substitution, and redirection forms remain denied before the wildcard
+issue-number argument can match.
 Wildcard Python and Node test-runner commands are denied; only exact tracked
 Factory suites anchored to `FACTORY_DEV_OPENCODE_ROOT` are allowed so a caller
 cannot select a product-owned module or test file through an allowed runner.
