@@ -203,6 +203,16 @@ exception is removed rather than repaired without a dedicated transport design.
 Tests require each guard. Vorynce integration therefore remains blocked pending
 a separately reviewed push path.
 
+The follow-up push transport is repository-owned and interactive. It accepts one
+validated lowercase `feature/...` branch and one full expected commit, verifies
+that commit as `HEAD` plus the `hellofoculoom` identity, uses the pinned GitHub
+CLI and `/usr/bin/git`, suppresses system/global Git configuration, rejects local
+URL, HTTP, and include settings, removes inherited `GIT_*` and proxy overrides,
+fixes the canonical HTTPS remote and no-follow-tags refspec to that commit, and
+executes from the Factory root without bypassing hooks. Its test rejects
+non-feature, option-bearing, mutable, and mismatched commit inputs and captures
+the exact child-process arguments.
+
 The first full verification of that correction failed two assertions:
 
 1. The provenance fixture was rejected because its executable resolved beneath

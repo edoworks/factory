@@ -73,7 +73,7 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertEqual(permissions["node --test*"], "deny")
         self.assertEqual(permissions["python3 -m unittest discover -s {env:FACTORY_DEV_OPENCODE_ROOT}/../../tests"], "allow")
         self.assertEqual(
-            permissions["node --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs"],
+            permissions["node --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs"],
             "allow",
         )
         for mutation in ("gh issue create*", "gh issue comment*", "gh issue close*"):
@@ -82,6 +82,7 @@ class SingleFactoryContractTests(unittest.TestCase):
             "node {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs create *",
             "node {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs comment *",
             "node {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs close *",
+            "node {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.mjs feature/* *",
             "open https://github.com/edoworks/factory/*",
         }
         self.assertEqual(

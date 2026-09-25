@@ -87,8 +87,13 @@ the screenshot utility at its fixed home-directory installation; neither
 permission grants content mutation.
 The launched process receives a fixed system/package-manager `PATH`, so a product
 target cannot shadow allowed interpreters or tools. PR URL selectors and trailing
-issue/PR repository overrides are denied. Git push has no shell allow exception;
-a future push workflow requires a separately reviewed pinned transport.
+issue/PR repository overrides are denied. Git push has no shell allow exception.
+An interactive repository-owned transport accepts one lowercase `feature/...`
+branch and one full expected commit, verifies both `HEAD` and the GitHub identity,
+pins Git and GitHub CLI, suppresses system/global configuration, rejects local
+transport-affecting configuration, clears inherited Git and proxy overrides,
+fixes the canonical HTTPS remote and no-follow-tags refspec to the expected
+commit, and runs from the Factory root so repository hooks remain active.
 
 Doctor emits one JSON object containing `factory_version`, `git_revision`,
 `dirty`, `opencode_version`, `policy_digest`, `active_installation`,

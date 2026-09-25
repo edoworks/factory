@@ -19,9 +19,11 @@ agent: explore
   still weakened the issue-write trust boundary. The correction is committed
   locally at `a3bb760`; 49 Python tests, 6 Node tests, Factory doctor, diff checks,
   and independent rereview pass with no finding. Hosted integration is blocked
-  because the unsafe Git credential-helper push exception was removed and no
-  separately reviewed push transport exists. No child issue creation is permitted
-  until the correction is pushed, merged, freshly launched, and verified.
+  because the unsafe Git credential-helper push exception was removed. A pinned
+  repository-owned push transport is now implemented locally but still requires
+  verification, independent review, commit, and a fresh session before use. No
+  child issue creation is permitted until the correction is pushed, merged,
+  freshly launched, and verified.
 - Issue #70 tracks product and release-workflow decoupling.
 - The Vorynce ownership chunk is implemented and verified locally at commit
   `f47cab8` on `feature/vorynce-prd-70` in the isolated worktree
@@ -37,10 +39,11 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Add a separately reviewed, pinned Factory push transport without restoring
-   the malformed shell credential-helper exception or broad Git push authority.
-4. Push exact commit `a3bb760` and its continuation update to a feature branch,
-   then run hosted checks and bounded rendered PRD review before integration.
+3. Verify, independently review, and commit the pinned Factory push transport
+   without restoring broad Git push authority.
+4. Start a fresh Factory session, push the exact correction commits to a feature
+   branch with that transport, then run hosted checks and bounded rendered PRD
+   review before integration.
 5. Start a fresh `bin/factory-dev` session after that integration and use the repository-owned intent
    workflow to freeze, validate, create, and remotely read back only the
    owner-approved private-public, portfolio-index, and product-repository child
