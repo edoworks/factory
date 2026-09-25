@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "tracker": "edoworks/factory#77",
+  "parent_tracker": "edoworks/factory#68",
+  "default_disposition": "private",
+  "public_record_files": [
+    "docs/consolidation-evidence-public.json"
+  ],
+  "storage_classes": {
+    "owner_controlled_private": {
+      "visibility": "private",
+      "status": "REQUIRED_NOT_PROVISIONED"
+    },
+    "repository_public_record": {
+      "visibility": "public",
+      "status": "ACTIVE"
+    }
+  },
+  "public_record_contract": {
+    "required_fields": [
+      "evidence_class",
+      "disposition",
+      "provenance_reference"
+    ],
+    "allowed_fields": [
+      "evidence_class",
+      "disposition",
+      "provenance_reference",
+      "inventory_reference",
+      "checksum_sha256",
+      "recovery_receipt_reference"
+    ],
+    "allowed_disposition": "public_safe_reference",
+    "prohibited_fields": [
+      "archive_path",
+      "backup_routing",
+      "credential",
+      "credentials",
+      "email",
+      "local_path",
+      "payload",
+      "person_name",
+      "personal_information",
+      "preservation_destination",
+      "private_metadata",
+      "private_repository",
+      "remote_identity",
+      "remote_url",
+      "restore_path",
+      "secret",
+      "token",
+      "tokens"
+    ]
+  },
+  "evidence_inventory": [
+    {
+      "evidence_class": "repository_history",
+      "source_disposition": "private",
+      "storage_class": "owner_controlled_private",
+      "public_projection": "public_safe_reference"
+    },
+    {
+      "evidence_class": "hosted_metadata",
+      "source_disposition": "private",
+      "storage_class": "owner_controlled_private",
+      "public_projection": "public_safe_reference"
+    },
+    {
+      "evidence_class": "local_overlays",
+      "source_disposition": "private",
+      "storage_class": "owner_controlled_private",
+      "public_projection": "public_safe_reference"
+    },
+    {
+      "evidence_class": "obligations",
+      "source_disposition": "private",
+      "storage_class": "owner_controlled_private",
+      "public_projection": "public_safe_reference"
+    },
+    {
+      "evidence_class": "checksums",
+      "source_disposition": "private",
+      "storage_class": "owner_controlled_private",
+      "public_projection": "public_safe_reference"
+    },
+    {
+      "evidence_class": "recovery_receipts",
+      "source_disposition": "private",
+      "storage_class": "owner_controlled_private",
+      "public_projection": "public_safe_reference"
+    }
+  ]
+}

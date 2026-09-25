@@ -42,6 +42,9 @@ jobs:
       - name: Validate doctor receipt
         run: python3 -m json.tool doctor-receipt.json >/dev/null
 
+      - name: Validate public consolidation evidence
+        run: python3 scripts/check_consolidation_evidence.py
+
       - name: Run Python unit tests
         env:
           GITHUB_TOKEN: ${{ github.token }}

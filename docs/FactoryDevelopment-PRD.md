@@ -143,6 +143,19 @@ classify, not a deletion decision. Product repositories, paused products,
 secrets, preservation artifacts, runner definitions needed for recovery, and
 targets with unknown ownership or lifecycle state are excluded.
 
+The issue #77 privacy contract in
+`docs/consolidation-evidence-classification.json` classifies the required
+evidence classes, not concrete predecessor instances. Repository history,
+hosted metadata, local overlays, obligations, checksums, recovery receipts, and
+unknown material remain private at source. The sole public classification record
+under this contract is `docs/consolidation-evidence-public.json`; it contains
+only fixed provenance and opaque inventory references. No checksum or recovery
+receipt is public until its exact value is added to the validator-owned approval
+set for its exact evidence class after privacy review. Issue #81 owns the
+separate private instance inventory, preservation destination, payload integrity,
+and restore evidence, so this classification alone cannot establish
+`PRESERVATION_VERIFIED` or deletion readiness.
+
 ## Required Controls
 
 - Routine work uses the lowest-cost qualified route; premium escalation is
