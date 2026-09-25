@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-09-21T23:30:00Z",
+  "objective": ["meet the task tier quality threshold", "minimize marginal monetary cost", "prefer reliable available capacity", "use latency as a tiebreaker"],
+  "catalog_refresh_hours": 24,
+  "catalog_max_age_hours": 48,
+  "benchmark_max_age_days": 30,
+  "benchmark_error_retry_hours": 24,
+  "benchmark_suite_version": 2,
+  "allow_routine_cloud_fallback": false,
+  "auto_promotion_tiers": ["routine", "standard", "vision"],
+  "manual_global_routes": ["small", "explore", "general", "plan", "build"],
+  "approval_required_tiers": ["complex", "trust_boundary"],
+  "deterministic_tasks": ["commit_creation", "command_execution", "formatting", "state_edit"],
+  "providers": {
+    "openai": {"label": "OpenAI", "billing_mode": "oauth_or_subscription", "enabled": true},
+    "opencode": {"label": "OpenCode Zen", "billing_mode": "metered", "enabled": true},
+    "opencode-go": {"label": "OpenCode Go", "billing_mode": "metered_or_plan_credits", "enabled": true},
+    "ollama-cloud": {"label": "Ollama Cloud", "billing_mode": "subscription_or_included_quota", "enabled": true},
+    "ollama": {"label": "Ollama Local", "billing_mode": "local", "enabled": true},
+    "github-copilot": {"label": "GitHub Copilot", "billing_mode": "subscription_or_included_quota", "enabled": false, "disabled_reason": "no valid Copilot subscription; provider disabled since 2026-08-21"}
+  },
+  "tiers": {
+    "routine": {"minimum_quality": 0.8, "required": ["toolcall", "text"]},
+    "standard": {"minimum_quality": 0.9, "required": ["toolcall", "reasoning", "text"]},
+    "complex": {"minimum_quality": 0.95, "required": ["toolcall", "reasoning", "text"]},
+    "vision": {"minimum_quality": 0.9, "required": ["toolcall", "image", "text"]},
+    "trust_boundary": {"minimum_quality": 0.97, "required": ["toolcall", "reasoning", "text"]}
+  }
+}

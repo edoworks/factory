@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "files": {
+    ".gitignore": "4d56952b0fb13bf8f9b6c13a6d4c34a075bac3af447636a1df4335d7576e2f97",
+    "active-baseline.json": "47a2421df08940c8b5f47231effbfd4ea01178d22fe06a38f3ada1493ffa2260",
+    "commands/continue-factory.md": "035af7ab17f4527eec12e3e95c597ec0605710a45e06a26ba52a19894d0aff47",
+    "model-routing/approved.json": "9d908dfb868cec573954e0741e67385ab56a5f2c7f596e4e07f57b04f5e0a985",
+    "model-routing/benchmark-suite.mjs": "0739dd72655c56cdf74839f0c6f5335abb26a5363215f73e71477567ae83cd7d",
+    "model-routing/benchmarks.json": "52ef7d8fb950453337c690a04437e9307ad467f65bd3748bc3f4446e9fb9d0d3",
+    "model-routing/catalog.json": "faf13cc95f774e4c15bb15f72611eee55f8f6696f4cb88f4dd83ff38dc74d834",
+    "model-routing/instructions.md": "55669db893a2bf3b15e9e39c11d5cbb1d7307f7501410be40ef1e72dfba66465",
+    "model-routing/policy.json": "871b49adfb2535c8eba4a78150fabee96556051bd8635d6791f858803e9368d7",
+    "model-routing/routing-lib.mjs": "1b4545ba0909ca96b2509ea227fff1a3c97316b583c8dfb67f1e0ee900610034",
+    "opencode.jsonc": "36f85a8f40d2a4271dc6e326a91da1d6286c1c5c488e85660970e8a7d9e1e7fd",
+    "package-lock.json": "2d18f04401921bc0670e41c3f6d95a9d5f7935b3271bb1bfa85587338b7cb6bf",
+    "package.json": "b4dd5ac6d6e3cdf91f1ff9f20c987f2086ab318abb80dcc2d348cee3040991df",
+    "plugins/cost-router-lib.mjs": "f0a745caad2a544e8f5566575c89febf68abb44b17a0a00a42fa7099db7436e1",
+    "plugins/cost-router.test.mjs": "4cc1966e360abf71459e134145e3e0c23e31f0a64d20148c11c1cd05cf1bbee3",
+    "plugins/cost-router.mjs": "fa9ed6b36438117165bd5985aaaea60ce301f18310ecf1eb763931362dd8587d",
+    "policies/factory-progress.md": "c84b99c7edc7ec250460040850cf5334163e4dee167838bf29262d90a55934f6",
+    "scripts/issue-closeout.mjs": "0edf8cf799ee53916f701eec9664f3f1a2f38d7d54d6ae10f725b7cf616e75f3",
+    "scripts/continuation-command.test.mjs": "29d2b7946138ce102a91fec1f66922a4b70271669500cd3115d0db82621a9499",
+    "scripts/issue-intent.mjs": "fae2151c0142948acbd7b96888563e6104958e6f0ace59fa8af9d4b20f20c6aa",
+    "scripts/notify-completion.mjs": "7148026e0e6b2eb1e64de0da0b49d49d59120759ece6291665bb5ae97b0cef59",
+    "scripts/routing-ready.mjs": "bb3f2f2eed39218f5956c7ef3387748fe5955b68f7362db4907bf24dc6cec689",
+    "skills/issue-tracking/SKILL.md": "9bb94b6a2073d8d1831094c2279021ca4dfe9c588b2386c1585f1ee0ea56a422",
+    "skills/model-routing/SKILL.md": "e6aa12725ff4a42bdfeadbb7286abe4e71d971ea148947252f462d48938b56a5"
+  }
+}

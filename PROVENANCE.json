@@ -44,5 +44,15 @@
       "modifications": "none (template as-is; comment references audio on-device but template is generic for offline apps)",
       "reason": "Generic privacy manifest for offline, no-tracking, UserDefaults-only apps"
     }
-  ]
+  ],
+  "development_environment": {
+    "captured": "2026-09-24",
+    "tracking": "edoworks/factory#69",
+    "source": "active owner OpenCode configuration under ~/.config/opencode",
+    "target": "development/opencode",
+    "manifest": "development/opencode/policy-manifest.json",
+    "modifications": "removed predecessor repository permissions and continuation; resolved source paths to repository-owned policy; excluded credentials, dependencies, generated locks, stale incidents, and unrelated commands",
+    "effective_build_route": "openai/gpt-5.6-luna with no variant",
+    "runtime_boundary": "factory runtime and generated products do not import or require development/opencode"
+  }
 }

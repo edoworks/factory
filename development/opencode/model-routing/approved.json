@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-09-21T23:30:00Z",
+  "routes": {
+    "small": {"provider": "ollama", "model": "granite4.1:3b", "variant": null, "tier": "routine", "startup_fallback": {"provider": "ollama-cloud", "model": "glm-5.3-flash", "variant": null}},
+    "explore": {"provider": "ollama", "model": "granite4.1:3b", "variant": null, "tier": "routine", "startup_fallback": {"provider": "ollama-cloud", "model": "glm-5.3-flash", "variant": null}},
+    "general": {"provider": "openai", "model": "gpt-5.6-luna", "variant": null, "tier": "standard", "startup_fallback": {"provider": "opencode", "model": "x-preview-f-free", "variant": null}},
+    "plan": {"provider": "openai", "model": "gpt-5.6-luna", "variant": "low", "tier": "standard", "startup_fallback": {"provider": "opencode", "model": "x-preview-f-free", "variant": null}},
+    "build": {"provider": "openai", "model": "gpt-5.6-luna", "variant": null, "tier": "standard", "startup_fallback": {"provider": "opencode", "model": "x-preview-f-free", "variant": null}},
+    "trust-review": {"provider": "openai", "model": "gpt-5.6-sol", "variant": "medium", "tier": "trust_boundary", "startup_fallback": {"provider": "opencode", "model": "gpt-5.6-sol", "variant": "medium"}},
+    "frontier-build": {"provider": "openai", "model": "gpt-5.6-terra", "variant": "medium", "tier": "complex", "startup_fallback": {"provider": "opencode", "model": "gpt-5.6-sol", "variant": "medium"}},
+    "vision": {"provider": "ollama", "model": "qwen3.5:4b", "variant": null, "tier": "vision", "startup_fallback": {"provider": "ollama-cloud", "model": "gemma4:31b", "variant": "medium"}},
+    "openai-routine": {"provider": "openai", "model": "gpt-5.6-luna", "variant": "low", "tier": "routine"},
+    "openai-standard": {"provider": "openai", "model": "gpt-5.6-luna", "variant": null, "tier": "standard"},
+    "zen-routine": {"provider": "opencode", "model": "x-preview-f-free", "variant": null, "tier": "routine"},
+    "zen-standard": {"provider": "opencode", "model": "x-preview-f-free", "variant": null, "tier": "standard"},
+    "zen-frontier": {"provider": "opencode", "model": "gpt-5.6-sol", "variant": "medium", "tier": "complex"},
+    "go-routine": {"provider": "opencode-go", "model": "hy3", "variant": "low", "tier": "routine"},
+    "ollama-cloud-routine": {"provider": "ollama-cloud", "model": "glm-5.3-flash", "variant": null, "tier": "routine"},
+    "ollama-cloud-vision": {"provider": "ollama-cloud", "model": "gemma4:31b", "variant": "medium", "tier": "vision"},
+    "copilot-routine": {"provider": "github-copilot", "model": "gpt-5-mini", "variant": "low", "tier": "routine", "disabled": true},
+    "copilot-standard": {"provider": "github-copilot", "model": "gpt-5.4-mini", "variant": "medium", "tier": "standard", "disabled": true},
+    "copilot-code": {"provider": "github-copilot", "model": "gpt-5.3-codex", "variant": "medium", "tier": "complex", "disabled": true}
+  }
+}

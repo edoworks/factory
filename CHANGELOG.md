@@ -9,11 +9,23 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Single Factory Law, explicit cutover and deletion states, and a factory-
+  development PRD that keeps OpenCode orchestration separate from product
+  runtime (issues #68 and #69).
+- Checksum-bound `development/opencode` policy source and `bin/factory-dev`
+  doctor/launcher with local-config isolation, active-control comparison, target
+  safety, predecessor rejection, and runtime-independence tests (issue #69).
+- Evidence-backed predecessor service freeze and a recurrence guard that keeps
+  later operational, preservation, and deletion-readiness states unclaimed
+  until their separate evidence exists.
 - Workload-aware storage admission, atomic reservations, lease reconciliation,
   scoped Xcode build state, and storage lifecycle receipts (issue #60).
 
 ### Changed
 
+- Replaced the former Apple-acceptance-gated, never-delete predecessor policy
+  with exact-target, preservation-verified, owner-authorized retirement while
+  leaving product qualification gates unchanged.
 - Successful ordinary verification now removes only its run-owned build state
   and unsigned archive; `--retain-archive` explicitly promotes an archive.
 

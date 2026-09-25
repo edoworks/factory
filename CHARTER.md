@@ -1,9 +1,10 @@
 # Edoworks Factory Charter
 
-Date: 2026-09-20
+Date: 2026-09-24
 Status: ACTIVE
 Owner: founder (customer zero)
-Reference: [PRD](https://github.com/edoworks/sf0.8/blob/main/docs/PRD-edoworks-factory.md)
+Reference: [Factory Development PRD](docs/FactoryDevelopment-PRD.md)
+Historical source: `edoworks/sf0.8@5277e8a654adc8057a2bca37ecd22abb9993c65a`
 
 ## Founding Statement
 
@@ -12,6 +13,13 @@ produces offline-first iOS/iPadOS apps through a deterministic paved road. The
 founder is customer zero. The factory is downloaded from the generated source
 archive for an exact release tag, used to scaffold and verify an app, and
 produces human-gated release candidates for Apple App Store submission.
+
+The repository has two separate responsibilities. **Product runtime** is the
+provider-independent paved road, templates, verification, and evidence used by
+products. **Factory development** is the versioned OpenCode environment,
+planning/build/review policy, dispatch safeguards, cost controls, and recovery
+workflow used to improve that runtime. Development tooling must not become a
+runtime dependency of generated products.
 
 The factory does not autonomously publish. It does not promise Apple approval
 dates. It does not manage multiple tenants until v1.0.0.
@@ -56,6 +64,17 @@ policy. Automatic cleanup is limited to exact factory-owned reproducible paths;
 source, uncommitted work, promoted artifacts, pinned resources, and global
 developer state are never inferred to be disposable.
 
+### Single Factory Law
+
+`edoworks/factory` is the sole canonical software factory. New factory
+implementation, reusable policy, orchestration, verification, versioning, and
+successor issue tracking originate here. Predecessor repositories are bounded
+migration and preservation sources, never operational fallbacks.
+
+Version-pinned installations sourced from this repository are deployments of
+the same factory, not independently maintained factories. Product repositories
+remain separate and own their product-specific behavior, data, and evidence.
+
 ## Paved Road
 
 The factory's public API is one opinionated journey:
@@ -86,7 +105,7 @@ Commands:
 - Template app fleet generation
 - Customer self-service without human gates
 - General-purpose CI/CD platform
-- Dashboards, learned routing, transcript stores
+- Product-runtime dashboards, transcript stores, or provider routing
 - General portfolio automation
 - Self-modifying policy
 
@@ -117,6 +136,8 @@ Track these, not app count:
 | TestFlight upload | Human only |
 | App Store submission | Human only |
 | Repository visibility change | Human only |
+| Predecessor remote deletion | Exact owner approval after recovery proof |
+| Predecessor local cleanup | Separate exact owner approval after recovery proof |
 | License or trademark decision | Human only |
 | Customer engagement | Human only |
 
@@ -225,14 +246,37 @@ separately gated by [Issue #12](https://github.com/edoworks/factory/issues/12).
 
 ## Predecessor Disposition
 
-sf0.8 is frozen and superseded — not archived — until the new factory proves:
+The 2026-09-24 owner decision supersedes the former archive-only and
+Apple-acceptance-gated repository strategy. The change is prospective and does
+not rewrite predecessor history.
 
-1. Two Apple-accepted reference apps
-2. Recovery from factory failure rehearsed
-3. Every open sf0.8 issue dispositioned with successor links
-4. All obligations tracked to a successor
+Repository strategy has independent states:
 
-Only then are sf0.8 and predecessors archived (read-only, never deleted).
+1. `CANONICAL_FOR_NEW_WORK`: all new factory work and tracking start here.
+2. `OPERATIONALLY_CUT_OVER`: supported development and runtime workflows do not
+   execute or silently fall back to a predecessor.
+3. `PRESERVATION_VERIFIED`: required Git, local-only work, hosted metadata, and
+   obligations are recoverable from tested preservation outside deletion
+   targets.
+4. `READY_FOR_OWNER_DELETION_APPROVAL`: exact remote and local allowlists pass
+   dependency, privacy, recovery, and target-safety gates.
+5. `REMOTE_DELETION_COMPLETED`: only the specifically approved remote actions
+   succeeded and were authenticated and verified.
+6. `LOCAL_CLEANUP_COMPLETED`: only the separately approved resolved local paths
+   were removed and the factory was reverified.
+
+Choosing the sole active factory does not complete product qualification.
+Apple acceptance, physical-device evidence, privacy, security, licensing,
+retention, recovery, and human-authorization obligations remain governed by
+their own evidence and gates.
+
+Historical preservation does not constitute a second active factory. A
+predecessor may be deleted only after current capabilities and obligations are
+accounted for, local-only work and required hosted metadata are recovery-tested,
+the preserved copy is outside the deletion/failure boundary, and the owner
+approves the exact current remote and local target lists. `edoworks/factory`,
+product repositories, secrets, and preservation artifacts are never retirement
+targets.
 
 ## Customer Zero
 
