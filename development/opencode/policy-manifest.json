@@ -2,7 +2,7 @@
   "schema_version": 1,
   "files": {
     ".gitignore": "4d56952b0fb13bf8f9b6c13a6d4c34a075bac3af447636a1df4335d7576e2f97",
-    "active-baseline.json": "2337f00360638e4ab6aced791beeaa1b3fd69c562f21ff7d78bcc8947762f904",
+    "active-baseline.json": "85f7a865f70d22790888871de11809099c563f3c20c97171e9d1224a9599eae9",
     "commands/continue-factory.md": "1549294e378b3585d9633eee9dc13f262d40f0a99a53f7d7d2a411b32c4cb7ad",
     "model-routing/approved.json": "9d908dfb868cec573954e0741e67385ab56a5f2c7f596e4e07f57b04f5e0a985",
     "model-routing/benchmark-suite.mjs": "0739dd72655c56cdf74839f0c6f5335abb26a5363215f73e71477567ae83cd7d",
@@ -11,7 +11,7 @@
     "model-routing/instructions.md": "55669db893a2bf3b15e9e39c11d5cbb1d7307f7501410be40ef1e72dfba66465",
     "model-routing/policy.json": "871b49adfb2535c8eba4a78150fabee96556051bd8635d6791f858803e9368d7",
     "model-routing/routing-lib.mjs": "1b4545ba0909ca96b2509ea227fff1a3c97316b583c8dfb67f1e0ee900610034",
-    "opencode.jsonc": "51d896de79d3306fd6cd7adcf99912a4e6e63bff464f8747270b2245eaf666a0",
+    "opencode.jsonc": "a212e9925c58364a0994cb2f49a18b3475797fc92e7b94231b360464ff6b07d0",
     "package-lock.json": "2d18f04401921bc0670e41c3f6d95a9d5f7935b3271bb1bfa85587338b7cb6bf",
     "package.json": "b4dd5ac6d6e3cdf91f1ff9f20c987f2086ab318abb80dcc2d348cee3040991df",
     "plugins/cost-router-lib.mjs": "f0a745caad2a544e8f5566575c89febf68abb44b17a0a00a42fa7099db7436e1",

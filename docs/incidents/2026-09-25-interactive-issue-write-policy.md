@@ -38,6 +38,28 @@ and child issue bodies could be prepared but not transported.
   screenshot utility permission; it requires broad issue denies and rejects any
   additional interactive shell permission.
 
+## Pre-Merge Review Gap
+
+Independent review found that the first correction used a suffix-matched
+screenshot path, allowed a second repository flag after the approved Factory
+repository, and skipped active-policy comparison when only part of the policy
+was installed.
+
+1. Those defects survived because tests asserted the intended positive forms
+   but not adversarial path, argument, or partial-install forms.
+2. The adversarial forms were absent because "exact" was treated as a readable
+   command prefix rather than the command's effective destination and binary.
+3. That interpretation persisted because policy matching was reviewed as text,
+   not as a last-match-wins authorization surface.
+4. The partial-install skip shared the same flaw: absence and inconsistency were
+   treated as one state instead of separate trust states.
+5. The root cause was incomplete negative modeling at the policy boundary.
+
+The correction pins the screenshot command to its home-directory installation,
+denies trailing long and short repository overrides, and skips baseline checks
+only when no baseline files are installed. Regression tests require all three
+properties.
+
 ## Boundaries
 
 This change does not auto-approve a write, permit another repository, weaken the

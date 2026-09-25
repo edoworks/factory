@@ -59,10 +59,12 @@ may be claimed. The policy inventory is closed-world outside generated `node_mod
 unlisted files and symlinked policy paths fail readiness. Broad GitHub issue
 mutations remain denied. Exact repository-first create, comment, and close
 commands for `edoworks/factory` are interactive `ask` operations; auto mode
-cannot supply that human authorization. Ordinary factory PR integration uses
+cannot supply that human authorization, and trailing repository overrides are
+denied. Ordinary factory PR integration uses
 only explicitly allowed canonical command forms. Rendered Factory documentation
 review may interactively open only `edoworks/factory` GitHub pages and may run
-the installed screenshot utility; neither permission grants content mutation.
+the screenshot utility at its fixed home-directory installation; neither
+permission grants content mutation.
 
 Doctor emits one JSON object containing `factory_version`, `git_revision`,
 `dirty`, `opencode_version`, `policy_digest`, `active_installation`,

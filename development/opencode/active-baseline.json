@@ -2,7 +2,7 @@
   "schema_version": 1,
   "captured_from": "active user OpenCode controls on 2026-09-24",
   "files": {
-    "opencode.jsonc": "0c166af7b34285a46ce848e0b1b998b48494b3ec937b0e02348afc5c27cef4c3",
+    "opencode.jsonc": "d53c30e0250f29231bf36aa3c2764070dd54d758bafb4bcfae9a9e38d0776723",
     "commands/continue-factory.md": "1549294e378b3585d9633eee9dc13f262d40f0a99a53f7d7d2a411b32c4cb7ad",
     "scripts/continuation-command.test.mjs": "f38a87e89f21dec531dad2977a7baa61d1e5a7df07dd0dfc41c4f086afe16f21"
   }

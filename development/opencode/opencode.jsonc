@@ -33,7 +33,7 @@
       "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git show*": "allow",
       "git add *": "allow", "git commit -m *": "allow",
       "python3 -m unittest*": "allow", "node --test*": "allow", "./bin/factory-dev doctor*": "allow",
-      "python3 */.agents/skills/macos-screenshot/scripts/screenshot.py *": "allow",
+      "python3 ~/.agents/skills/macos-screenshot/scripts/screenshot.py *": "allow",
       "gh issue view --repo edoworks/factory *": "allow", "gh issue list --repo edoworks/factory *": "allow",
       "gh pr view * --repo edoworks/factory *": "allow", "gh pr checks * --repo edoworks/factory *": "allow",
       "gh pr create --repo edoworks/factory *": "allow", "gh pr edit * --repo edoworks/factory *": "allow", "gh pr merge * --repo edoworks/factory *": "allow",
@@ -44,6 +44,8 @@
       "gh issue create*": "deny", "gh issue comment*": "deny", "gh issue close*": "deny",
       "gh issue create --repo edoworks/factory *": "ask", "gh issue comment --repo edoworks/factory *": "ask", "gh issue close --repo edoworks/factory *": "ask",
       "open https://github.com/edoworks/factory/*": "ask",
+      "gh issue create --repo edoworks/factory *--repo*": "deny", "gh issue comment --repo edoworks/factory *--repo*": "deny", "gh issue close --repo edoworks/factory *--repo*": "deny",
+      "gh issue create --repo edoworks/factory *-R*": "deny", "gh issue comment --repo edoworks/factory *-R*": "deny", "gh issue close --repo edoworks/factory *-R*": "deny",
       "gh pr merge*--admin*": "deny", "gh repo *": "deny", "gh api *": "deny", "gh api user --jq .login": "allow",
       "*;*": "deny", "*&&*": "deny", "*||*": "deny", "*|*": "deny", "*\n*": "deny"
     }

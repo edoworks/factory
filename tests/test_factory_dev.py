@@ -63,8 +63,14 @@ class FactoryDevTests(unittest.TestCase):
         source = ROOT / "development" / "opencode"
         active = Path.home() / ".config" / "opencode"
         baseline = json.loads((source / "active-baseline.json").read_text())
-        if not all((active / relative).is_file() for relative in baseline["files"]):
+        installed = [
+            relative
+            for relative in baseline["files"]
+            if (active / relative).is_file()
+        ]
+        if not installed:
             self.skipTest("Factory OpenCode controls are not installed")
+        self.assertEqual(set(installed), set(baseline["files"]))
         for relative, expected in baseline["files"].items():
             actual = hashlib.sha256((active / relative).read_bytes()).hexdigest()
             self.assertEqual(expected, actual, relative)
