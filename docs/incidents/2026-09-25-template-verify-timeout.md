@@ -3,7 +3,7 @@
 Date: 2026-09-25
 Issue: [#81](https://github.com/edoworks/factory/issues/81)
 Run: `36117730389`
-Status: correction pending hosted verification
+Status: correction verified in hosted CI
 
 ## Observation
 
@@ -42,3 +42,12 @@ test failure was reported before timeout.
 
 The change does not alter storage tolerance, product behavior, deletion state,
 or release authority.
+
+## Verification
+
+- Correction run `36119551879` passed the Factory policy gate in 4 minutes 34
+  seconds with the 15-minute template step bound.
+- The independent iPhone and iPad jobs also passed in 7 minutes 53 seconds and
+  6 minutes 23 seconds respectively.
+- Local verification passed 53 Python tests, 7 Node tests, Factory doctor, and
+  diff checks.
