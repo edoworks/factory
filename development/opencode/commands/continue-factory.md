@@ -46,12 +46,15 @@ agent: explore
 - PR #83 merged the final deletion-readiness integration record at `676256b`.
   Its exact documentation head `cbdb992` received bounded rendered review with
   no overlap, clipping, or readability defect.
-- Issue #84 tracks the launch-readiness dead-end caused by an expiring tracked
-  routing catalog with no repository-owned import path. The bounded correction
-  imports only route-relevant fields from approved generated evidence, records
-  absent optional routes as unavailable, and changes no route, provider,
-  benchmark, budget, or fallback semantics. Integration and fresh-session
-  verification remain pending.
+- Issue #84 and PR #85 completed the repository-owned routing catalog refresh
+  path at merge `a1529c8`; exact feature head `edf5a90` imports only
+  route-relevant fields from approved generated evidence, records absent
+  optional routes as unavailable, and changes no route, provider, benchmark,
+  budget, or fallback semantics. The final head passed 55 Python tests, 13 Node
+  tests, Factory doctor with `launch_ready: true`, independent trust review,
+  and hosted run `36141758339` across the policy, iPhone, and iPad jobs. Remote
+  readback reports issue #84 `CLOSED`; the exact closeout helper remains
+  unexecuted because this loaded session does not admit that command.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -60,10 +63,9 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Complete issue #84 verification, integration, and closeout. From a normal
-   terminal, run the approved user catalog refresh, then
-   `bin/factory-dev refresh-catalog`; require the subsequent doctor receipt to
-   report `launch_ready: true` before starting a fresh Factory session.
+3. From a policy-valid session that admits the exact closeout helper, run its
+   issue #84 verification and require `CLOSED` before claiming tracked
+   completion.
 4. If an authorized exact-page open becomes available, complete and record the
    bounded rendered review of PR #76's final PRD without claiming it preceded
    merge.

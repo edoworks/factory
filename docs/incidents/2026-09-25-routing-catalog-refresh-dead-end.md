@@ -4,7 +4,7 @@ Date: 2026-09-25
 
 Tracker: `edoworks/factory#84`
 
-Status: corrected pending integration and fresh-session verification
+Status: integrated by PR #85; exact issue-closeout helper verification pending
 
 ## Evidence
 
