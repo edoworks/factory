@@ -182,6 +182,7 @@ class FactoryDevTests(unittest.TestCase):
                 source / "scripts" / "continuation-command.test.mjs",
                 source / "scripts" / "git-push.test.mjs",
                 source / "scripts" / "import-routing-catalog.test.mjs",
+                source / "scripts" / "issue-closeout.test.mjs",
                 source / "plugins" / "cost-router.test.mjs",
             ],
             text=True,

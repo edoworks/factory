@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Admit pinned Factory issue closeout verification",
+  "body_file": "issue-closeout-verifier-body.md",
+  "body_sha256": "453e157816b17621ab28819dbd7a669eb4d0c41f12c24ffd66416dfcfad2d95e",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["Parent canonical-development issue #69", "Issue #84 and merged PRs #85 and #86"],
+  "authority_constraints": ["Read-only edoworks/factory issue-state verification", "No issue mutation", "No repository setting or credential change", "Repository-local tooling and evidence only"],
+  "source_provenance": ["Factory head e3a789fe1b3a78cfc952f76a5fcc9d7454cbc66b", "Issue-tracking skill closeout requirement", "Issue #84 remote CLOSED readback and blocked helper invocation"],
+  "duplicate_review": ["Issues #69 and #84 do not admit the mandatory closeout helper; no duplicate found"],
+  "reprioritization_review": ["Mandatory closeout contradiction blocks compliant issue #84 completion before issue #77"]
+}
