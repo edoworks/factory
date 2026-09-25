@@ -180,6 +180,49 @@ class ExternalStorageAttributionTests(unittest.TestCase):
                 ATTRIBUTION,
                 "allocated_bytes",
                 side_effect=OSError(f"cannot inspect {private_path}"),
+            ) as measured:
+                value = ATTRIBUTION.measure_root("test_root", private_path)
+        self.assertEqual(
+            value,
+            {
+                "state": "unavailable",
+                "allocated_bytes": None,
+                "reason": "traversal_failed",
+            },
+        )
+        self.assertEqual(measured.call_count, 3)
+
+    def test_measurement_retries_complete_traversal_from_fresh_root(self):
+        private_path = pathlib.Path("/private/runner/path")
+        with mock.patch.object(
+            ATTRIBUTION,
+            "open_root",
+            side_effect=[10, 11],
+        ) as opened:
+            with mock.patch.object(
+                ATTRIBUTION,
+                "allocated_bytes",
+                side_effect=[OSError("tree changed"), 4096],
+            ) as measured:
+                value = ATTRIBUTION.measure_root("test_root", private_path)
+        self.assertEqual(
+            value,
+            {"state": "present", "allocated_bytes": 4096, "reason": None},
+        )
+        self.assertEqual(opened.call_count, 2)
+        self.assertEqual(measured.call_args_list, [mock.call(10), mock.call(11)])
+
+    def test_root_disappearance_after_failed_traversal_stays_unavailable(self):
+        private_path = pathlib.Path("/private/runner/path")
+        with mock.patch.object(
+            ATTRIBUTION,
+            "open_root",
+            side_effect=[10, None, None],
+        ):
+            with mock.patch.object(
+                ATTRIBUTION,
+                "allocated_bytes",
+                side_effect=OSError("tree changed"),
             ):
                 value = ATTRIBUTION.measure_root("test_root", private_path)
         self.assertEqual(
@@ -190,6 +233,7 @@ class ExternalStorageAttributionTests(unittest.TestCase):
                 "reason": "traversal_failed",
             },
         )
+        self.assertEqual(ATTRIBUTION.TRAVERSAL_ATTEMPTS, 3)
 
     def test_compare_omits_unavailable_class_from_aggregates(self):
         identifiers = list(ATTRIBUTION.ROOTS)

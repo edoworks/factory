@@ -164,6 +164,48 @@ passed all three jobs and its exact integration diff received bounded rendered
 review with no layout or privacy defect. Remote readback reports issue #77
 closed, and the pinned closeout verifier returned exactly `CLOSED`.
 
+## Canonical Portfolio Index
+
+Tracker: issue #78
+
+The public-safe index at `docs/product-portfolio-index.json` records nine known
+portfolio entries. It publishes no organization-wide repository snapshot;
+hosted inventory remains behind the issue #77 opaque evidence reference. Public
+products bind to approved, already-public canonical identities and evidence
+revisions. Mews & Woofs remains an internal reference fixture. Vorynce remains
+paused under its lifecycle admission. Three issue-disclosed private products
+remain `UNKNOWN`, with opaque repository references and no public or active
+claim. Edglex and Noraze remain archived historical public surfaces.
+
+Private repository identities, completeness, and metadata remain in the
+owner-controlled private evidence class. The public index does not replace that
+inventory and does not establish preservation or deletion readiness, change a
+product's lifecycle, authorize release, or make Factory the owner of
+product-specific PRDs. The direct CI validator rejects stale observations,
+duplicate ownership, missing records, and private paths. Hosted-state
+contradictions require a fresh timestamp-bound source inspection before the
+closed approved mappings are updated.
+
+The PR #98 portfolio diff, this cutover section, the Factory PRD section, and
+issue #78 received bounded rendered review at exact head
+`f2c6c1d3625b9eaeda222d1d6d0f2df168fcb82b` with no layout, wrapping, privacy,
+or lifecycle-claim defect. Hosted run `36184422124` passed the Factory policy
+and iPad jobs, but its iPhone job reached the 15-minute verification bound while
+tests were still passing and then failed while zipping the live result bundle.
+Issue #99 owns that separate CI evidence correction. PR #98, issue #78, and this
+portfolio state remain open until the corrected exact head passes all required
+hosted checks.
+
+At corrected head `e34236788525e2d04d99b5e6ce23473014535d79`, hosted run
+`36189352038` passed both independent Mews & Woofs jobs, proving the issue #99
+timeout and immutable-archive correction. The Factory policy gate still failed
+closed on `865488896` unknown persistent bytes against the unchanged
+`805306368`-byte tolerance. Available attribution classes measured zero growth,
+while `coresimulator_system` remained unavailable after a path-free traversal
+failure whose underlying `OSError` class is not identified. Issue #100 owns the
+bounded fresh-root retry for a potentially transient failure; no tolerance,
+lifecycle, or portfolio claim is changed.
+
 ## State Claims
 
 | State | Result |

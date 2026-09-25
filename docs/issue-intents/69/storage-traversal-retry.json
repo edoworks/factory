@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Stabilize concurrent storage attribution traversal",
+  "body_file": "storage-traversal-retry-body.md",
+  "body_sha256": "4ad0364acae8de6201b053f6677a6e6be934e10d866ed8bb9a77f6aa15184961",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["PR #98 run 36189352038", "Issue #93 external-owner attribution contract"],
+  "authority_constraints": ["Bounded read-only repository-local measurement only", "No tolerance increase", "No partial count acceptance", "No global cleanup", "No private path publication"],
+  "source_provenance": ["PR #98 run 36189352038", "Policy job 108250432758", "scripts/external_storage_attribution.py", "tests/test_external_storage_attribution.py"],
+  "duplicate_review": ["Issue #93 does not retry transient concurrent traversal", "Issue #99 owns the separate reference-app evidence correction"],
+  "reprioritization_review": ["Required because PR #98 cannot merge while attribution is incomplete and the policy gate fails"]
+}

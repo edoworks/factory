@@ -214,6 +214,15 @@ Every result is `PASS`, `FAIL`, or `NOT VERIFIED`. Simulator evidence is never
 reported as physical-device evidence. A working build does not prove usability,
 repeat use, commercial demand, or willingness to pay.
 
+Hosted iPhone and iPad verification remains independently bounded and fail
+closed. Issue #99 owns the CI evidence correction after PR #98 run `36184422124`
+reached the former iPhone step bound while tests were still passing and then
+failed to upload the live result directory. Hosted evidence must be packaged as
+an immutable archive before upload; a missing or unpackageable archive fails the
+job and cannot be reported as product qualification evidence.
+The corrected iPhone and iPad jobs passed in PR #98 run `36189352038`; the PR
+remains unqualified because its separate Factory storage policy gate failed.
+
 ## Usability Protocol
 
 Give a representative participant a device without explaining the controls.

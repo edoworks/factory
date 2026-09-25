@@ -16,6 +16,7 @@ ROOTS = {
 }
 MEASUREMENT_FIELDS = {"state", "allocated_bytes", "reason"}
 UNAVAILABLE_REASONS = {"root_open_failed", "traversal_failed"}
+TRAVERSAL_ATTEMPTS = 3
 
 
 def reject_duplicate_keys(pairs):
@@ -105,25 +106,31 @@ def allocated_bytes(root_descriptor):
 
 
 def measure_root(identifier, path):
-    try:
-        descriptor = open_root(path)
-    except ValueError:
-        return {
-            "state": "unavailable",
-            "allocated_bytes": None,
-            "reason": "root_open_failed",
-        }
-    if descriptor is None:
-        return {"state": "absent", "allocated_bytes": 0, "reason": None}
-    try:
-        allocated = allocated_bytes(descriptor)
-    except OSError:
-        return {
-            "state": "unavailable",
-            "allocated_bytes": None,
-            "reason": "traversal_failed",
-        }
-    return {"state": "present", "allocated_bytes": allocated, "reason": None}
+    traversal_failed = False
+    for _ in range(TRAVERSAL_ATTEMPTS):
+        try:
+            descriptor = open_root(path)
+        except ValueError:
+            return {
+                "state": "unavailable",
+                "allocated_bytes": None,
+                "reason": "root_open_failed",
+            }
+        if descriptor is None:
+            if not traversal_failed:
+                return {"state": "absent", "allocated_bytes": 0, "reason": None}
+            continue
+        try:
+            allocated = allocated_bytes(descriptor)
+        except OSError:
+            traversal_failed = True
+            continue
+        return {"state": "present", "allocated_bytes": allocated, "reason": None}
+    return {
+        "state": "unavailable",
+        "allocated_bytes": None,
+        "reason": "traversal_failed",
+    }
 
 
 def snapshot():
