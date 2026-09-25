@@ -11,19 +11,14 @@ agent: explore
 - Issue #68 is the active consolidation map. PR #74 merged interactive Factory
   issue writes, bounded visual review, and GitHub authentication preservation at
   `1536ba6`; its local and hosted verification and rendered PRD review passed.
-- PR #75 restores the fixed repository-owned issue-intent hash, validation, and
-  remote-readback commands required before approved child issue creation.
-  Independent review then found a shadowable relative script path and unbound
-  raw create command. The correction anchors the script to the trusted
-  environment root, routes interactive creation through validated intent, and
-  pins its GitHub CLI child transport to the launcher's resolved executable.
-  It passes 48 Python tests, 6 Node tests, Factory doctor, policy integrity,
-  installed-policy comparison, and diff checks locally. Fresh hosted checks,
-  independent rereview, and rendered PRD review remain required at the next
-  pushed head.
-- The current OpenCode process predates PR #75's policy. A fresh
-  `bin/factory-dev` session is required after integration before intent commands
-  or child issue creation.
+- PR #75 merged the repository-owned issue-intent workflow at `dfbc416` after
+  its three hosted checks passed. Its bounded rendered PRD review at the final
+  feature head found no overlap, clipping, or readability defect.
+- Post-merge independent review found that wildcard test runners, initial `gh`
+  selection from inherited `PATH`, and inherited GitHub host/token overrides
+  still weakened the issue-write trust boundary. Correction is in progress under
+  issue #68; no child issue creation is permitted until it is merged, freshly
+  launched, and independently verified.
 - Issue #70 tracks product and release-workflow decoupling.
 - The Vorynce ownership chunk is implemented and verified locally at commit
   `f47cab8` on `feature/vorynce-prd-70` in the isolated worktree
@@ -39,11 +34,11 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Open PR #75's rendered PRD in the bounded browser path, capture it with the
-   pinned screenshot utility, and verify readability before integration.
-4. Recheck PR #75's required checks at the current head. Merge only while they
-   remain passed and the visual review has no unresolved findings.
-5. Start a fresh `bin/factory-dev` session and use the repository-owned intent
+3. Complete the issue #68 transport-trust correction, including the 5-Whys,
+   exact-runner, executable-provenance, host, token, and identity guards.
+4. Run local verification, independent rereview, hosted checks, and bounded
+   rendered PRD review before integrating the correction.
+5. Start a fresh `bin/factory-dev` session after that integration and use the repository-owned intent
    workflow to freeze, validate, create, and remotely read back only the
    owner-approved private-public, portfolio-index, and product-repository child
    issues.

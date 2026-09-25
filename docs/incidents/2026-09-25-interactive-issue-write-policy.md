@@ -2,7 +2,7 @@
 
 Date: 2026-09-25
 Tracker: `edoworks/factory#68`
-Status: correction pending merged verification
+Status: post-merge correction pending verification
 
 ## Observation
 
@@ -159,6 +159,65 @@ The launcher now resolves `gh` once, passes its absolute real path as
 `FACTORY_DEV_GH`, and refuses readiness when GitHub CLI is unavailable. The
 script requires that pinned absolute path for creation and readback. A regression
 test prepends a hostile executable after pinning and proves it is not selected.
+
+## Post-Merge Transport Trust Gap
+
+Independent post-merge review found that initial executable selection, inherited
+GitHub overrides, and wildcard test runners still weakened the issue-write
+boundary.
+
+1. An unapproved write could run indirectly because allowed wildcard test
+   runners could select arbitrary workspace code.
+2. A substituted transport could be pinned because the launcher selected the
+   first `gh` from inherited `PATH` before resolving it.
+3. A different host or credential could be selected because inherited
+   `GH_HOST`, `GH_TOKEN`, and related overrides remained in the launched process.
+4. Tests covered post-launch `PATH` substitution and direct command strings, but
+   not initial executable provenance, exact runner operands, host pinning, or
+   authenticated identity.
+5. The root cause was treating an absolute path, a repository argument, and a
+   top-level permission match as complete provenance without binding where the
+   executable came from, which host received the operation, which identity
+   authenticated it, and what code an allowed runner could select.
+
+The correction denies wildcard Python and Node runner forms while allowing only
+the two exact tracked suite commands anchored to `FACTORY_DEV_OPENCODE_ROOT`.
+The launcher resolves GitHub CLI once from explicit package-manager paths,
+requires its target to remain within a `gh` package root and rejects a
+group/world-writable executable, strips inherited `GH_*` and `GITHUB_*`
+overrides, and the issue workflow
+pins `github.com/edoworks/factory` and verifies
+`hellofoculoom` before creation or readback. Regression tests inject a repository
+`gh`, hostile host and token variables, an incorrect authenticated identity, and
+non-exact runner forms. All allowed GitHub commands now use the pinned executable,
+comment and close use the identity-checking repository script, and doctor is
+anchored to the environment root. These checks are the mechanical recurrence
+guard.
+
+Final command-surface review found that inherited `PATH` could still shadow the
+anchored commands' interpreters, PR URL selectors could override the canonical
+repository, and the Git credential-helper push exception was malformed. The
+launcher now supplies a fixed system/package-manager `PATH`; policy denies PR URL
+selectors and trailing issue-read repository overrides; and the unsafe push
+exception is removed rather than repaired without a dedicated transport design.
+Tests require each guard. Vorynce integration therefore remains blocked pending
+a separately reviewed push path.
+
+The first full verification of that correction failed two assertions:
+
+1. The provenance fixture was rejected because its executable resolved beneath
+   `/private/var` while its approved package root retained the `/var` spelling.
+2. The comment assertion differed for the same reason: production canonicalized
+   the body file while the expected fixture path did not.
+3. The tests used macOS temporary paths, where `/var` is a symlink to
+   `/private/var`.
+4. The implementation canonicalized leaf files but not both sides of containment
+   and equality checks.
+5. The root cause was inconsistent path canonicalization at a trust boundary.
+
+The correction resolves approved roots and expected body paths before comparison.
+The full Python suite, rather than a platform-specific skip or relaxed string
+comparison, remains the mechanical recurrence guard.
 
 ## Boundaries
 

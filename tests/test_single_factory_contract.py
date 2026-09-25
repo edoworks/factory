@@ -69,12 +69,19 @@ class SingleFactoryContractTests(unittest.TestCase):
 
         self.assertNotIn("@frankhommers/opencode-yolo", plugins)
         self.assertEqual(permissions["*"], "deny")
+        self.assertEqual(permissions["python3 -m unittest*"], "deny")
+        self.assertEqual(permissions["node --test*"], "deny")
+        self.assertEqual(permissions["python3 -m unittest discover -s {env:FACTORY_DEV_OPENCODE_ROOT}/../../tests"], "allow")
+        self.assertEqual(
+            permissions["node --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs"],
+            "allow",
+        )
         for mutation in ("gh issue create*", "gh issue comment*", "gh issue close*"):
             self.assertEqual(permissions[mutation], "deny")
         interactive = {
-            "gh issue comment --repo edoworks/factory *",
-            "gh issue close --repo edoworks/factory *",
             "node {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs create *",
+            "node {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs comment *",
+            "node {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs close *",
             "open https://github.com/edoworks/factory/*",
         }
         self.assertEqual(
@@ -94,6 +101,14 @@ class SingleFactoryContractTests(unittest.TestCase):
             "node development/opencode/scripts/issue-intent.mjs validate *",
             permissions,
         )
+        self.assertNotIn("./bin/factory-dev doctor*", permissions)
+        self.assertEqual(
+            permissions["{env:FACTORY_DEV_OPENCODE_ROOT}/../../bin/factory-dev doctor*"],
+            "allow",
+        )
+        self.assertFalse(any(pattern.startswith("gh ") and action in {"allow", "ask"} for pattern, action in permissions.items()))
+        self.assertTrue(all("{env:FACTORY_DEV_GH}" in pattern for pattern, action in permissions.items() if action == "allow" and (" issue " in pattern or " pr " in pattern or " api " in pattern)))
+        self.assertFalse(any("credential.helper" in pattern and action == "allow" for pattern, action in permissions.items()))
         self.assertNotIn(
             "python3 */.agents/skills/macos-screenshot/scripts/screenshot.py *",
             permissions,
@@ -108,11 +123,17 @@ class SingleFactoryContractTests(unittest.TestCase):
                 "deny",
             )
         self.assertEqual(
-            permissions["gh pr * --repo edoworks/factory *--repo*"], "deny"
+            permissions["{env:FACTORY_DEV_GH} pr * --repo edoworks/factory *--repo*"], "deny"
         )
         self.assertEqual(
-            permissions["gh pr * --repo edoworks/factory *-R*"], "deny"
+            permissions["{env:FACTORY_DEV_GH} pr * --repo edoworks/factory *-R*"], "deny"
         )
+        self.assertEqual(permissions["{env:FACTORY_DEV_GH} pr *https://*"], "deny")
+        self.assertEqual(permissions["{env:FACTORY_DEV_GH} pr *http://*"], "deny")
+        self.assertEqual(permissions["{env:FACTORY_DEV_GH} issue * --repo edoworks/factory *--repo*"], "deny")
+        self.assertEqual(permissions["{env:FACTORY_DEV_GH} issue * --repo edoworks/factory *-R*"], "deny")
+        self.assertEqual(permissions["{env:FACTORY_DEV_GH} issue *https://*"], "deny")
+        self.assertEqual(permissions["{env:FACTORY_DEV_GH} issue *http://*"], "deny")
         self.assertEqual(
             permissions["open https://github.com/edoworks/factory/* *"], "deny"
         )
@@ -200,6 +221,7 @@ class SingleFactoryContractTests(unittest.TestCase):
             fake_gh = directory / "gh"
             fake_gh.write_text(
                 "#!/bin/sh\n"
+                "if [ \"$1 $2 $3 $4 $5 $6\" = \"api --hostname github.com user --jq .login\" ]; then printf 'hellofoculoom\\n'; exit 0; fi\n"
                 "if [ \"$1\" = issue ] && [ \"$2\" = view ]; then cat \"$FAKE_REMOTE\"; exit 0; fi\n"
                 "python3 -c 'import json, os, sys; open(os.environ[\"FAKE_CAPTURE\"], \"w\").write(json.dumps(sys.argv[1:]))' \"$@\"\n"
                 "printf 'https://github.com/edoworks/factory/issues/999\\n'\n"
@@ -218,7 +240,7 @@ class SingleFactoryContractTests(unittest.TestCase):
             created = subprocess.run(["node", str(script), "create", str(intent_path)], text=True, capture_output=True, env=environment, check=False)
             self.assertEqual(created.returncode, 0, created.stderr)
             args = json.loads(capture.read_text())
-            self.assertEqual(args[:4], ["issue", "create", "--repo", "edoworks/factory"])
+            self.assertEqual(args[:4], ["issue", "create", "--repo", "github.com/edoworks/factory"])
             self.assertEqual(args[args.index("--title") + 1], intent["title"])
             self.assertEqual(args[args.index("--body") + 1], body)
             hostile = directory / "hostile" / "gh"
@@ -229,6 +251,20 @@ class SingleFactoryContractTests(unittest.TestCase):
             readback = subprocess.run(["node", str(script), "verify-remote", str(intent_path), "999"], text=True, capture_output=True, env=environment, check=False)
             self.assertEqual(readback.returncode, 0, readback.stderr)
             self.assertEqual(readback.stdout, "MATCH\n")
+
+            comment_body = directory / "comment.md"
+            comment_body.write_text("Verified evidence.\n")
+            commented = subprocess.run(["node", str(script), "comment", "999", str(comment_body)], text=True, capture_output=True, env=environment, check=False)
+            self.assertEqual(commented.returncode, 0, commented.stderr)
+            self.assertEqual(json.loads(capture.read_text()), ["issue", "comment", "--repo", "github.com/edoworks/factory", "999", "--body-file", str(comment_body.resolve())])
+            closed = subprocess.run(["node", str(script), "close", "999"], text=True, capture_output=True, env=environment, check=False)
+            self.assertEqual(closed.returncode, 0, closed.stderr)
+            self.assertEqual(json.loads(capture.read_text()), ["issue", "close", "--repo", "github.com/edoworks/factory", "999"])
+
+            fake_gh.write_text("#!/bin/sh\nif [ \"$1\" = api ]; then printf 'wrong-user\\n'; exit 0; fi\nexit 99\n")
+            rejected_identity = subprocess.run(["node", str(script), "create", str(intent_path)], text=True, capture_output=True, env=environment, check=False)
+            self.assertNotEqual(rejected_identity.returncode, 0)
+            self.assertIn("GitHub identity must be hellofoculoom", rejected_identity.stderr)
 
             intent["body_sha256"] = "0" * 64
             intent_path.write_text(json.dumps(intent))

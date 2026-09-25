@@ -7,12 +7,25 @@ import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import subprocess
 import sys
 
 
 CANONICAL_REPO = "edoworks/factory"
 PREDECESSOR = re.compile(r"(?:^|/)(?:sf0\.[0-9]+|actions-runner-sf0?8)(?:/|$)|edoworks/sf0\.[0-9]+", re.I)
+TRUSTED_GITHUB_CLI_PATHS = (
+    Path("/opt/homebrew/bin/gh"),
+    Path("/usr/local/bin/gh"),
+    Path("/usr/bin/gh"),
+    Path("/home/linuxbrew/.linuxbrew/bin/gh"),
+)
+TRUSTED_GITHUB_CLI_ROOTS = {
+    Path("/opt/homebrew/Cellar/gh"),
+    Path("/usr/local/Cellar/gh"),
+    Path("/home/linuxbrew/.linuxbrew/Cellar/gh"),
+}
+TRUSTED_PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/home/linuxbrew/.linuxbrew/bin"
 
 
 def fail(message):
@@ -59,6 +72,20 @@ def sha256(path):
 def command_output(args, cwd):
     result = subprocess.run(args, cwd=cwd, text=True, capture_output=True, check=False)
     return result.stdout.strip() if result.returncode == 0 else None
+
+
+def trusted_github_cli():
+    for candidate in TRUSTED_GITHUB_CLI_PATHS:
+        try:
+            resolved = candidate.resolve(strict=True)
+            package_root = next((root for root in TRUSTED_GITHUB_CLI_ROOTS if resolved.is_relative_to(root.resolve())), None)
+            system_binary = candidate == Path("/usr/bin/gh") and resolved == candidate
+            mode = resolved.stat().st_mode
+            if resolved.is_file() and os.access(resolved, os.X_OK) and not mode & (stat.S_IWGRP | stat.S_IWOTH) and (package_root or system_binary):
+                return resolved
+        except OSError:
+            continue
+    return None
 
 
 def inspect(root, target):
@@ -151,7 +178,7 @@ def inspect(root, target):
     opencode_version = command_output([opencode, "--version"], root) if shutil.which(opencode) or Path(opencode).is_file() else None
     if not opencode_version:
         errors.append("OpenCode is unavailable")
-    github_cli = shutil.which("gh")
+    github_cli = trusted_github_cli()
     if not github_cli:
         errors.append("GitHub CLI is unavailable")
 
@@ -187,6 +214,7 @@ def inspect(root, target):
         "git_revision": revision,
         "dirty": bool(status),
         "opencode_version": opencode_version,
+        "github_cli": str(github_cli) if github_cli else None,
         "policy_digest": policy_digest,
         "policy_status": "valid" if not errors else "invalid",
         "active_installation": {"status": active_status, "files": active_files},
@@ -226,14 +254,15 @@ def main(argv):
         user_config = Path(environment.get("XDG_CONFIG_HOME", Path.home() / ".config")).expanduser()
         github_config = str(user_config / "gh")
     for name in tuple(environment):
-        if name.startswith("OPENCODE_"):
+        if name.startswith("OPENCODE_") or name.startswith("GH_") or name.startswith("GITHUB_"):
             environment.pop(name)
     environment["OPENCODE_DISABLE_AUTOUPDATE"] = "1"
     environment["OPENCODE_DISABLE_MODELS_FETCH"] = "1"
+    environment["PATH"] = TRUSTED_PATH
     environment["XDG_CONFIG_HOME"] = str(root / "development")
     environment["GH_CONFIG_DIR"] = github_config
     environment["FACTORY_DEV_OPENCODE_ROOT"] = str(source)
-    environment["FACTORY_DEV_GH"] = str(Path(shutil.which("gh")).resolve(strict=True))
+    environment["FACTORY_DEV_GH"] = receipt["github_cli"]
     environment["FACTORY_CANONICAL_REPO"] = CANONICAL_REPO
     opencode = environment.get("FACTORY_DEV_OPENCODE", "opencode")
     os.execvpe(opencode, [opencode, str(target)], environment)
