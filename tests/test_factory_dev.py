@@ -1,4 +1,5 @@
 import hashlib
+import importlib.machinery
 import json
 import os
 from datetime import datetime, timezone
@@ -7,6 +8,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
+import types
 import unittest
 
 
@@ -15,6 +17,11 @@ COMMAND = ROOT / "bin" / "factory-dev"
 
 
 class FactoryDevTests(unittest.TestCase):
+    def load_command_module(self):
+        module = types.ModuleType("factory_dev_test_module")
+        importlib.machinery.SourceFileLoader(module.__name__, str(COMMAND)).exec_module(module)
+        return module
+
     def run_dev(self, *args, root=None, opencode=None, overrides=None):
         environment = os.environ.copy()
         if opencode:
@@ -38,9 +45,9 @@ class FactoryDevTests(unittest.TestCase):
         fake = temporary / "opencode"
         fake.write_text(
             "#!/bin/sh\n"
-            "if [ \"$1\" = --version ]; then echo 1.18.19; "
-            "else printf '{\"target\":\"%s\",\"config\":\"%s\",\"github\":\"%s\",\"factory_gh\":\"%s\",\"custom\":\"%s\",\"directory\":\"%s\",\"content\":\"%s\",\"permission\":\"%s\",\"pure\":\"%s\",\"future\":\"%s\",\"autoupdate\":\"%s\",\"models_fetch\":\"%s\"}\\n' "
-            "\"$1\" \"$XDG_CONFIG_HOME\" \"$GH_CONFIG_DIR\" \"$FACTORY_DEV_GH\" \"$OPENCODE_CONFIG\" \"$OPENCODE_CONFIG_DIR\" \"$OPENCODE_CONFIG_CONTENT\" \"$OPENCODE_PERMISSION\" \"$OPENCODE_PURE\" \"$OPENCODE_FUTURE_FLAG\" \"$OPENCODE_DISABLE_AUTOUPDATE\" \"$OPENCODE_DISABLE_MODELS_FETCH\"; fi\n"
+            "if [ \"$1\" = --version ]; then if [ -n \"$NODE_OPTIONS\" ]; then exit 98; fi; echo 1.18.19; "
+            "else printf '{\"target\":\"%s\",\"config\":\"%s\",\"github\":\"%s\",\"factory_gh\":\"%s\",\"factory_node\":\"%s\",\"path\":\"%s\",\"gh_host\":\"%s\",\"gh_token\":\"%s\",\"github_token\":\"%s\",\"enterprise_token\":\"%s\",\"http_socket\":\"%s\",\"node_options\":\"%s\",\"custom\":\"%s\",\"directory\":\"%s\",\"content\":\"%s\",\"permission\":\"%s\",\"pure\":\"%s\",\"future\":\"%s\",\"autoupdate\":\"%s\",\"models_fetch\":\"%s\"}\\n' "
+            "\"$1\" \"$XDG_CONFIG_HOME\" \"$GH_CONFIG_DIR\" \"$FACTORY_DEV_GH\" \"$FACTORY_DEV_NODE\" \"$PATH\" \"$GH_HOST\" \"$GH_TOKEN\" \"$GITHUB_TOKEN\" \"$GH_ENTERPRISE_TOKEN\" \"$GH_HTTP_UNIX_SOCKET\" \"$NODE_OPTIONS\" \"$OPENCODE_CONFIG\" \"$OPENCODE_CONFIG_DIR\" \"$OPENCODE_CONFIG_CONTENT\" \"$OPENCODE_PERMISSION\" \"$OPENCODE_PURE\" \"$OPENCODE_FUTURE_FLAG\" \"$OPENCODE_DISABLE_AUTOUPDATE\" \"$OPENCODE_DISABLE_MODELS_FETCH\"; fi\n"
         )
         fake.chmod(fake.stat().st_mode | stat.S_IXUSR)
         return temporary, fake
@@ -96,6 +103,83 @@ class FactoryDevTests(unittest.TestCase):
         self.assertEqual(receipt["policy_status"], "valid")
         self.assertEqual(receipt["routing_contradictions"], [])
         self.assertTrue(receipt["launch_ready"])
+
+    def test_github_cli_provenance_rejects_escape_and_writable_binary(self):
+        module = self.load_command_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            package = root / "Cellar" / "gh"
+            binary = package / "1.0" / "bin" / "gh"
+            binary.parent.mkdir(parents=True)
+            binary.write_text("#!/bin/sh\nexit 0\n")
+            binary.chmod(0o755)
+            link = root / "bin" / "gh"
+            link.parent.mkdir()
+            link.symlink_to(binary)
+            module.TRUSTED_GITHUB_CLI_PATHS = (link,)
+            module.TRUSTED_GITHUB_CLI_ROOTS = {package}
+            self.assertEqual(module.trusted_github_cli(), binary.resolve())
+
+            binary.chmod(0o775)
+            self.assertIsNone(module.trusted_github_cli())
+            binary.chmod(0o755)
+            outside = root / "outside-gh"
+            outside.write_text("#!/bin/sh\nexit 0\n")
+            outside.chmod(0o755)
+            link.unlink()
+            link.symlink_to(outside)
+            self.assertIsNone(module.trusted_github_cli())
+
+    def test_node_provenance_rejects_broken_and_writable_binaries(self):
+        module = self.load_command_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            package = root / "Cellar" / "node"
+            broken = package / "1.0" / "bin" / "node"
+            malformed = package / "1.5" / "bin" / "node"
+            working = package / "2.0" / "bin" / "node"
+            broken.parent.mkdir(parents=True)
+            malformed.parent.mkdir(parents=True)
+            working.parent.mkdir(parents=True)
+            broken.write_text("#!/bin/sh\nexit 1\n")
+            malformed.write_text("#!/bin/sh\nprintf 'not-node\\n'\n")
+            working.write_text("#!/bin/sh\nprintf 'v22.0.0\\n'\n")
+            broken.chmod(0o755)
+            malformed.chmod(0o755)
+            working.chmod(0o755)
+            module.TRUSTED_NODE_PATHS = (broken, malformed, working)
+            module.TRUSTED_NODE_ROOTS = {package}
+            self.assertEqual(module.trusted_node(), working.resolve())
+
+            working.chmod(0o775)
+            self.assertIsNone(module.trusted_node())
+
+            working.chmod(0o755)
+            working.parent.chmod(0o775)
+            self.assertIsNone(module.trusted_node())
+
+            working.parent.chmod(0o755)
+            package.chmod(0o775)
+            self.assertIsNone(module.trusted_node())
+
+    def test_trusted_node_runs_repository_policy_suite(self):
+        module = self.load_command_module()
+        node = module.trusted_node()
+        self.assertIsNotNone(node)
+        source = ROOT / "development" / "opencode"
+        result = subprocess.run(
+            [
+                node,
+                "--test",
+                source / "scripts" / "continuation-command.test.mjs",
+                source / "scripts" / "git-push.test.mjs",
+                source / "plugins" / "cost-router.test.mjs",
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_missing_or_mismatched_required_config_fails_closed(self):
         root, fake = self.fixture()
@@ -204,6 +288,16 @@ class FactoryDevTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertTrue(any("cost-router is not launch-ready" in error for error in receipt["routing_contradictions"]))
 
+    def test_router_readiness_requires_expected_receipt(self):
+        root, fake = self.fixture()
+        self.make_launch_ready(root)
+        script = root / "development" / "opencode" / "scripts" / "routing-ready.mjs"
+        script.write_text("process.stdout.write('unexpected\\n');\n")
+        self.update_manifest(root, "scripts/routing-ready.mjs")
+        result, receipt = self.run_dev("doctor", root=root, opencode=fake)
+        self.assertEqual(result.returncode, 1)
+        self.assertTrue(any("unexpected" in error for error in receipt["routing_contradictions"]))
+
     def test_launch_execs_with_local_config_isolation(self):
         root, fake = self.fixture()
         self.make_launch_ready(root)
@@ -223,6 +317,12 @@ class FactoryDevTests(unittest.TestCase):
                 "OPENCODE_FUTURE_FLAG": "untrusted",
                 "XDG_CONFIG_HOME": "/tmp/user-config",
                 "GH_CONFIG_DIR": "",
+                "GH_HOST": "enterprise.invalid",
+                "GH_TOKEN": "untrusted-gh-token",
+                "GITHUB_TOKEN": "untrusted-github-token",
+                "GH_ENTERPRISE_TOKEN": "untrusted-enterprise-token",
+                "GH_HTTP_UNIX_SOCKET": "/tmp/untrusted.sock",
+                "NODE_OPTIONS": "--require=/tmp/untrusted.js",
                 "PATH": f"{root}:{os.environ['PATH']}",
             },
         )
@@ -231,7 +331,17 @@ class FactoryDevTests(unittest.TestCase):
         self.assertEqual(launched["target"], str(root))
         self.assertEqual(launched["config"], str(root / "development"))
         self.assertEqual(launched["github"], "/tmp/user-config/gh")
-        self.assertEqual(launched["factory_gh"], str(fake_gh.resolve()))
+        trusted_gh = next(path.resolve() for path in (Path("/opt/homebrew/bin/gh"), Path("/usr/local/bin/gh"), Path("/usr/bin/gh"), Path("/home/linuxbrew/.linuxbrew/bin/gh")) if path.is_file())
+        self.assertEqual(launched["factory_gh"], str(trusted_gh))
+        self.assertNotEqual(launched["factory_gh"], str(fake_gh.resolve()))
+        self.assertEqual(launched["factory_node"], receipt["node_cli"])
+        self.assertEqual(launched["path"], "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/home/linuxbrew/.linuxbrew/bin")
+        self.assertEqual(launched["gh_host"], "")
+        self.assertEqual(launched["gh_token"], "")
+        self.assertEqual(launched["github_token"], "")
+        self.assertEqual(launched["enterprise_token"], "")
+        self.assertEqual(launched["http_socket"], "")
+        self.assertEqual(launched["node_options"], "")
         self.assertEqual(launched["custom"], "")
         self.assertEqual(launched["directory"], "")
         self.assertEqual(launched["content"], "")

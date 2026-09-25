@@ -2,7 +2,7 @@
 
 Date: 2026-09-25
 Tracker: `edoworks/factory#68`
-Status: correction pending merged verification
+Status: post-merge correction pending verification
 
 ## Observation
 
@@ -159,6 +159,102 @@ The launcher now resolves `gh` once, passes its absolute real path as
 `FACTORY_DEV_GH`, and refuses readiness when GitHub CLI is unavailable. The
 script requires that pinned absolute path for creation and readback. A regression
 test prepends a hostile executable after pinning and proves it is not selected.
+
+## Post-Merge Transport Trust Gap
+
+Independent post-merge review found that initial executable selection, inherited
+GitHub overrides, and wildcard test runners still weakened the issue-write
+boundary.
+
+1. An unapproved write could run indirectly because allowed wildcard test
+   runners could select arbitrary workspace code.
+2. A substituted transport could be pinned because the launcher selected the
+   first `gh` from inherited `PATH` before resolving it.
+3. A different host or credential could be selected because inherited
+   `GH_HOST`, `GH_TOKEN`, and related overrides remained in the launched process.
+4. Tests covered post-launch `PATH` substitution and direct command strings, but
+   not initial executable provenance, exact runner operands, host pinning, or
+   authenticated identity.
+5. The root cause was treating an absolute path, a repository argument, and a
+   top-level permission match as complete provenance without binding where the
+   executable came from, which host received the operation, which identity
+   authenticated it, and what code an allowed runner could select.
+
+The correction denies wildcard Python and Node runner forms while allowing only
+the two exact tracked suite commands anchored to `FACTORY_DEV_OPENCODE_ROOT`.
+The launcher resolves GitHub CLI once from explicit package-manager paths,
+requires its target to remain within a `gh` package root and rejects a
+group/world-writable executable, strips inherited `GH_*` and `GITHUB_*`
+overrides, and the issue workflow
+pins `github.com/edoworks/factory` and verifies
+`hellofoculoom` before creation or readback. Regression tests inject a repository
+`gh`, hostile host and token variables, an incorrect authenticated identity, and
+non-exact runner forms. All allowed GitHub commands now use the pinned executable,
+comment and close use the identity-checking repository script, and doctor is
+anchored to the environment root. These checks are the mechanical recurrence
+guard.
+
+Final command-surface review found that inherited `PATH` could still shadow the
+anchored commands' interpreters, PR URL selectors could override the canonical
+repository, and the Git credential-helper push exception was malformed. The
+launcher now supplies a fixed system/package-manager `PATH`; policy denies PR URL
+selectors and trailing issue-read repository overrides; and the unsafe push
+exception is removed rather than repaired without a dedicated transport design.
+Tests require each guard. Vorynce integration therefore remains blocked pending
+a separately reviewed push path.
+
+The follow-up push transport is repository-owned and interactive. It accepts one
+validated lowercase `feature/...` branch and one full expected commit, verifies
+that commit as `HEAD` plus the `hellofoculoom` identity, uses the pinned GitHub
+CLI and `/usr/bin/git`, suppresses system/global Git configuration, rejects local
+URL, HTTP, and include settings, removes inherited `GIT_*` and proxy overrides,
+fixes the canonical HTTPS remote and no-follow-tags refspec to that commit, and
+executes from the Factory root without bypassing hooks. Its test rejects
+non-feature, option-bearing, mutable, and mismatched commit inputs and captures
+the exact child-process arguments.
+
+The first full verification of that correction failed two assertions:
+
+1. The provenance fixture was rejected because its executable resolved beneath
+   `/private/var` while its approved package root retained the `/var` spelling.
+2. The comment assertion differed for the same reason: production canonicalized
+   the body file while the expected fixture path did not.
+3. The tests used macOS temporary paths, where `/var` is a symlink to
+   `/private/var`.
+4. The implementation canonicalized leaf files but not both sides of containment
+   and equality checks.
+5. The root cause was inconsistent path canonicalization at a trust boundary.
+
+The correction resolves approved roots and expected body paths before comparison.
+The full Python suite, rather than a platform-specific skip or relaxed string
+comparison, remains the mechanical recurrence guard.
+
+## Node Runtime Provenance Gap
+
+A fresh restart found policy integrity valid but routing readiness blocked because
+the first `node` on the inherited path could not load its linked simdjson ABI.
+
+1. Factory development could not launch because the routing-readiness subprocess
+   terminated before evaluating the tracked routing evidence.
+2. The subprocess terminated because Homebrew Node 25 referenced simdjson ABI 29
+   while the installed simdjson package supplied ABI 33.
+3. The launcher selected that binary because it resolved `node` from inherited
+   `PATH` without checking provenance or execution readiness.
+4. This remained after GitHub CLI hardening because privileged transport
+   provenance was tested, but the interpreter for repository-owned policy tools
+   was still treated as an ambient development dependency.
+5. The root cause was an incomplete executable-provenance boundary: the launcher
+   isolated its child path but did not first bind a runnable Node executable.
+
+The correction selects Node only from explicit system and package-manager roots,
+rejects group/world-writable or non-runnable candidates, reports the selected
+real path, removes inherited Node runtime overrides, and exposes that exact path
+as `FACTORY_DEV_NODE` without widening the isolated session path. Tests require
+a broken trusted candidate to be skipped, a writable candidate to be rejected,
+and direct issue-intent tests to bind a runnable executable. The first test edit
+also failed import because a starred conditional expression was malformed; full
+test discovery exposed it immediately, and the corrected explicit candidate
+tuple plus full discovery remain the structural recurrence guard.
 
 ## Boundaries
 

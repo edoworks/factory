@@ -7,6 +7,9 @@ import { fileURLToPath } from "node:url";
 
 export const REQUIRED_SECTIONS = ["Outcome", "Scope", "Out of scope", "Acceptance criteria", "Verification", "Dependencies", "Authority and privacy", "Source provenance", "Classification", "Priority", "Triage review"];
 const ALLOWED = new Set(["bug", "documentation", "enhancement", "good first issue", "help wanted", "question", "duplicate", "invalid", "wontfix"]);
+const GITHUB_HOST = "github.com";
+const GITHUB_REPO = `${GITHUB_HOST}/edoworks/factory`;
+const GITHUB_IDENTITY = "hellofoculoom";
 const fail = (message) => { throw new Error(message); };
 const requireString = (value, field) => { if (typeof value !== "string" || !value.trim()) fail(`${field} must be a non-empty string`); };
 const requireArray = (value, field) => { if (!Array.isArray(value) || !value.length) fail(`${field} must be a non-empty array`); value.forEach((item) => requireString(item, `${field} entry`)); };
@@ -15,6 +18,13 @@ const githubCli = () => {
   const configured = process.env.FACTORY_DEV_GH;
   if (!configured || !isAbsolute(configured)) fail("FACTORY_DEV_GH must identify the pinned GitHub CLI");
   return realpathSync(configured);
+};
+const authenticatedGithubCli = () => {
+  const cli = githubCli();
+  const result = spawnSync(cli, ["api", "--hostname", GITHUB_HOST, "user", "--jq", ".login"], { encoding: "utf8" });
+  if (result.status !== 0) fail(result.stderr.trim() || "GitHub identity check failed");
+  if (result.stdout.trim() !== GITHUB_IDENTITY) fail(`GitHub identity must be ${GITHUB_IDENTITY}`);
+  return cli;
 };
 
 export function validateIssueIntent(intentPath) {
@@ -52,19 +62,34 @@ function main(argv) {
     process.stdout.write(`${sha256(readFileSync(realpathSync(intentPath), "utf8"))}\n`);
     return;
   }
+  if (command === "comment") {
+    if (extra.length || !/^\d+$/.test(intentPath ?? "") || !issueNumber) fail("usage: issue-intent.mjs comment ISSUE_NUMBER BODY_FILE");
+    const bodyPath = realpathSync(issueNumber);
+    const result = spawnSync(authenticatedGithubCli(), ["issue", "comment", "--repo", GITHUB_REPO, intentPath, "--body-file", bodyPath], { encoding: "utf8" });
+    if (result.status !== 0) fail(result.stderr.trim() || "gh issue comment failed");
+    process.stdout.write(result.stdout);
+    return;
+  }
+  if (command === "close") {
+    if (issueNumber || extra.length || !/^\d+$/.test(intentPath ?? "")) fail("usage: issue-intent.mjs close ISSUE_NUMBER");
+    const result = spawnSync(authenticatedGithubCli(), ["issue", "close", "--repo", GITHUB_REPO, intentPath], { encoding: "utf8" });
+    if (result.status !== 0) fail(result.stderr.trim() || "gh issue close failed");
+    process.stdout.write(result.stdout);
+    return;
+  }
   if (extra.length || !intentPath || !["validate", "create", "verify-remote"].includes(command)) fail("usage: issue-intent.mjs hash BODY.md | validate INTENT.json | create INTENT.json | verify-remote INTENT.json ISSUE_NUMBER");
   const validated = validateIssueIntent(intentPath);
   if (command === "create") {
     if (issueNumber) fail("unexpected issue number");
-    const args = ["issue", "create", "--repo", validated.intent.repo, "--title", validated.intent.title, "--body", validated.body];
+    const args = ["issue", "create", "--repo", GITHUB_REPO, "--title", validated.intent.title, "--body", validated.body];
     for (const label of validated.intent.labels) args.push("--label", label);
-    const result = spawnSync(githubCli(), args, { encoding: "utf8" });
+    const result = spawnSync(authenticatedGithubCli(), args, { encoding: "utf8" });
     if (result.status !== 0) fail(result.stderr.trim() || "gh issue create failed");
     process.stdout.write(result.stdout);
     return;
   } else if (command === "verify-remote") {
     if (!/^\d+$/.test(issueNumber ?? "")) fail("issue number must be numeric");
-    const result = spawnSync(githubCli(), ["issue", "view", "--repo", "edoworks/factory", issueNumber, "--json", "title,body,labels"], { encoding: "utf8" });
+    const result = spawnSync(authenticatedGithubCli(), ["issue", "view", "--repo", GITHUB_REPO, issueNumber, "--json", "title,body,labels"], { encoding: "utf8" });
     if (result.status !== 0) fail(result.stderr.trim() || "gh issue view failed");
     const remote = JSON.parse(result.stdout);
     verifyReadback(validated, remote);

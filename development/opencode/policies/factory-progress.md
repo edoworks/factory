@@ -12,7 +12,8 @@ chunks and keep `edoworks/factory` issue state and repository evidence current.
 - Observe CI through bounded snapshots; a queued self-hosted job without steps
   for 60 seconds is a runner-readiness blocker.
 - Completion notifications use
-  `{env:FACTORY_DEV_OPENCODE_ROOT}/scripts/notify-completion.mjs`; notification
+  `{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/notify-completion.mjs`;
+  notification
   delivery is not completion evidence.
 - GitHub writes require the authorized identity and explicit applicable
   authority. Never use `--admin`, force-push, or permission workarounds.

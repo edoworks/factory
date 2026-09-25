@@ -49,6 +49,10 @@ dedicated `XDG_CONFIG_HOME` for the fresh process, leaving credentials and data
 untouched while isolating local user configuration. Before that isolation,
 the launcher resolves and pins GitHub CLI's user configuration through
 `GH_CONFIG_DIR`; it does not copy credentials into Factory source or receipts.
+It removes inherited GitHub host and token overrides, selects GitHub CLI only
+from a resolved `gh` package root, rejects a group/world-writable executable,
+pins every allowed GitHub command to that executable and operations to `github.com`,
+and requires the authenticated `hellofoculoom` identity before issue transport.
 There is no install or sync command: doctor compares active user controls with
 the captured source baseline, while launch uses the checksum-bound repository
 source.
@@ -67,16 +71,29 @@ GitHub CLI to an absolute executable path before the script can transport or
 read back that intent. Exact repository-first
 comment and close commands for `edoworks/factory` are also interactive `ask` operations;
 auto mode cannot supply that human authorization, and trailing
-repository overrides are denied. Repository-owned issue-intent hashing, local
+repository overrides are denied. Issue comments and closeout are routed through
+the same pinned host, executable, and identity check. Repository-owned issue-intent hashing, local
 validation, and remote readback commands are read-only allowed operations; their
 fixed script path and argument validation prevent them from becoming alternate
 mutation transports.
+Wildcard Python and Node test-runner commands are denied; only exact tracked
+Factory suites anchored to `FACTORY_DEV_OPENCODE_ROOT` are allowed so a caller
+cannot select a product-owned module or test file through an allowed runner.
 Ordinary factory PR integration uses only explicitly allowed canonical command
 forms, with trailing repository overrides denied. Rendered Factory
 documentation review may interactively open one `edoworks/factory` GitHub page
 with no additional target and may run
 the screenshot utility at its fixed home-directory installation; neither
 permission grants content mutation.
+The launched process receives a fixed system/package-manager `PATH`, so a product
+target cannot shadow allowed interpreters or tools. PR URL selectors and trailing
+issue/PR repository overrides are denied. Git push has no shell allow exception.
+An interactive repository-owned transport accepts one lowercase `feature/...`
+branch and one full expected commit, verifies both `HEAD` and the GitHub identity,
+pins Git and GitHub CLI, suppresses system/global configuration, rejects local
+transport-affecting configuration, clears inherited Git and proxy overrides,
+fixes the canonical HTTPS remote and no-follow-tags refspec to the expected
+commit, and runs from the Factory root so repository hooks remain active.
 
 Doctor emits one JSON object containing `factory_version`, `git_revision`,
 `dirty`, `opencode_version`, `policy_digest`, `active_installation`,
