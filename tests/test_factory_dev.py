@@ -60,8 +60,10 @@ class FactoryDevTests(unittest.TestCase):
         self.update_manifest(root, "model-routing/benchmarks.json")
 
     def test_doctor_receipt_fields_and_stable_policy_digest(self):
-        first, receipt = self.run_dev("doctor")
-        second, repeated = self.run_dev("doctor")
+        root, fake = self.fixture()
+        self.make_launch_ready(root)
+        first, receipt = self.run_dev("doctor", root=root, opencode=fake)
+        second, repeated = self.run_dev("doctor", root=root, opencode=fake)
         self.assertEqual(first.returncode, 0)
         self.assertEqual(second.returncode, 0)
         for field in ("factory_version", "git_revision", "dirty", "opencode_version", "policy_digest", "active_installation", "config_override", "canonical_repo"):
