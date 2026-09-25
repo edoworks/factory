@@ -3,7 +3,7 @@
   "files": {
     ".gitignore": "4d56952b0fb13bf8f9b6c13a6d4c34a075bac3af447636a1df4335d7576e2f97",
     "active-baseline.json": "78699eb688fa55b3cc0531ce7e030ab5d93668dda0c0fc64c90d0dd5ded7ecad",
-    "commands/continue-factory.md": "145a7a64e7c88e0175153f71d92bfd2257ea3b2a2115e4a48746f2cf68d7075b",
+    "commands/continue-factory.md": "8cf99ff6bc17138321be3a15736f0996ccc3d0ecd59abffd12995a631ced7469",
     "model-routing/approved.json": "9d908dfb868cec573954e0741e67385ab56a5f2c7f596e4e07f57b04f5e0a985",
     "model-routing/benchmark-suite.mjs": "0739dd72655c56cdf74839f0c6f5335abb26a5363215f73e71477567ae83cd7d",
     "model-routing/benchmarks.json": "52ef7d8fb950453337c690a04437e9307ad467f65bd3748bc3f4446e9fb9d0d3",
@@ -20,7 +20,7 @@
     "policies/factory-progress.md": "c84b99c7edc7ec250460040850cf5334163e4dee167838bf29262d90a55934f6",
     "scripts/issue-closeout.mjs": "0edf8cf799ee53916f701eec9664f3f1a2f38d7d54d6ae10f725b7cf616e75f3",
     "scripts/continuation-command.test.mjs": "29d2b7946138ce102a91fec1f66922a4b70271669500cd3115d0db82621a9499",
-    "scripts/issue-intent.mjs": "fcbc20c7a825ca0996f9df5d9fbc58f5e24763b757341da47864a0b054ca3606",
+    "scripts/issue-intent.mjs": "2dacc07f2825aa1856e8b783a77da768b8df3ee0a583d7385d0c324524fcff1b",
     "scripts/notify-completion.mjs": "7148026e0e6b2eb1e64de0da0b49d49d59120759ece6291665bb5ae97b0cef59",
     "scripts/routing-ready.mjs": "bb3f2f2eed39218f5956c7ef3387748fe5955b68f7362db4907bf24dc6cec689",
     "skills/issue-tracking/SKILL.md": "9bb94b6a2073d8d1831094c2279021ca4dfe9c588b2386c1585f1ee0ea56a422",

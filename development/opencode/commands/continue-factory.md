@@ -16,10 +16,11 @@ agent: explore
   Independent review then found a shadowable relative script path and unbound
   raw create command. The correction anchors the script to the trusted
   environment root, routes interactive creation through validated intent, and
-  passes 48 Python tests, 6 Node tests, Factory doctor, policy integrity,
+  pins its GitHub CLI child transport to the launcher's resolved executable.
+  It passes 48 Python tests, 6 Node tests, Factory doctor, policy integrity,
   installed-policy comparison, and diff checks locally. Fresh hosted checks,
-  independent rereview, and rendered PRD review remain required at the pushed
-  head.
+  independent rereview, and rendered PRD review remain required at the next
+  pushed head.
 - The current OpenCode process predates PR #75's policy. A fresh
   `bin/factory-dev` session is required after integration before intent commands
   or child issue creation.

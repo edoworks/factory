@@ -62,7 +62,9 @@ may be claimed. The policy inventory is closed-world outside generated `node_mod
 unlisted files and symlinked policy paths fail readiness. Broad GitHub issue
 mutations remain denied. Issue creation is an interactive `ask` operation routed
 through the environment-rooted repository script, which validates and transports
-the frozen intent without accepting inline issue content. Exact repository-first
+the frozen intent without accepting inline issue content. The launcher pins the
+GitHub CLI to an absolute executable path before the script can transport or
+read back that intent. Exact repository-first
 comment and close commands for `edoworks/factory` are also interactive `ask` operations;
 auto mode cannot supply that human authorization, and trailing
 repository overrides are denied. Repository-owned issue-intent hashing, local

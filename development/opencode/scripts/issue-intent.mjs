@@ -11,6 +11,11 @@ const fail = (message) => { throw new Error(message); };
 const requireString = (value, field) => { if (typeof value !== "string" || !value.trim()) fail(`${field} must be a non-empty string`); };
 const requireArray = (value, field) => { if (!Array.isArray(value) || !value.length) fail(`${field} must be a non-empty array`); value.forEach((item) => requireString(item, `${field} entry`)); };
 export const sha256 = (text) => createHash("sha256").update(text).digest("hex");
+const githubCli = () => {
+  const configured = process.env.FACTORY_DEV_GH;
+  if (!configured || !isAbsolute(configured)) fail("FACTORY_DEV_GH must identify the pinned GitHub CLI");
+  return realpathSync(configured);
+};
 
 export function validateIssueIntent(intentPath) {
   const absolute = realpathSync(intentPath);
@@ -53,13 +58,13 @@ function main(argv) {
     if (issueNumber) fail("unexpected issue number");
     const args = ["issue", "create", "--repo", validated.intent.repo, "--title", validated.intent.title, "--body", validated.body];
     for (const label of validated.intent.labels) args.push("--label", label);
-    const result = spawnSync("gh", args, { encoding: "utf8" });
+    const result = spawnSync(githubCli(), args, { encoding: "utf8" });
     if (result.status !== 0) fail(result.stderr.trim() || "gh issue create failed");
     process.stdout.write(result.stdout);
     return;
   } else if (command === "verify-remote") {
     if (!/^\d+$/.test(issueNumber ?? "")) fail("issue number must be numeric");
-    const result = spawnSync("gh", ["issue", "view", "--repo", "edoworks/factory", issueNumber, "--json", "title,body,labels"], { encoding: "utf8" });
+    const result = spawnSync(githubCli(), ["issue", "view", "--repo", "edoworks/factory", issueNumber, "--json", "title,body,labels"], { encoding: "utf8" });
     if (result.status !== 0) fail(result.stderr.trim() || "gh issue view failed");
     const remote = JSON.parse(result.stdout);
     verifyReadback(validated, remote);

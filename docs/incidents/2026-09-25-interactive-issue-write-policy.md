@@ -142,6 +142,24 @@ validated title, body bytes, and labels to GitHub. Tests reject the relative
 shadowable pattern and exercise valid, hash-mismatched, created, and remote
 readback states through a fake GitHub transport.
 
+Rereview found that the trusted script still spawned `gh` by name:
+
+1. Validated intent could reach a substituted executable because child-process
+   transport resolved `gh` from inherited `PATH`.
+2. Anchoring the script protected its own code but did not anchor its external
+   transport dependency.
+3. The launcher preserved the user environment without resolving the allowed
+   GitHub CLI before entering a product target.
+4. The transport test intentionally injected a fake `gh` through `PATH` to
+   observe arguments, so it proved construction while normalizing substitution.
+5. The root cause was applying executable provenance to the validator but not
+   recursively to the validator's privileged child process.
+
+The launcher now resolves `gh` once, passes its absolute real path as
+`FACTORY_DEV_GH`, and refuses readiness when GitHub CLI is unavailable. The
+script requires that pinned absolute path for creation and readback. A regression
+test prepends a hostile executable after pinning and proves it is not selected.
+
 ## Boundaries
 
 This change does not auto-approve a write, permit another repository, weaken the

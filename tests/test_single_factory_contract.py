@@ -207,6 +207,7 @@ class SingleFactoryContractTests(unittest.TestCase):
             fake_gh.chmod(fake_gh.stat().st_mode | stat.S_IXUSR)
             environment = os.environ | {
                 "PATH": f"{directory}:{os.environ['PATH']}",
+                "FACTORY_DEV_GH": str(fake_gh),
                 "FAKE_REMOTE": str(remote),
                 "FAKE_CAPTURE": str(capture),
             }
@@ -220,6 +221,11 @@ class SingleFactoryContractTests(unittest.TestCase):
             self.assertEqual(args[:4], ["issue", "create", "--repo", "edoworks/factory"])
             self.assertEqual(args[args.index("--title") + 1], intent["title"])
             self.assertEqual(args[args.index("--body") + 1], body)
+            hostile = directory / "hostile" / "gh"
+            hostile.parent.mkdir()
+            hostile.write_text("#!/bin/sh\nexit 99\n")
+            hostile.chmod(hostile.stat().st_mode | stat.S_IXUSR)
+            environment["PATH"] = f"{hostile.parent}:{environment['PATH']}"
             readback = subprocess.run(["node", str(script), "verify-remote", str(intent_path), "999"], text=True, capture_output=True, env=environment, check=False)
             self.assertEqual(readback.returncode, 0, readback.stderr)
             self.assertEqual(readback.stdout, "MATCH\n")
