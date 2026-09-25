@@ -46,9 +46,12 @@ The supported development entry path is `bin/factory-dev`. It must:
 
 The versioned source is `development/opencode`. `bin/factory-dev` sets a
 dedicated `XDG_CONFIG_HOME` for the fresh process, leaving credentials and data
-untouched while isolating local user configuration. There is no install or sync
-command: doctor compares active user controls with the captured source baseline,
-while launch uses the checksum-bound repository source.
+untouched while isolating local user configuration. Before that isolation,
+the launcher resolves and pins GitHub CLI's user configuration through
+`GH_CONFIG_DIR`; it does not copy credentials into Factory source or receipts.
+There is no install or sync command: doctor compares active user controls with
+the captured source baseline, while launch uses the checksum-bound repository
+source.
 
 Launch removes every inherited `OPENCODE_*` variable, rejects project
 configuration in the target or its ancestors, and rejects local managed

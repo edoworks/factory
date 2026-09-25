@@ -39,8 +39,8 @@ class FactoryDevTests(unittest.TestCase):
         fake.write_text(
             "#!/bin/sh\n"
             "if [ \"$1\" = --version ]; then echo 1.18.19; "
-            "else printf '{\"target\":\"%s\",\"config\":\"%s\",\"custom\":\"%s\",\"directory\":\"%s\",\"content\":\"%s\",\"permission\":\"%s\",\"pure\":\"%s\",\"future\":\"%s\",\"autoupdate\":\"%s\",\"models_fetch\":\"%s\"}\\n' "
-            "\"$1\" \"$XDG_CONFIG_HOME\" \"$OPENCODE_CONFIG\" \"$OPENCODE_CONFIG_DIR\" \"$OPENCODE_CONFIG_CONTENT\" \"$OPENCODE_PERMISSION\" \"$OPENCODE_PURE\" \"$OPENCODE_FUTURE_FLAG\" \"$OPENCODE_DISABLE_AUTOUPDATE\" \"$OPENCODE_DISABLE_MODELS_FETCH\"; fi\n"
+            "else printf '{\"target\":\"%s\",\"config\":\"%s\",\"github\":\"%s\",\"custom\":\"%s\",\"directory\":\"%s\",\"content\":\"%s\",\"permission\":\"%s\",\"pure\":\"%s\",\"future\":\"%s\",\"autoupdate\":\"%s\",\"models_fetch\":\"%s\"}\\n' "
+            "\"$1\" \"$XDG_CONFIG_HOME\" \"$GH_CONFIG_DIR\" \"$OPENCODE_CONFIG\" \"$OPENCODE_CONFIG_DIR\" \"$OPENCODE_CONFIG_CONTENT\" \"$OPENCODE_PERMISSION\" \"$OPENCODE_PURE\" \"$OPENCODE_FUTURE_FLAG\" \"$OPENCODE_DISABLE_AUTOUPDATE\" \"$OPENCODE_DISABLE_MODELS_FETCH\"; fi\n"
         )
         fake.chmod(fake.stat().st_mode | stat.S_IXUSR)
         return temporary, fake
@@ -218,12 +218,14 @@ class FactoryDevTests(unittest.TestCase):
                 "OPENCODE_PERMISSION": '{"bash":"allow"}',
                 "OPENCODE_PURE": "1",
                 "OPENCODE_FUTURE_FLAG": "untrusted",
+                "XDG_CONFIG_HOME": "/tmp/user-config",
             },
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         launched = json.loads(result.stdout.splitlines()[1])
         self.assertEqual(launched["target"], str(root))
         self.assertEqual(launched["config"], str(root / "development"))
+        self.assertEqual(launched["github"], "/tmp/user-config/gh")
         self.assertEqual(launched["custom"], "")
         self.assertEqual(launched["directory"], "")
         self.assertEqual(launched["content"], "")

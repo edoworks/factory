@@ -14,8 +14,8 @@ agent: explore
 - PR #74's current feature branch passes 46 Python tests, 6 Node tests, Factory
   doctor, policy integrity, installed-policy comparison, and an independent
   review with no remaining findings.
-- GitHub Actions run `36101164469` passed the Factory policy gate and the
-  independent iPhone and iPad reference-app jobs at PR head `1950d6f`.
+- PR #74's latest completed hosted run passed the Factory policy gate and the
+  independent iPhone and iPad reference-app jobs; recheck the current head.
 - The current OpenCode process predates the corrected policy. A fresh
   `bin/factory-dev` session is required before visual review or issue writes.
 - Issue #70 tracks product and release-workflow decoupling.

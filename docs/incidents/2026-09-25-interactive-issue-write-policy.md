@@ -71,6 +71,28 @@ the root cause was an unverified structural edit. The correction moved the
 assertion back into the loop, and full Python test discovery remains the
 mechanical recurrence guard required before commit.
 
+## Fresh-Session Authentication Gap
+
+Pre-merge execution found that the restored issue commands still could not use
+GitHub CLI authentication inside `bin/factory-dev`, even though the same
+credential helper could push the feature branch.
+
+1. `gh issue` could not authenticate because it found no host configuration.
+2. GitHub CLI resolved its configuration beneath the launcher's isolated
+   `XDG_CONFIG_HOME`.
+3. The launcher replaced `XDG_CONFIG_HOME` for OpenCode without first preserving
+   GitHub CLI's user configuration root.
+4. Launch tests asserted removal of OpenCode overrides but did not observe any
+   credential-bearing tool's configuration path.
+5. The root cause was process-wide configuration isolation modeled only as an
+   OpenCode concern, leaving allowed external tools without an explicit
+   configuration-preservation contract.
+
+The correction resolves `GH_CONFIG_DIR` from the pre-isolation environment and
+passes that path to the launched process while continuing to isolate OpenCode.
+The launcher test records both paths and requires GitHub CLI to retain the user
+configuration root. No credential value is copied, logged, or committed.
+
 ## Boundaries
 
 This change does not auto-approve a write, permit another repository, weaken the
