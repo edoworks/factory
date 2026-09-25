@@ -52,6 +52,23 @@ class FactoryDevTests(unittest.TestCase):
         manifest["files"][relative] = hashlib.sha256((source / relative).read_bytes()).hexdigest()
         manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 
+    def test_tracked_policy_manifest_matches_sources(self):
+        source = ROOT / "development" / "opencode"
+        manifest = json.loads((source / "policy-manifest.json").read_text())
+        for relative, expected in manifest["files"].items():
+            actual = hashlib.sha256((source / relative).read_bytes()).hexdigest()
+            self.assertEqual(expected, actual, relative)
+
+    def test_active_controls_match_baseline_when_installed(self):
+        source = ROOT / "development" / "opencode"
+        active = Path.home() / ".config" / "opencode"
+        baseline = json.loads((source / "active-baseline.json").read_text())
+        if not all((active / relative).is_file() for relative in baseline["files"]):
+            self.skipTest("Factory OpenCode controls are not installed")
+        for relative, expected in baseline["files"].items():
+            actual = hashlib.sha256((active / relative).read_bytes()).hexdigest()
+            self.assertEqual(expected, actual, relative)
+
     def make_launch_ready(self, root):
         path = root / "development" / "opencode" / "model-routing" / "benchmarks.json"
         value = json.loads(path.read_text())

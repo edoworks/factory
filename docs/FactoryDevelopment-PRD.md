@@ -56,10 +56,13 @@ configuration that could override repository policy. Authenticated
 organization `.well-known` policy is not suppressible by this launcher; any
 future enrollment requires a separate effective-config review before readiness
 may be claimed. The policy inventory is closed-world outside generated `node_modules`:
-unlisted files and symlinked policy paths fail readiness. GitHub issue mutations
-are denied because OpenCode auto mode cannot prove human authorization;
-ordinary factory PR integration uses only explicitly allowed canonical command
-forms.
+unlisted files and symlinked policy paths fail readiness. Broad GitHub issue
+mutations remain denied. Exact repository-first create, comment, and close
+commands for `edoworks/factory` are interactive `ask` operations; auto mode
+cannot supply that human authorization. Ordinary factory PR integration uses
+only explicitly allowed canonical command forms. Rendered Factory documentation
+review may interactively open only `edoworks/factory` GitHub pages and may run
+the installed screenshot utility; neither permission grants content mutation.
 
 Doctor emits one JSON object containing `factory_version`, `git_revision`,
 `dirty`, `opencode_version`, `policy_digest`, `active_installation`,
