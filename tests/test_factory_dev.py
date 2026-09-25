@@ -82,12 +82,20 @@ class FactoryDevTests(unittest.TestCase):
             actual = hashlib.sha256((active / relative).read_bytes()).hexdigest()
             self.assertEqual(expected, actual, relative)
 
-    def make_launch_ready(self, root):
+    def make_benchmarks_ready(self, root):
         path = root / "development" / "opencode" / "model-routing" / "benchmarks.json"
         value = json.loads(path.read_text())
         value["results"][0]["measured_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         path.write_text(json.dumps(value, indent=2) + "\n")
         self.update_manifest(root, "model-routing/benchmarks.json")
+
+    def make_launch_ready(self, root):
+        self.make_benchmarks_ready(root)
+        path = root / "development" / "opencode" / "model-routing" / "catalog.json"
+        value = json.loads(path.read_text())
+        value["refreshed_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        path.write_text(json.dumps(value, indent=2) + "\n")
+        self.update_manifest(root, "model-routing/catalog.json")
 
     def test_doctor_receipt_fields_and_stable_policy_digest(self):
         root, fake = self.fixture()
@@ -173,6 +181,7 @@ class FactoryDevTests(unittest.TestCase):
                 "--test",
                 source / "scripts" / "continuation-command.test.mjs",
                 source / "scripts" / "git-push.test.mjs",
+                source / "scripts" / "import-routing-catalog.test.mjs",
                 source / "plugins" / "cost-router.test.mjs",
             ],
             text=True,
@@ -361,6 +370,51 @@ class FactoryDevTests(unittest.TestCase):
             }.issubset(receipt["ignored_environment_overrides"]),
         )
         self.assertTrue(receipt["launch_ready"])
+
+    def test_refresh_catalog_imports_generated_evidence_and_restores_readiness(self):
+        root, fake = self.fixture()
+        self.make_benchmarks_ready(root)
+        catalog = root / "development" / "opencode" / "model-routing" / "catalog.json"
+        generated = json.loads(catalog.read_text())
+        generated["generation"] = "1790335243580-66796"
+        generated["refreshed_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        home = root / "home"
+        source = home / ".config" / "opencode" / "model-routing" / "catalog.json"
+        source.parent.mkdir(parents=True)
+        source.write_text(json.dumps(generated, indent=2) + "\n")
+
+        stale = dict(generated)
+        stale["generation"] = "1-1"
+        stale["refreshed_at"] = "2000-01-01T00:00:00Z"
+        catalog.write_text(json.dumps(stale, indent=2) + "\n")
+        self.update_manifest(root, "model-routing/catalog.json")
+
+        result, receipt = self.run_dev(
+            "refresh-catalog",
+            root=root,
+            opencode=fake,
+            overrides={"HOME": str(home)},
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(receipt["command"], "factory-dev refresh-catalog")
+        self.assertEqual(receipt["catalog_import"]["generation"], generated["generation"])
+        self.assertTrue(receipt["launch_ready"])
+        self.assertEqual(json.loads(catalog.read_text())["generation"], generated["generation"])
+        manifest = json.loads((root / "development" / "opencode" / "policy-manifest.json").read_text())
+        self.assertEqual(manifest["files"]["model-routing/catalog.json"], hashlib.sha256(catalog.read_bytes()).hexdigest())
+
+    def test_tracked_catalog_matches_available_generated_user_evidence(self):
+        generated = Path.home() / ".config" / "opencode" / "model-routing" / "catalog.json"
+        if not generated.is_file():
+            self.skipTest("generated user catalog is unavailable")
+        root, fake = self.fixture()
+        self.make_benchmarks_ready(root)
+        result, receipt = self.run_dev("refresh-catalog", root=root, opencode=fake)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(receipt["launch_ready"])
+        imported = root / "development" / "opencode" / "model-routing" / "catalog.json"
+        tracked = ROOT / "development" / "opencode" / "model-routing" / "catalog.json"
+        self.assertEqual(imported.read_bytes(), tracked.read_bytes())
 
     def test_product_runtime_has_no_development_dependency(self):
         runtime = [ROOT / "bin" / name for name in ("factory-doctor", "factory-init", "factory-storage", "factory-verify", "factory-uninstall")]

@@ -280,13 +280,49 @@ def inspect(root, target):
 
 
 def usage():
-    return "usage: factory-dev [doctor [PRODUCT_PATH] | launch [PRODUCT_PATH] | PRODUCT_PATH]"
+    return "usage: factory-dev [doctor [PRODUCT_PATH] | launch [PRODUCT_PATH] | refresh-catalog | PRODUCT_PATH]"
+
+
+def refresh_catalog(root):
+    before = inspect(root, root)
+    stale_catalog = "cost-router is not launch-ready: cost-router catalog is missing or stale;"
+    if before["policy_status"] != "valid" or before["errors"]:
+        fail("catalog import requires valid repository policy integrity")
+    if any(not contradiction.startswith(stale_catalog) for contradiction in before["routing_contradictions"]):
+        fail("catalog import cannot bypass non-catalog routing contradictions")
+    node = before["node_cli"]
+    if not node:
+        fail("catalog import requires the trusted Node.js runtime")
+    source = root / "development" / "opencode"
+    result = subprocess.run(
+        [node, str(source / "scripts" / "import-routing-catalog.mjs")],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=False,
+        env=without_node_overrides(os.environ),
+    )
+    if result.returncode != 0:
+        fail(f"catalog import failed: {result.stderr.strip() or result.stdout.strip() or 'unknown error'}")
+    try:
+        imported = json.loads(result.stdout)
+    except json.JSONDecodeError as error:
+        fail(f"catalog import returned an invalid receipt: {error}")
+    receipt = inspect(root, root)
+    receipt["command"] = "factory-dev refresh-catalog"
+    receipt["catalog_import"] = imported
+    print(json.dumps(receipt, sort_keys=True), flush=True)
+    return 0 if receipt["launch_ready"] else 1
 
 
 def main(argv):
     root = repository_root()
     mode = "launch"
     args = list(argv)
+    if args and args[0] == "refresh-catalog":
+        if len(args) != 1:
+            fail(usage())
+        return refresh_catalog(root)
     if args and args[0] in {"doctor", "launch"}:
         mode = args.pop(0)
     if len(args) > 1:

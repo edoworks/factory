@@ -23,3 +23,6 @@
   also require owner approval. `approved.json` is the route registry.
 - Follow the repository-owned `model-routing` skill; do not hand-edit live
   routes or alter provider budgets to bypass a failed readiness check.
+- After the approved user catalog refresh, import tracked route evidence with
+  `bin/factory-dev refresh-catalog`; missing routes remain unavailable rather
+  than inheriting stale active claims.

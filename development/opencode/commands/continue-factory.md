@@ -43,6 +43,15 @@ agent: explore
   hosted run `36120411239` across the policy, iPhone, and iPad jobs. Issue #81
   remains open for private inventory, preservation, restore, and exact-target
   evidence.
+- PR #83 merged the final deletion-readiness integration record at `676256b`.
+  Its exact documentation head `cbdb992` received bounded rendered review with
+  no overlap, clipping, or readability defect.
+- Issue #84 tracks the launch-readiness dead-end caused by an expiring tracked
+  routing catalog with no repository-owned import path. The bounded correction
+  imports only route-relevant fields from approved generated evidence, records
+  absent optional routes as unavailable, and changes no route, provider,
+  benchmark, budget, or fallback semantics. Integration and fresh-session
+  verification remain pending.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -51,12 +60,20 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. If an authorized exact-page open becomes available, complete and record the
+3. Complete issue #84 verification, integration, and closeout. From a normal
+   terminal, run the approved user catalog refresh, then
+   `bin/factory-dev refresh-catalog`; require the subsequent doctor receipt to
+   report `launch_ready: true` before starting a fresh Factory session.
+4. If an authorized exact-page open becomes available, complete and record the
    bounded rendered review of PR #76's final PRD without claiming it preceded
    merge.
-4. Continue issue #70 only with an explicitly active product or release workflow
+5. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
-5. Continue the smallest independently verifiable issue #81 inventory and
+6. Continue the smallest independently verifiable issue #77 privacy and
+   preservation-policy increment before repository provisioning. Do not create
+   the preservation repository until its exact provisioner is reviewed, merged,
+   and launched from a fresh policy-valid session.
+7. Continue issue #81 inventory and
    preservation increment. Do not delete, archive, unarchive, publish, or clean
    any target under that evidence issue.
 

@@ -53,9 +53,17 @@ It removes inherited GitHub host and token overrides, selects GitHub CLI only
 from a resolved `gh` package root, rejects a group/world-writable executable,
 pins every allowed GitHub command to that executable and operations to `github.com`,
 and requires the authenticated `hellofoculoom` identity before issue transport.
-There is no install or sync command: doctor compares active user controls with
-the captured source baseline, while launch uses the checksum-bound repository
-source.
+There is no control install or synchronization command: doctor compares active
+user controls with the captured source baseline, while launch uses the
+checksum-bound repository source. The bounded exception is
+`bin/factory-dev refresh-catalog`, which imports only route-relevant non-secret
+fields from the fixed approved generated user-catalog path. It first requires
+valid repository integrity, accepts no non-catalog routing contradiction,
+rejects older, stale, malformed, incomplete, or failed-provider evidence, and
+updates the tracked catalog and its manifest digest together. Models absent from
+the fresh generation remain unavailable rather than inheriting stale active
+claims. The command does not refresh providers, run benchmarks, promote routes,
+or change provider, budget, and fallback policy.
 
 Launch removes every inherited `OPENCODE_*` variable, rejects project
 configuration in the target or its ancestors, and rejects local managed
@@ -150,6 +158,9 @@ targets with unknown ownership or lifecycle state are excluded.
   `ollama/granite4.1:3b` on the local zero-marginal-cost provider. It passed the
   unchanged suite on 2026-09-25. No paid benchmark, provider, Build route,
   budget, or fallback policy changed.
+- Catalog expiry has a pre-launch recovery path: generate user evidence through
+  the approved model-routing procedure, run `bin/factory-dev refresh-catalog`
+  from a normal terminal, then require a launch-ready doctor receipt.
 
 ## Non-Goals
 
