@@ -30,9 +30,7 @@
         }
       },
       "variants": [
-        "low",
-        "medium",
-        "high"
+        "medium"
       ]
     },
     {
@@ -52,11 +50,7 @@
           "text": true
         }
       },
-      "variants": [
-        "low",
-        "high",
-        "max"
-      ]
+      "variants": []
     },
     {
       "full_name": "ollama/granite4.1:3b",
@@ -114,12 +108,7 @@
         }
       },
       "variants": [
-        "none",
-        "low",
-        "medium",
-        "high",
-        "xhigh",
-        "max"
+        "low"
       ]
     },
     {
@@ -140,12 +129,7 @@
         }
       },
       "variants": [
-        "none",
-        "low",
-        "medium",
-        "high",
-        "xhigh",
-        "max"
+        "medium"
       ]
     },
     {
@@ -166,12 +150,7 @@
         }
       },
       "variants": [
-        "none",
-        "low",
-        "medium",
-        "high",
-        "xhigh",
-        "max"
+        "medium"
       ]
     },
     {
@@ -192,9 +171,7 @@
         }
       },
       "variants": [
-        "none",
-        "low",
-        "high"
+        "low"
       ]
     },
     {
@@ -215,12 +192,7 @@
         }
       },
       "variants": [
-        "none",
-        "low",
-        "medium",
-        "high",
-        "xhigh",
-        "max"
+        "medium"
       ]
     },
     {

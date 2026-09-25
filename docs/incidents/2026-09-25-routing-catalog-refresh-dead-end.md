@@ -50,10 +50,55 @@ catalog evidence.
 - The tracked snapshot copies only non-secret route fields. Referenced optional
   models absent from the generation are recorded as `missing`, never inherited
   as active.
-- Catalog and manifest writes use exclusive temporary files, rollback ordinary
-  write failures, and leave crash interruption fail-closed on digest mismatch.
+- Catalog and manifest writes use exclusive temporary files, a persistent
+  SQLite mutex whose kernel lock is released on process death, and a separate
+  durable SQLite journal that rolls back an interrupted two-file transition
+  before policy validation resumes.
 - The exact mutation is interactive, while deterministic focused tests remain
   constrained to the pinned Node runtime and tracked test list.
+
+Independent review of the first implementation found that its in-process
+rollback could not recover an abrupt termination, pathname reads followed
+metadata checks instead of reading the checked inode, model identity types were
+under-validated, and the output retained arbitrary source provider and variant
+names.
+
+1. Why could a crash strand the importer? Catalog and manifest renames were
+   separate, while rollback state existed only in process memory.
+2. Why could a checked source still be replaced? Metadata and content were read
+   through separate pathname operations.
+3. Why could malformed identity fields pass? String interpolation occurred
+   before provider and model types were asserted.
+4. Why could private names enter tracked evidence? Provider and variant arrays
+   were copied from the broad generated catalog rather than projected from
+   tracked policy and route references.
+5. Why did the first tests miss these defects? They covered validation failures
+   and ordinary rollback but did not model process interruption, inode
+   substitution, malformed scalar types, or excess source metadata.
+
+Additional root cause: the first correction treated an ordinary exception as
+representative of a process crash and treated a generated catalog as trusted as
+a whole rather than as an untrusted source for a minimal projection.
+
+Independent re-review then found that filesystem stale-lock takeover remained
+racy even after owner records and recovery claims were added.
+
+1. Why could two recoverers overlap? A stale claim was removed and recreated by
+   pathname rather than transferred through an atomic ownership primitive.
+2. Why could inode checks not close that race? They checked the lock directory,
+   while a competing process could replace the claim within the same directory.
+3. Why could ownerless cleanup delete active work? Recursive removal resolved
+   the lock pathname after inspection and could therefore target a replacement
+   generation.
+4. Why did additional lock files not solve ownership? Portable Node filesystem
+   APIs provide exclusive creation but no conditional unlink by observed inode.
+5. Why was the design changed instead of adding another claim protocol? Kernel
+   SQLite locking releases ownership on process death without stale path
+   deletion, while a separate committed database preserves recovery state.
+
+Additional root cause: a removable filesystem pathname was being used both as
+the ownership primitive and as crash-recovery data, although those concerns
+require different durability and lifecycle semantics.
 
 ## Mechanical Recurrence Guard
 
@@ -65,6 +110,16 @@ catalog evidence.
   become launch-ready.
 - General launcher fixtures refresh both benchmark and catalog times, preventing
   wall-clock expiry from obscuring the tested readiness condition.
+- Import tests require file-descriptor reads of regular non-symlink sources,
+  strict active-model identity types, and exact manifest digests for the
+  registry, policy, and current catalog.
+- Recovery tests interrupt the importer between catalog and manifest replacement
+  and require the committed journal to restore the old pair. A second recoverer
+  must fail while the first importer holds the SQLite write transaction, and the
+  persistent coordination directory is never treated as removable lock state.
+- Snapshot tests require provider names to come from tracked policy and variants
+  to come from tracked route references, preventing generated private metadata
+  from entering repository evidence.
 
 No benchmark, route, provider, budget, credential, or fallback policy change is
 authorized or made by this correction.

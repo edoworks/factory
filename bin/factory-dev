@@ -285,6 +285,25 @@ def usage():
 
 def refresh_catalog(root):
     before = inspect(root, root)
+    source = root / "development" / "opencode"
+    recoverable = {"policy digest mismatch: model-routing/catalog.json"}
+    unexpected = [error for error in before["errors"] if error not in recoverable]
+    if unexpected:
+        fail("catalog recovery requires otherwise valid repository policy integrity")
+    node = before["node_cli"]
+    if not node:
+        fail("catalog recovery requires the trusted Node.js runtime")
+    recovery = subprocess.run(
+        [node, str(source / "scripts" / "import-routing-catalog.mjs"), "--recover"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=False,
+        env=without_node_overrides(os.environ),
+    )
+    if recovery.returncode != 0:
+        fail(f"catalog recovery failed: {recovery.stderr.strip() or recovery.stdout.strip() or 'unknown error'}")
+    before = inspect(root, root)
     stale_catalog = "cost-router is not launch-ready: cost-router catalog is missing or stale;"
     if before["policy_status"] != "valid" or before["errors"]:
         fail("catalog import requires valid repository policy integrity")
@@ -293,7 +312,6 @@ def refresh_catalog(root):
     node = before["node_cli"]
     if not node:
         fail("catalog import requires the trusted Node.js runtime")
-    source = root / "development" / "opencode"
     result = subprocess.run(
         [node, str(source / "scripts" / "import-routing-catalog.mjs")],
         cwd=root,
