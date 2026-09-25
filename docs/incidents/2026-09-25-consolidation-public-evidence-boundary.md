@@ -93,3 +93,20 @@ integration.
 The retry used `git show --no-patch --format=%H HEAD` and pushed only the returned
 commit. Future pinned pushes must derive the full expected commit from Git rather
 than expand an abbreviated receipt manually.
+
+## Final Rendered Review
+
+After final-head hosted checks passed, the owner opened the exact GitHub pages
+under the recorded read-only authorization. Bounded Safari captures verified:
+
+- `docs/FactoryDevelopment-PRD.md` at `ae22cd1`, including the cutover-state
+  table and issue #77 class-versus-instance boundary;
+- the issue #77 classification section and unchanged later-state table in
+  `docs/single-factory-cutover.md` as rendered in PR #90;
+- issue #77's open state and exact final-head evidence comment; and
+- PR #90's non-closing body, exact final head, three successful checks, and
+  conflict-free merge state.
+
+No overlap, clipping, unreadable wrapping, private payload, or later-state
+overclaim was observed. An unrelated browser capture from the earlier blocked
+attempt was deleted and was never used as evidence.

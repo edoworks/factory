@@ -71,12 +71,12 @@ agent: explore
   instance inventory and preservation evidence. Exact implementation head
   `bebb2ef` passed 68 Python tests, 15 pinned Node tests, Factory doctor,
   first-parent diff checks, and independent review with no material findings.
-  PR #90 hosted run `36166973284` passed the Factory policy, iPhone, and iPad
-  jobs. The owner authorized opening the exact rendered page, but this loaded
-  session still denied that command; the available browser page was unrelated
-  and was not used as evidence. PR #90 remains open and unmerged, issue #77
-  remains open, and private preservation storage remains required and
-  unprovisioned.
+  PR #90 final hosted run `36167964354` passed the Factory policy, iPhone, and
+  iPad jobs. Bounded rendered review of the exact PRD, cutover record, PR, and
+  issue found no overlap, clipping, unreadable wrapping, private payload, or
+  later-state overclaim. PR #90 merged at `2a20e81`; issue #77 remains open
+  pending integration of this repository evidence, and private preservation
+  storage remains required and unprovisioned.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -90,12 +90,11 @@ agent: explore
    merge.
 4. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
-5. Launch a fresh policy-valid session, open PR #90's exact final documentation
-   revision under the recorded owner authorization, and complete bounded
-   rendered validation. Then require final hosted checks, merge, repository
-   integration evidence, issue #77 closeout, and an exact `CLOSED` receipt. Do
-   not create the preservation repository until its exact provisioner is
-   reviewed, merged, and launched from a fresh policy-valid session.
+5. Integrate the issue #77 repository evidence update through final hosted checks
+   and bounded rendered review, then comment and close issue #77 and require an
+   exact `CLOSED` receipt. Do not create the preservation repository until its
+   exact provisioner is reviewed, merged, and launched from a fresh policy-valid
+   session.
 6. Continue issue #81 inventory and
    preservation increment. Do not delete, archive, unarchive, publish, or clean
    any target under that evidence issue.
