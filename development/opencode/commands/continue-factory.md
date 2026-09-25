@@ -24,6 +24,13 @@ agent: explore
   7 Node tests, Factory doctor, diff checks, and independent review pass. A fresh
   session is required before using it. No child issue creation is permitted until
   the correction is pushed, merged, freshly launched, and verified.
+- Fresh restart validation then found that inherited `node` selected a broken
+  Homebrew runtime and still weakened interpreter provenance. Commit `b7d0cbd`
+  pins a runnable Node from trusted package roots, removes Node runtime overrides,
+  binds policy commands through `FACTORY_DEV_NODE`, and records the 5-Whys.
+  Fifty-two Python tests (including the three Node policy suites), Factory
+  doctor, diff checks, and independent trust rereview pass. A fresh session
+  containing this commit is required before push.
 - Issue #70 tracks product and release-workflow decoupling.
 - The Vorynce ownership chunk is implemented and verified locally at commit
   `f47cab8` on `feature/vorynce-prd-70` in the isolated worktree
@@ -39,9 +46,10 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Start a fresh Factory session, obtain the full current commit with
-   `git log -1 --format=%H`, and run the interactive pinned push transport for
-   branch `feature/issue-transport-trust-68` and that exact expected commit.
+3. Start a fresh Factory session containing commit `b7d0cbd`, obtain the full
+   current commit with `git log -1 --format=%H`, and run the interactive pinned
+   push transport for branch `feature/issue-transport-trust-68` and that exact
+   expected commit.
 4. Run hosted checks and bounded rendered PRD review before integration.
 5. Start a fresh `bin/factory-dev` session after that integration and use the repository-owned intent
    workflow to freeze, validate, create, and remotely read back only the
