@@ -3,6 +3,7 @@
 Date: 2026-09-20
 Status: OWNER APPROVED FOR REFERENCE APP 1
 Factory: Edoworks Factory v0.1.0-rc1
+Factory authority: `edoworks/factory`
 Tracking: https://github.com/edoworks/factory/issues/8
 
 ## Product Premise
@@ -158,6 +159,9 @@ All data is app-local. No raw data leaves the device.
 
 Simulated evidence must remain separate from physical-device and Apple
 processing evidence.
+
+The single-factory repository strategy does not alter or complete any product,
+physical-device, distribution, or Apple acceptance gate in this PRD.
 
 ## Success Measures
 

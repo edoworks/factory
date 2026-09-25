@@ -13,13 +13,13 @@ curl -fsSL "https://github.com/edoworks/factory/archive/refs/tags/v${FACTORY_VER
 mv "factory-${FACTORY_VERSION}" factory
 
 # Verify your toolchain
-./factory/bin/factory doctor
+./factory/bin/factory-doctor
 
 # Scaffold a new app
-./factory/bin/factory init my-app
+./factory/bin/factory-init my-app
 
 # Verify your app
-cd my-app && ../factory/bin/factory verify
+cd my-app && ../factory/bin/factory-verify
 ```
 
 ## What It Does
@@ -47,6 +47,21 @@ explicit human authorization.
 - Recovery knowledge boundary and failure classifier
 - CI policy gate (deterministic verification)
 
+## One Factory, Two Responsibilities
+
+`edoworks/factory` is the sole canonical factory. Its product runtime remains
+provider-independent; its separately versioned development environment contains
+the OpenCode policy and safeguards used to improve the factory. Predecessor
+repositories are preservation sources, not execution fallbacks.
+
+Run `bin/factory-dev doctor` before starting development, then use
+`bin/factory-dev [PRODUCT_PATH]` to print the receipt and start a fresh,
+local-config-isolated OpenCode process. The tracked source is under
+`development/opencode`; it does not install or modify global OpenCode config.
+See the [Factory Development PRD](docs/FactoryDevelopment-PRD.md).
+Product repositories remain separate and should pin a supported factory version
+and revision rather than copy or independently maintain factory policy.
+
 ## Requirements
 
 - macOS 26.x (current or previous major)
@@ -67,6 +82,8 @@ archive is an intentional retained artifact.
 - [CHARTER.md](CHARTER.md) — Founding contract, product laws, authority boundaries
 - [CONTRIBUTING.md](CONTRIBUTING.md) — How to contribute
 - [Mews & Woofs MVP PRD](docs/MewsAndWoofs-PRD.md) — Reference App 2 product contract
+- [Factory Development PRD](docs/FactoryDevelopment-PRD.md) — versioned development environment and cutover contract
+- [Single-factory cutover](docs/single-factory-cutover.md) — current state, evidence, and retirement gates
 - [SECURITY.md](SECURITY.md) — Security policy
 
 ## License

@@ -3,6 +3,7 @@
 Date: 2026-09-24
 Status: ACTIVE, IMPLEMENTATION BOUNDED BY CHILD ISSUES
 Parent: [Reference App 2](https://github.com/edoworks/factory/issues/13)
+Factory authority: `edoworks/factory`
 
 ## Product Promise
 
@@ -243,3 +244,7 @@ issue tracking, and ordinary reviewed integration in `edoworks/factory`.
 dedicated public repository, household-media fixtures, physical-device or
 real-pet sessions, Apple credentials, upload, submission, release, pricing, and
 public claims remain separately gated.
+
+The single-factory repository strategy does not qualify this product, complete
+issues 64-66, or authorize physical-device, household-media, Apple, release, or
+commercial claims.

@@ -1,0 +1,238 @@
+#!/usr/bin/env python3
+"""Verify and launch the repository-owned Factory OpenCode environment."""
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+
+
+CANONICAL_REPO = "edoworks/factory"
+PREDECESSOR = re.compile(r"(?:^|/)(?:sf0\.[0-9]+|actions-runner-sf0?8)(?:/|$)|edoworks/sf0\.[0-9]+", re.I)
+
+
+def fail(message):
+    raise RuntimeError(message)
+
+
+def repository_root():
+    script = Path(__file__).absolute()
+    probe = Path(script.anchor)
+    for part in script.parts[1:]:
+        probe /= part
+        if probe.is_symlink():
+            fail(f"factory-dev path contains a symlink: {probe}")
+    root = script.resolve().parents[1]
+    if PREDECESSOR.search(root.as_posix()):
+        fail("factory root resolves through a predecessor path")
+    return root
+
+
+def safe_directory(value, base):
+    raw = Path(value).expanduser()
+    candidate = raw if raw.is_absolute() else base / raw
+    probe = Path(candidate.anchor)
+    for part in candidate.parts[1:]:
+        probe /= part
+        if probe.is_symlink():
+            fail(f"target contains a symlink: {probe}")
+    target = candidate.resolve(strict=True)
+    if not target.is_dir():
+        fail("target is not a directory")
+    if PREDECESSOR.search(target.as_posix()):
+        fail("target resolves through a predecessor path")
+    return target
+
+
+def sha256(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def command_output(args, cwd):
+    result = subprocess.run(args, cwd=cwd, text=True, capture_output=True, check=False)
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def inspect(root, target):
+    source = root / "development" / "opencode"
+    errors = []
+    probe = root
+    for part in ("development", "opencode"):
+        probe /= part
+        if probe.is_symlink():
+            errors.append(f"policy source path contains a symlink: {probe.relative_to(root)}")
+    target_overrides = []
+    current = target
+    while True:
+        target_overrides.extend((current / "opencode.json", current / "opencode.jsonc", current / ".opencode"))
+        if current == current.parent:
+            break
+        current = current.parent
+    if any(path.exists() or path.is_symlink() for path in target_overrides):
+        errors.append("target or ancestor contains an OpenCode project override")
+    managed = Path("/Library/Application Support/opencode")
+    if managed.exists() or managed.is_symlink():
+        errors.append("managed OpenCode configuration can override repository policy")
+    try:
+        manifest = json.loads((source / "policy-manifest.json").read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        manifest = {"files": {}}
+        errors.append(f"policy manifest unavailable: {error}")
+
+    entries = []
+    listed = set(manifest.get("files", {}))
+    actual = set()
+    for path in source.rglob("*"):
+        relative = path.relative_to(source)
+        if relative.parts and relative.parts[0] == "node_modules":
+            continue
+        if path.is_symlink():
+            errors.append(f"policy source contains a symlink: {relative}")
+        elif path.is_file() and path.name != "policy-manifest.json":
+            actual.add(relative.as_posix())
+    unlisted = sorted(actual - listed)
+    absent = sorted(listed - actual)
+    if unlisted:
+        errors.append("unlisted policy files: " + ", ".join(unlisted))
+    if absent:
+        errors.append("manifest entries without regular files: " + ", ".join(absent))
+    for relative, expected in sorted(manifest.get("files", {}).items()):
+        path = source / relative
+        try:
+            resolved = path.resolve(strict=True)
+            if path.is_symlink() or source.resolve() not in resolved.parents:
+                fail("path escapes source root")
+            actual = sha256(path)
+            if actual != expected:
+                errors.append(f"policy digest mismatch: {relative}")
+        except (OSError, RuntimeError) as error:
+            actual = None
+            errors.append(f"required policy missing or unsafe: {relative}: {error}")
+        entries.append(f"{relative}\0{expected}\n")
+    if not entries:
+        errors.append("policy manifest contains no files")
+    policy_digest = hashlib.sha256("".join(entries).encode()).hexdigest()
+
+    predecessor_hits = []
+    for relative in manifest.get("files", {}):
+        path = source / relative
+        if path.is_file() and PREDECESSOR.search(path.read_text(errors="ignore")):
+            predecessor_hits.append(relative)
+    if predecessor_hits:
+        errors.append("predecessor references in active policy: " + ", ".join(predecessor_hits))
+
+    baseline_path = source / "active-baseline.json"
+    active_files = []
+    active_status = "unavailable"
+    try:
+        baseline = json.loads(baseline_path.read_text())
+        active_status = "match"
+        home = Path.home()
+        for relative, expected in sorted(baseline["files"].items()):
+            path = home / ".config" / "opencode" / relative
+            actual = sha256(path) if path.is_file() else None
+            if actual != expected:
+                active_status = "mismatch"
+            active_files.append({"path": relative, "status": "match" if actual == expected else "mismatch"})
+    except (OSError, KeyError, json.JSONDecodeError):
+        active_status = "unavailable"
+
+    revision = command_output(["git", "rev-parse", "HEAD"], root) or "UNKNOWN"
+    status = command_output(["git", "status", "--porcelain"], root)
+    opencode = os.environ.get("FACTORY_DEV_OPENCODE", "opencode")
+    opencode_version = command_output([opencode, "--version"], root) if shutil.which(opencode) or Path(opencode).is_file() else None
+    if not opencode_version:
+        errors.append("OpenCode is unavailable")
+
+    contradictions = []
+    node = shutil.which("node")
+    if errors:
+        contradictions.append("routing readiness skipped until policy integrity is valid")
+    elif not node:
+        contradictions.append("Node.js is unavailable for routing readiness validation")
+    else:
+        readiness = subprocess.run(
+            [node, str(source / "scripts" / "routing-ready.mjs")],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if readiness.returncode != 0:
+            detail = readiness.stderr.strip() or readiness.stdout.strip() or "unknown error"
+            contradictions.append(f"cost-router is not launch-ready: {detail}")
+
+    try:
+        factory_version = (root / "VERSION").read_text().strip()
+    except OSError:
+        factory_version = "UNKNOWN"
+        errors.append("factory VERSION is missing")
+
+    return {
+        "schema_version": 1,
+        "command": "factory-dev doctor",
+        "canonical_repo": CANONICAL_REPO,
+        "factory_version": factory_version,
+        "git_revision": revision,
+        "dirty": bool(status),
+        "opencode_version": opencode_version,
+        "policy_digest": policy_digest,
+        "policy_status": "valid" if not errors else "invalid",
+        "active_installation": {"status": active_status, "files": active_files},
+        "config_override": {"state": "local_sources_isolated", "path": str(source / "opencode.jsonc")},
+        "ignored_environment_overrides": sorted(name for name in os.environ if name.startswith("OPENCODE_")),
+        "target": str(target),
+        "routing_contradictions": contradictions,
+        "launch_ready": not errors and not contradictions,
+        "errors": errors,
+    }
+
+
+def usage():
+    return "usage: factory-dev [doctor [PRODUCT_PATH] | launch [PRODUCT_PATH] | PRODUCT_PATH]"
+
+
+def main(argv):
+    root = repository_root()
+    mode = "launch"
+    args = list(argv)
+    if args and args[0] in {"doctor", "launch"}:
+        mode = args.pop(0)
+    if len(args) > 1:
+        fail(usage())
+    target = safe_directory(args[0], Path.cwd()) if args else root
+    receipt = inspect(root, target)
+    print(json.dumps(receipt, sort_keys=True), flush=True)
+    if not receipt["launch_ready"]:
+        return 1
+    if mode == "doctor":
+        return 0
+
+    source = root / "development" / "opencode"
+    environment = os.environ.copy()
+    for name in tuple(environment):
+        if name.startswith("OPENCODE_"):
+            environment.pop(name)
+    environment["OPENCODE_DISABLE_AUTOUPDATE"] = "1"
+    environment["OPENCODE_DISABLE_MODELS_FETCH"] = "1"
+    environment["XDG_CONFIG_HOME"] = str(root / "development")
+    environment["FACTORY_DEV_OPENCODE_ROOT"] = str(source)
+    environment["FACTORY_CANONICAL_REPO"] = CANONICAL_REPO
+    opencode = environment.get("FACTORY_DEV_OPENCODE", "opencode")
+    os.execvpe(opencode, [opencode, str(target)], environment)
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main(sys.argv[1:]))
+    except (OSError, RuntimeError, ValueError) as error:
+        print(json.dumps({"schema_version": 1, "command": "factory-dev doctor", "canonical_repo": CANONICAL_REPO, "launch_ready": False, "errors": [str(error)]}, sort_keys=True))
+        raise SystemExit(1)
