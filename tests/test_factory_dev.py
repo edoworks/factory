@@ -45,9 +45,9 @@ class FactoryDevTests(unittest.TestCase):
         fake = temporary / "opencode"
         fake.write_text(
             "#!/bin/sh\n"
-            "if [ \"$1\" = --version ]; then if [ -n \"$NODE_OPTIONS\" ]; then exit 98; fi; echo 1.18.19; "
-            "else printf '{\"target\":\"%s\",\"config\":\"%s\",\"github\":\"%s\",\"factory_gh\":\"%s\",\"factory_node\":\"%s\",\"path\":\"%s\",\"gh_host\":\"%s\",\"gh_token\":\"%s\",\"github_token\":\"%s\",\"enterprise_token\":\"%s\",\"http_socket\":\"%s\",\"node_options\":\"%s\",\"custom\":\"%s\",\"directory\":\"%s\",\"content\":\"%s\",\"permission\":\"%s\",\"pure\":\"%s\",\"future\":\"%s\",\"autoupdate\":\"%s\",\"models_fetch\":\"%s\"}\\n' "
-            "\"$1\" \"$XDG_CONFIG_HOME\" \"$GH_CONFIG_DIR\" \"$FACTORY_DEV_GH\" \"$FACTORY_DEV_NODE\" \"$PATH\" \"$GH_HOST\" \"$GH_TOKEN\" \"$GITHUB_TOKEN\" \"$GH_ENTERPRISE_TOKEN\" \"$GH_HTTP_UNIX_SOCKET\" \"$NODE_OPTIONS\" \"$OPENCODE_CONFIG\" \"$OPENCODE_CONFIG_DIR\" \"$OPENCODE_CONFIG_CONTENT\" \"$OPENCODE_PERMISSION\" \"$OPENCODE_PURE\" \"$OPENCODE_FUTURE_FLAG\" \"$OPENCODE_DISABLE_AUTOUPDATE\" \"$OPENCODE_DISABLE_MODELS_FETCH\"; fi\n"
+            "if [ \"$1\" = --version ]; then if [ -n \"$NODE_OPTIONS\" ]; then exit 98; fi; if [ -n \"${OPENAI_API_KEY+x}\" ]; then exit 99; fi; echo 1.18.19; "
+            "else printf '{\"target\":\"%s\",\"config\":\"%s\",\"github\":\"%s\",\"factory_gh\":\"%s\",\"factory_node\":\"%s\",\"path\":\"%s\",\"gh_host\":\"%s\",\"gh_token\":\"%s\",\"github_token\":\"%s\",\"enterprise_token\":\"%s\",\"http_socket\":\"%s\",\"node_options\":\"%s\",\"openai_key_present\":\"%s\",\"custom\":\"%s\",\"directory\":\"%s\",\"content\":\"%s\",\"permission\":\"%s\",\"pure\":\"%s\",\"future\":\"%s\",\"autoupdate\":\"%s\",\"models_fetch\":\"%s\"}\\n' "
+            "\"$1\" \"$XDG_CONFIG_HOME\" \"$GH_CONFIG_DIR\" \"$FACTORY_DEV_GH\" \"$FACTORY_DEV_NODE\" \"$PATH\" \"$GH_HOST\" \"$GH_TOKEN\" \"$GITHUB_TOKEN\" \"$GH_ENTERPRISE_TOKEN\" \"$GH_HTTP_UNIX_SOCKET\" \"$NODE_OPTIONS\" \"${OPENAI_API_KEY+yes}\" \"$OPENCODE_CONFIG\" \"$OPENCODE_CONFIG_DIR\" \"$OPENCODE_CONFIG_CONTENT\" \"$OPENCODE_PERMISSION\" \"$OPENCODE_PURE\" \"$OPENCODE_FUTURE_FLAG\" \"$OPENCODE_DISABLE_AUTOUPDATE\" \"$OPENCODE_DISABLE_MODELS_FETCH\"; fi\n"
         )
         fake.chmod(fake.stat().st_mode | stat.S_IXUSR)
         return temporary, fake
@@ -333,6 +333,7 @@ class FactoryDevTests(unittest.TestCase):
                 "GH_ENTERPRISE_TOKEN": "untrusted-enterprise-token",
                 "GH_HTTP_UNIX_SOCKET": "/tmp/untrusted.sock",
                 "NODE_OPTIONS": "--require=/tmp/untrusted.js",
+                "OPENAI_API_KEY": "test-only-stale-key",
                 "PATH": f"{root}:{os.environ['PATH']}",
             },
         )
@@ -352,6 +353,9 @@ class FactoryDevTests(unittest.TestCase):
         self.assertEqual(launched["enterprise_token"], "")
         self.assertEqual(launched["http_socket"], "")
         self.assertEqual(launched["node_options"], "")
+        self.assertEqual(launched["openai_key_present"], "")
+        self.assertNotIn("test-only-stale-key", result.stdout)
+        self.assertNotIn("test-only-stale-key", result.stderr)
         self.assertEqual(launched["custom"], "")
         self.assertEqual(launched["directory"], "")
         self.assertEqual(launched["content"], "")

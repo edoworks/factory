@@ -53,6 +53,13 @@ It removes inherited GitHub host and token overrides, selects GitHub CLI only
 from a resolved `gh` package root, rejects a group/world-writable executable,
 pins every allowed GitHub command to that executable and operations to `github.com`,
 and requires the authenticated `hellofoculoom` identity before issue transport.
+The Factory OpenAI route is intended to use the user's OpenCode ChatGPT browser
+OAuth connection, not an inherited API key. Doctor's OpenCode version probe and
+launch remove `OPENAI_API_KEY` from their child environments without reading or
+modifying OpenCode's credential store. Doctor does not validate the stored
+credential type or make an OpenAI request. A stored API-key connection must be
+replaced interactively through OpenCode `/connect` if present. Neither a browser
+sign-in alone nor a launch-ready doctor receipt proves an OAuth-backed model call.
 There is no control install or synchronization command: doctor compares active
 user controls with the captured source baseline, while launch uses the
 checksum-bound repository source. The bounded exception is
