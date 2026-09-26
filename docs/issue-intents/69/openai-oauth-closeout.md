@@ -15,6 +15,8 @@ Date: 2026-09-25
 - The live request establishes the issue acceptance path for that launch. It does
   not establish which saved credential records exist, reveal credential internals,
   or guarantee every future provider request.
+- The exact closeout record and PR #107 files rendered at head `de54116` without
+  overlap, clipping, unreadable wrapping, or exposed credential material.
 
 Issue #101 may close only after this record integrates into canonical `main`.
 After authorized closure, the pinned closeout verifier must return `CLOSED`

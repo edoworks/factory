@@ -15,7 +15,9 @@ final head `61e0565` as `28edd62`, and hosted run `36219860937` passed all three
 jobs. A fresh launch from that canonical merge reported `launch_ready: true` and
 completed one owner-controlled OAuth-backed request without credential
 disclosure. Repository closeout integration and issue-state verification remain
-required; doctor alone is not the live-request evidence.
+required; doctor alone is not the live-request evidence. The exact closeout
+record and PR #107 files rendered at head `de54116` without readability or
+privacy defect, and temporary captures were deleted.
 
 The first external clean-worktree verification attempt failed closed because
 Python was launched from an unrelated checkout and the clean worktree's pinned
