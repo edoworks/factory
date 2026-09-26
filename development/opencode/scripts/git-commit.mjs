@@ -61,7 +61,9 @@ export function commitFeature(issue, args, environment = process.env) {
   const commonDir = spawnSync(git, ["rev-parse", "--git-common-dir"], { cwd, encoding: "utf8", env });
   if (gitDir.status !== 0 || commonDir.status !== 0 || !lstatSync(resolve(cwd, ".git"), { throwIfNoEntry: false })?.isFile() || gitDir.stdout.trim() === commonDir.stdout.trim()) fail("current checkout is not a linked worktree");
   const statePath = safeStatePath(`${environment.HOME || process.env.HOME}/Library/Application Support/EdoworksFactory/workspaces.json`);
-  if (lstatSync(statePath, { throwIfNoEntry: false })?.isSymbolicLink()) fail("workspace registry must not be a symlink");
+  const stateEntry = lstatSync(statePath, { throwIfNoEntry: false });
+  if (!stateEntry) fail("workspace registry is unavailable");
+  if (stateEntry.isSymbolicLink()) fail("workspace registry must not be a symlink");
   const lockPath = acquireLock(statePath);
   try {
     let state;
@@ -79,6 +81,10 @@ export function commitFeature(issue, args, environment = process.env) {
   if (head.status !== 0 || head.stdout.trim() !== record.head) fail("registered HEAD does not match the current worktree");
   const ancestry = spawnSync(git, ["merge-base", "--is-ancestor", record.base_revision, record.head], { cwd, env });
   if (ancestry.status !== 0) fail("workspace HEAD does not contain its registered base revision");
+  const metadata = spawnSync(git, ["show", "-s", "--format=%an%x00%ae%x00%cn%x00%ce", "HEAD"], { cwd, encoding: "utf8", env });
+  const commitIdentity = metadata.stdout.trimEnd().split("\0");
+  if (metadata.status !== 0 || commitIdentity.length !== 4 || commitIdentity.some((value) => !value || /[\r\n\0]/.test(value))) fail("registered HEAD commit identity is invalid");
+  [env.GIT_AUTHOR_NAME, env.GIT_AUTHOR_EMAIL, env.GIT_COMMITTER_NAME, env.GIT_COMMITTER_EMAIL] = commitIdentity;
   const issueResult = spawnSync(gh, ["issue", "view", String(issue), "--repo", "github.com/edoworks/factory", "--json", "state", "--jq", ".state"], { cwd, encoding: "utf8", env });
   if (issueResult.status !== 0 || issueResult.stdout.trim().toUpperCase() !== "OPEN") fail("issue is not open");
   const identity = spawnSync(gh, ["api", "--hostname", "github.com", "user", "--jq", ".login"], { cwd, encoding: "utf8", env });

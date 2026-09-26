@@ -19,6 +19,7 @@ case "$1" in
   symbolic-ref) printf 'feature/109-commit-guard\n';;
   rev-parse) if [ "$2" = --git-dir ]; then printf '.git/worktrees/x\n'; elif [ "$2" = --git-common-dir ]; then printf '.git\n'; else printf '${"a".repeat(40)}\n'; fi;;
   merge-base) exit 0;;
+  show) printf 'Factory Test\\0test@example.invalid\\0Factory Test\\0test@example.invalid\n';;
   worktree) printf 'worktree ${directory}\n';;
   config) if [ "$UNSAFE_CONFIG" = 1 ]; then printf 'url.bad.insteadOf https://github.com/\n'; exit 0; fi; if [ "$HOOKS_CONFIG" = 1 ]; then printf 'core.hookspath /tmp/none\n'; exit 0; fi; exit 1;;
   diff) if [ "$3" = --quiet ]; then exit 1; fi; exit 0;;

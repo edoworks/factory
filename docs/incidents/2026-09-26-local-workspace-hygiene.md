@@ -53,7 +53,12 @@ The first isolated local suites correctly rejected non-canonical macOS `/var`
 fixture paths and found an unescaped shell expansion in a JavaScript template
 fixture. Tests now canonicalize temporary roots before exercising symlink
 rejection, and the tracked Node suite parses and directly invokes both guarded
-transports. The remaining missing-package result is an environment prerequisite:
+transports. Hosted verification then found that missing-registry validation ran
+after lock acquisition; the transport now proves registry presence before any
+mutation lock is created, preserving the intended fail-closed diagnostic. The
+same correction validates and carries forward registered commit identity so
+suppressed global Git configuration cannot make the guarded commit unusable. The
+remaining missing-package result was an environment prerequisite:
 the pinned `npm ci --prefix development/opencode` step must run before the Node
 suite, as already enforced by hosted checks.
 
