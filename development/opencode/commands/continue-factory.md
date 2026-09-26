@@ -6,6 +6,12 @@ agent: explore
 ## Current State
 
 - `edoworks/factory` is the sole canonical factory.
+- Issue #109 is the P0 local workspace hygiene correction. The primary checkout
+  at `/Users/hello/factory` is quarantined: local `main` points to open PR #98
+  head `d4d1068`, canonical GitHub `main` is `3762758`, and mixed uncommitted
+  issue #101/#102/#103/#108 material remains classified but uncontained. The
+  owner bootstrapped clean linked worktree `/Users/hello/factory-issue109` at
+  canonical `main`; do not reset, clean, commit, or add files in the quarantine.
 - Issue #69 and PR #71 completed the repository-owned OpenCode development
   environment and `CANONICAL_FOR_NEW_WORK` state.
 - Issue #68 is the active consolidation map. PR #74 merged interactive Factory
@@ -142,26 +148,35 @@ agent: explore
 
 ## Restart
 
-1. Run `bin/factory-dev doctor` and read its JSON receipt.
-2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
+1. Complete issue #109 only from its isolated linked worktree: verify workspace
+   registration, full tests, independent trust review, rendered PRD/issue/
+   incident/continuation review, hosted checks, merge, and closeout.
+2. After a fresh policy-valid launch, reconstruct issue #108 from canonical
+   `main` in its own registered worktree. Do not copy the mixed policy manifest;
+   regenerate only exact isolated hashes.
+3. Run `bin/factory-dev doctor` and read its JSON receipt.
+4. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Integrate issue #101's post-merge OAuth acceptance record, close issue #101
+5. Preserve issue #103 WIP in its own registered worktree, verify merged issue
+   #101/#102 content against canonical main, and retain PR #98 at its exact remote
+   head before preparing any quarantine cleanup manifest. No cleanup is implied.
+6. Integrate issue #101's post-merge OAuth acceptance record, close issue #101
    through the repository-owned workflow, require the pinned verifier to return
    `CLOSED`, and send its completion notification.
-4. From a policy-valid fresh Factory environment, verify doctor and
+7. From a policy-valid fresh Factory environment, verify doctor and
    autonomously open one approved Factory page in signed-out Chrome Guest. Record
    the post-integration receipt before claiming issue #102 completion or sending
    its notification.
-5. Keep issue #103 as the umbrella authenticated-browser contract. Freeze and
+8. Keep issue #103 as the umbrella authenticated-browser contract. Freeze and
    create separate artifact, runtime/profile, broker/minimization, capture, and
    activation child issues before implementation. No partial custom tool may be
    discoverable and no dedicated profile or persistent runtime may be created
    without its separate authority gate.
-6. Continue issue #70 only with an explicitly active product or release workflow
+9. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
-7. Continue issue #78's portfolio index under the issue #77 privacy boundary,
+10. Continue issue #78's portfolio index under the issue #77 privacy boundary,
    then continue issue #79's product-repository contract using that index.
-8. Keep issue #81 preservation and deletion-readiness work blocked on issues #78
+11. Keep issue #81 preservation and deletion-readiness work blocked on issues #78
    and #79. Do not delete, archive, unarchive, publish, or clean any target. Do
    not create the preservation repository until its exact provisioner is
    reviewed, merged, and launched from a fresh policy-valid session.

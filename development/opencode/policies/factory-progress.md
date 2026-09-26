@@ -7,6 +7,9 @@ chunks and keep `edoworks/factory` issue state and repository evidence current.
 - Use one issue per work chunk. Do not claim completion until implementation,
   verification, review, integration, and issue closeout are confirmed.
 - Preserve unrelated worktree changes and never bypass repository protections.
+- Treat the primary Factory checkout as read-only. Write-capable Factory work,
+  commits, and pushes require one registered linked worktree bound to one open
+  issue and a matching `feature/ISSUE-SLUG` branch.
 - Record an evidence-based 5-Whys and a mechanical recurrence guard for a
   material defect, failed verification, trust gap, or recurring workflow error.
 - Observe CI through bounded snapshots; a queued self-hosted job without steps

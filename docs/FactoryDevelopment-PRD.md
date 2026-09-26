@@ -43,6 +43,9 @@ The supported development entry path is `bin/factory-dev`. It must:
    state before launching OpenCode.
 5. Preserve the current working Build route and paid-fallback policy unless an
    independently verified change is explicitly authorized.
+6. Keep the primary Factory checkout read-only and admit write-capable launch
+   only from one registered linked worktree bound to one open Factory issue and
+   a matching `feature/ISSUE-SLUG` branch.
 
 The versioned source is `development/opencode`. `bin/factory-dev` sets a
 dedicated `XDG_CONFIG_HOME` for the fresh process, leaving credentials and data
@@ -53,6 +56,28 @@ It removes inherited GitHub host and token overrides, selects GitHub CLI only
 from a resolved `gh` package root, rejects a group/world-writable executable,
 pins every allowed GitHub command to that executable and operations to `github.com`,
 and requires the authenticated `hellofoculoom` identity before issue transport.
+`bin/factory-dev workspace create ISSUE SLUG` is the sole supported workspace
+bootstrap after integration. It runs only from the primary checkout, verifies
+the owner identity and open issue, rejects transport-affecting Git configuration,
+fetches exact canonical `main` through pinned HTTPS credentials, creates a
+linked `feature/ISSUE-SLUG` worktree under the Factory-owned workspace root, and
+records issue, resolved path, branch, base revision, and head in a symlink-safe
+local registry. `workspace register` exists only for an already clean linked
+bootstrap such as issue #109; duplicate issue, path, or branch records fail.
+Registration also requires the authorized GitHub identity, an exact clean
+worktree, safe local Git configuration, a fresh canonical-main fetch, and
+canonical-base ancestry.
+Registry mutations use one fail-closed cross-process lock and atomic file
+replacement so concurrent issue workspaces cannot overwrite each other's heads;
+lock ownership is recorded by process identity, but automatic stale-lock removal
+is prohibited because it cannot preserve mutual exclusion. A stale lock is an
+explicit availability blocker requiring separate owner-authorized recovery.
+Create and retire roll back their exact new worktree mutation if registry
+persistence fails, and surface rollback failure explicitly.
+`workspace audit` is read-only. `workspace retire` requires a closed issue, an
+exact clean registered worktree, freshly fetched canonical `main`, and proof
+that the recorded branch is merged. It removes only that linked worktree and
+does not delete the branch.
 The Factory OpenAI route is intended to use the user's OpenCode ChatGPT browser
 OAuth connection, not an inherited API key. Doctor's OpenCode version probe and
 launch remove `OPENAI_API_KEY` from their child environments without reading or
@@ -120,8 +145,21 @@ path must be exercised from a fresh Factory launch after integration.
 The launched process receives a fixed system/package-manager `PATH`, so a product
 target cannot shadow allowed interpreters or tools. PR URL selectors and trailing
 issue/PR repository overrides are denied. Git push has no shell allow exception.
-An interactive repository-owned transport accepts one lowercase `feature/...`
-branch and one full expected commit, verifies both `HEAD` and the GitHub identity,
+Raw commit, push, fetch, branch, switch, and worktree commands are denied. An
+interactive repository-owned commit transport accepts only an issue number and
+one `-m` message, requires staged changes in the matching registered linked
+worktree, verifies the issue remains open, preserves hooks, and atomically
+advances the registry's exact head. It suppresses ambient Git configuration and
+validates and carries forward the registered HEAD's author and committer
+metadata, so identity remains deterministic without trusting global config. The
+commit is reset softly to the prior registered head, preserving staged changes,
+if the registry cannot record the new head. Workspace creation preflights branch
+absence and rolls back an exact branch or linked worktree created by a failed
+bootstrap before returning an error. The
+interactive push transport accepts one
+`feature/ISSUE-SLUG` branch and one full expected commit, requires the current
+local branch and registry to match, requires a clean post-commit worktree and an
+open issue, and verifies both `HEAD` and the GitHub identity,
 pins Git and GitHub CLI, suppresses system/global configuration, rejects local
 transport-affecting configuration, clears inherited Git and proxy overrides,
 fixes the canonical HTTPS remote and no-follow-tags refspec to the expected
@@ -129,7 +167,9 @@ commit, and runs from the Factory root so repository hooks remain active.
 
 Doctor emits one JSON object containing `factory_version`, `git_revision`,
 `dirty`, `opencode_version`, `policy_digest`, `active_installation`,
-`config_override`, `canonical_repo`, target, and readiness fields. Missing,
+`config_override`, `canonical_repo`, target, workspace admission, and separate
+doctor/write/launch readiness fields. The primary checkout can remain
+doctor-ready while write and launch readiness fail closed. Missing,
 changed, escaping, symlinked, predecessor-bound, or project-config-overridden
 policy/targets fail closed.
 
