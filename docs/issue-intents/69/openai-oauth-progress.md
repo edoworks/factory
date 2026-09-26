@@ -10,9 +10,12 @@ passed from the isolated root. Factory doctor reports valid policy, matching
 active installation, no routing contradiction, and `launch_ready: true`. Exact
 rendered review of issue #101, PR #106, the exact-revision PRD paragraph, and
 both incident Five-Whys sections passed at implementation head `2a914b9` without
-clipping, unreadable wrapping, or exposed credential material. Hosted checks,
-integration, and a fresh user-controlled OAuth-backed request remain required.
-Do not close issue #101 from doctor evidence alone.
+clipping, unreadable wrapping, or exposed credential material. PR #106 merged
+final head `61e0565` as `28edd62`, and hosted run `36219860937` passed all three
+jobs. A fresh launch from that canonical merge reported `launch_ready: true` and
+completed one owner-controlled OAuth-backed request without credential
+disclosure. Repository closeout integration and issue-state verification remain
+required; doctor alone is not the live-request evidence.
 
 The first external clean-worktree verification attempt failed closed because
 Python was launched from an unrelated checkout and the clean worktree's pinned
