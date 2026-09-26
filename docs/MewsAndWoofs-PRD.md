@@ -245,6 +245,12 @@ dedicated public repository, household-media fixtures, physical-device or
 real-pet sessions, Apple credentials, upload, submission, release, pricing, and
 public claims remain separately gated.
 
+The former issue #14 Apple-submission contract is closed as premature, not
+completed. Issue #66 remains the current qualification gate. Any future Apple
+release requires a new owner-authorized lifecycle decision and release issue
+bound to the qualified product revision; closing #14 grants no Apple or release
+authority.
+
 The single-factory repository strategy does not qualify this product, complete
 issues 64-66, or authorize physical-device, household-media, Apple, release, or
 commercial claims.

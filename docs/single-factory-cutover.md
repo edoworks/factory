@@ -30,6 +30,11 @@ Status: `CANONICAL_FOR_NEW_WORK` verified; later states not claimed
 - No predecessor remote repository, local checkout, service definition, runner
   registration, backup, release, visibility, or credential was deleted or
   changed beyond the reversible local service disablement.
+- Issue #15's Apple-dependent freeze order is superseded by issue #68's
+  single-factory strategy, and issue #17's archive-only contract is superseded
+  by issue #81's evidence-bound deletion-readiness path. Neither older issue is
+  completed, and closing them changes no preservation, deletion, or cleanup
+  state.
 
 ### Service Evidence
 

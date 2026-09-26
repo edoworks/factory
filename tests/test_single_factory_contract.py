@@ -74,6 +74,41 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertIn("does not alter or complete", focusgate)
         self.assertIn("does not qualify this product", mews)
 
+    def test_superseded_issue_contracts_have_current_successors(self):
+        prd = (ROOT / "docs" / "FactoryDevelopment-PRD.md").read_text()
+        mews = (ROOT / "docs" / "MewsAndWoofs-PRD.md").read_text()
+        cutover = (ROOT / "docs" / "single-factory-cutover.md").read_text()
+        continuation = (
+            ROOT / "development" / "opencode" / "commands" / "continue-factory.md"
+        ).read_text()
+        hygiene = (
+            ROOT / "docs" / "incidents" / "2026-09-26-local-workspace-hygiene.md"
+        ).read_text()
+        audit = (ROOT / "docs" / "open-issue-reconciliation-2026-09-26.md").read_text()
+        normalized_prd = " ".join(prd.split())
+        normalized_mews = " ".join(mews.split())
+        normalized_cutover = " ".join(cutover.split())
+        normalized_continuation = " ".join(continuation.split())
+        normalized_hygiene = " ".join(hygiene.split())
+        restart = continuation.split("## Restart", 1)[1].split("## Boundaries", 1)[0]
+
+        self.assertIn("Issue #15's Apple-dependent predecessor freeze sequence", normalized_prd)
+        self.assertIn("issue #17's archive-only retirement sequence", normalized_prd)
+        self.assertIn("issue #81 owns exact-target private", normalized_prd)
+        self.assertIn("former issue #14 Apple-submission contract is closed as premature", normalized_mews)
+        self.assertIn("Issue #66 remains the current qualification gate", normalized_mews)
+        self.assertIn("Neither older issue is", normalized_cutover)
+        self.assertIn("issue #103 is an unimplemented obsolete diagnostic", normalized_continuation)
+        self.assertIn("remote closures remain pending integration", normalized_continuation)
+        self.assertNotIn("Keep issue #103 as the umbrella", continuation)
+        self.assertIn("After issue #116 merges, classify issue #103's exact", restart)
+        self.assertIn("Until then every #103 file remains preserved", restart)
+        self.assertIn("Every #103 path remains preserved until a later cleanup manifest records its exact hash", normalized_hygiene)
+        self.assertIn("receives owner approval", normalized_hygiene)
+        for issue in ("#15", "#17", "#103", "#14"):
+            self.assertIn(f"| {issue} |", audit)
+        self.assertIn("No authenticated browser was accepted or installed", audit)
+
     def test_development_policy_is_fail_closed_for_shell_and_plugins(self):
         config = json.loads(
             (ROOT / "development" / "opencode" / "opencode.jsonc").read_text()

@@ -10,20 +10,19 @@ agent: explore
   The primary checkout at `/Users/hello/factory` remains quarantined on local
   `main` at PR #98 head `d4d1068` with mixed preserved WIP; do not reset, clean,
   commit, or add files there.
-- Issue #114 is the P0 successor-workspace bootstrap correction. The owner
-  authorized one exact invocation of merged #109 code after the loaded pre-#109
-  permission map denied it. Registered workspace
-  `feature/114-workspace-bootstrap` starts at canonical `b588844`, and the
-  primary path set remains unchanged. The permanent correction accepts no
-  repository path: a clean linked launcher must share verified Git metadata with
-  the discovered primary and have its exact HEAD contained in freshly fetched
-  canonical `origin/main` before creating a new issue workspace. PR #115 head
-  `a5dcb77` passed local verification, independent trust review with no remaining
-  material findings, rendered issue and PR review, and all three hosted checks;
-  merge, fresh successor creation, and closeout remain.
+- Issue #114 and PR #115 merged the successor-workspace bootstrap correction as
+  `0eb7484`. Fresh registered workspaces for issues #113 and #116 prove that a
+  clean merged linked launcher can create successors without changing the
+  quarantined primary path set. Issue #114 is closed.
 - Issue #113 owns correction of the first Rubberduck report. Independent review
-  found no candidate qualifies for `INVESTIGATE NOW`; it remains blocked until
-  issue #114 integrates and a fresh registered #113 workspace is created.
+  found no candidate qualifies for `INVESTIGATE NOW`; its registered workspace
+  starts from canonical `0eb7484` and retains only its frozen intent so far.
+- Issue #116 records approved dispositions for the complete open queue. Issues
+  #15 and #17 are superseded by #68/#81, issue #103 is an unimplemented obsolete
+  diagnostic path after the PR #98 replacement decision, and issue #14 is
+  premature while Mews & Woofs remains an internal reference fixture. Their
+  remote closures remain pending integration and advance no deletion, browser,
+  product, Apple, or release state.
 - Issue #69 and PR #71 completed the repository-owned OpenCode development
   environment and `CANONICAL_FOR_NEW_WORK` state.
 - Issue #68 is the active consolidation map. PR #74 merged interactive Factory
@@ -160,11 +159,10 @@ agent: explore
 
 ## Restart
 
-1. Merge green PR #115 without bypass, then verify issue #114 closeout and create
-   a fresh registered issue #113 workspace from the merged launcher. Capture the
-   successor creation and audit receipts before completion notification. Do not
-   use the one-time bootstrap path again.
-2. Create a fresh registered issue #113 workspace from canonical `main`, then
+1. Complete issue #116 local, independent, rendered, and hosted verification;
+   merge without bypass, then comment, close, and verify exactly issues #15,
+   #17, #103, and #14 as non-completion dispositions.
+2. Continue in the registered issue #113 workspace from canonical `main`, then
    reconstruct and correct the preserved Rubberduck report, add its deterministic
    gate/ledger validator, update the PRD, and complete local, hosted, independent,
    and rendered verification. Do not copy mixed policy-manifest hashes.
@@ -173,9 +171,11 @@ agent: explore
 4. Run `bin/factory-dev doctor` and read its JSON receipt.
 5. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-6. Preserve issue #103 WIP in its own registered worktree, verify merged issue
-   #101/#102 content against canonical main, and retain PR #98 at its exact remote
-   head before preparing any quarantine cleanup manifest. No cleanup is implied.
+6. After issue #116 merges, classify issue #103's exact design-only
+   primary-checkout WIP hashes as intentionally superseded in the cleanup
+   manifest, verify merged issue #101/#102 content against canonical main, and
+   retain PR #98 at its exact remote head. Until then every #103 file remains
+   preserved; no cleanup is implied.
 7. Integrate issue #101's post-merge OAuth acceptance record, close issue #101
    through the repository-owned workflow, require the pinned verifier to return
    `CLOSED`, and send its completion notification.
@@ -183,11 +183,9 @@ agent: explore
    autonomously open one approved Factory page in signed-out Chrome Guest. Record
    the post-integration receipt before claiming issue #102 completion or sending
    its notification.
-9. Keep issue #103 as the umbrella authenticated-browser contract. Freeze and
-   create separate artifact, runtime/profile, broker/minimization, capture, and
-   activation child issues before implementation. No partial custom tool may be
-   discoverable and no dedicated profile or persistent runtime may be created
-   without its separate authority gate.
+9. Do not install or reconstruct issue #103's authenticated-browser design. A
+   future authenticated review need requires a new issue and fresh dependency,
+   profile, minimization, capture, and activation authority.
 10. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
 11. Continue issue #78's portfolio index under the issue #77 privacy boundary,

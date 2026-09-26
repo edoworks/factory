@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Reconcile superseded Factory issue contracts",
+  "body_file": "superseded-issues-body.md",
+  "body_sha256": "d10ef172647906bcce566deb4998885961b796157cf42f0e0483a88d9df3550e",
+  "classification": "documentation",
+  "labels": ["documentation", "factory", "gate"],
+  "priority": "P0",
+  "dependencies": ["Issues #68 and #81 predecessor strategy", "Issue #66 Mews & Woofs qualification", "PR #98 replacement plan"],
+  "authority_constraints": ["Close only issues #15, #17, #103, and #14", "No predecessor deletion or cleanup", "No browser installation or Apple action"],
+  "source_provenance": ["Complete 2026-09-26 open-issue review", "Current Factory PRDs and cutover record", "Owner-selected aggressive evidence-based threshold"],
+  "duplicate_review": ["Issue #68 owns consolidation", "Issue #81 owns deletion readiness", "Issue #66 owns product qualification", "Issue #102 owns public rendered review"],
+  "reprioritization_review": ["P0 because stale issue contracts block accurate integration and cleanup state"]
+}

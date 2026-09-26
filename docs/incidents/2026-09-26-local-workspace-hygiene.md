@@ -72,3 +72,11 @@ No current mixed-checkout file is deleted or rewritten by this correction. PR
 #98's exact remote head, merged issue #101/#102 state, issue #103 WIP, and issue
 #108 WIP must be independently classified and contained. Repairing local `main`
 requires a later exact cleanup manifest and owner approval after that evidence.
+
+Issue #116 classifies issue #103's implementation direction as obsolete, but
+that issue disposition does not classify or delete its primary-checkout files.
+Every #103 path remains preserved until a later cleanup manifest records its
+exact hash, verifies that merged issue #101/#102 content is unaffected, binds
+the supersession to merged issue #116 evidence, and receives owner approval.
+Historical issue intents remain immutable source evidence, not active cleanup
+instructions.

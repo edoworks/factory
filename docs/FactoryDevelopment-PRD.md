@@ -224,6 +224,13 @@ separate private instance inventory, preservation destination, payload integrity
 and restore evidence, so this classification alone cannot establish
 `PRESERVATION_VERIFIED` or deletion readiness.
 
+Issue #15's Apple-dependent predecessor freeze sequence and issue #17's
+archive-only retirement sequence are superseded, not completed. Issue #68 owns
+the single-factory consolidation map, while issue #81 owns exact-target private
+inventory, preservation, restore, dependency, and deletion-readiness evidence.
+Closing the older contracts advances none of the cutover states above and
+authorizes no archive, deletion, or local cleanup.
+
 ## Required Controls
 
 - Routine work uses the lowest-cost qualified route; premium escalation is
@@ -232,6 +239,8 @@ and restore evidence, so this classification alone cannot establish
   unapproved paid fallback or retry loop.
 - Issue state, implementation evidence, and release state are independently
   verified.
+- Superseded issue closure requires an explicit successor, a non-completion
+  statement, matching PRD and continuation state, and remote closeout evidence.
 - Product-repository work requires a current lifecycle admission record. A
   paused product is ineligible for implementation, unarchive, push, merge, or
   release until a separate owner reactivation decision is recorded. Current
