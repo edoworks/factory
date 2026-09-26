@@ -23,6 +23,21 @@ agent: explore
   premature while Mews & Woofs remains an internal reference fixture. Their
   remote closures remain pending integration and advance no deletion, browser,
   product, Apple, or release state.
+- PR #117 remains open at remote head `cf76348`. Hosted run `36270459972` failed
+  the Factory policy job because its new prose assertion compared raw wrapped
+  Markdown, and its iPhone job separately failed during target-app launch without
+  diagnostic detail; the iPad job passed. The registered issue workspace
+  correction normalizes only the bounded prose assertion and records both failed
+  verifications. A primary-policy session initially used raw commits, so the
+  branch advanced without the atomic registry update and the hash-bound
+  continuation changed without its manifest digest. The launcher correctly
+  failed closed. The owner-authorized guarded recommit combines the preserved
+  correction, restores manifest integrity, and atomically advances the workspace
+  registry in its resulting revision. Exact-head local gates, guarded push, all
+  three hosted checks, and final rendered review remain required. Confirm PR #117
+  does not auto-close issue #116; after merge, close and verify #15, #17, #103,
+  and #14 first, then close and verify #116 under the owner's 2026-09-26
+  instruction.
 - Issue #69 and PR #71 completed the repository-owned OpenCode development
   environment and `CANONICAL_FOR_NEW_WORK` state.
 - Issue #68 is the active consolidation map. PR #74 merged interactive Factory
@@ -159,9 +174,11 @@ agent: explore
 
 ## Restart
 
-1. Complete issue #116 local, independent, rendered, and hosted verification;
-   merge without bypass, then comment, close, and verify exactly issues #15,
-   #17, #103, and #14 as non-completion dispositions.
+1. Run issue #116's exact-head local and independent review, push through the
+   repository-owned guard, and require all three hosted checks plus final
+   rendered review. Confirm PR #117 has no automatic issue #116 closure, merge
+   without bypass, then comment, close, and verify #15, #17, #103, and #14 as
+   non-completion dispositions before closing and verifying issue #116 last.
 2. Continue in the registered issue #113 workspace from canonical `main`, then
    reconstruct and correct the preserved Rubberduck report, add its deterministic
    gate/ledger validator, update the PRD, and complete local, hosted, independent,

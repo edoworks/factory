@@ -91,6 +91,7 @@ class SingleFactoryContractTests(unittest.TestCase):
         normalized_continuation = " ".join(continuation.split())
         normalized_hygiene = " ".join(hygiene.split())
         restart = continuation.split("## Restart", 1)[1].split("## Boundaries", 1)[0]
+        normalized_restart = " ".join(restart.split())
 
         self.assertIn("Issue #15's Apple-dependent predecessor freeze sequence", normalized_prd)
         self.assertIn("issue #17's archive-only retirement sequence", normalized_prd)
@@ -101,8 +102,8 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertIn("issue #103 is an unimplemented obsolete diagnostic", normalized_continuation)
         self.assertIn("remote closures remain pending integration", normalized_continuation)
         self.assertNotIn("Keep issue #103 as the umbrella", continuation)
-        self.assertIn("After issue #116 merges, classify issue #103's exact", restart)
-        self.assertIn("Until then every #103 file remains preserved", restart)
+        self.assertIn("After issue #116 merges, classify issue #103's exact", normalized_restart)
+        self.assertIn("Until then every #103 file remains preserved", normalized_restart)
         self.assertIn("Every #103 path remains preserved until a later cleanup manifest records its exact hash", normalized_hygiene)
         self.assertIn("receives owner approval", normalized_hygiene)
         for issue in ("#15", "#17", "#103", "#14"):
