@@ -87,6 +87,21 @@ agent: explore
   Remote readback reports issue #93 closed, and the pinned closeout verifier
   returned exactly `CLOSED`. Storage tolerances and global-state ownership remain
   unchanged.
+- Issue #102 tracks self-service rendered Factory review. Its frozen intent and
+  remote readback match. Independent review rejected the first Bash-carried URL
+  design because quote-breaking expansion preceded validation. The corrected
+  structured OpenCode tool accepts one approved public `edoworks/factory` URL
+  field and launches Safari through fixed argv without a shell. It does not
+  automate page interaction, downloads, credential inspection, or GitHub
+  mutation; it opens a new private Safari instance, and captures remain
+  temporary and require privacy review. A second review found that OpenCode 1.18.19 would
+  not discover the first `.mjs` tool and that duplicate tool-shaped exports would
+  widen its name surface; the correction uses `.js` and one default tool export.
+  The corrected source passed 81 Python tests and 20 pinned Node tests,
+  `git diff --check`, launch-ready Factory doctor, and final independent review
+  with no material finding before isolation. Fresh isolated verification,
+  fresh-session navigation, screenshots, hosted checks, integration, and
+  closeout remain pending; no final rendered-review claim is made yet.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -95,9 +110,9 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. If an authorized exact-page open becomes available, complete and record the
-   bounded rendered review of PR #76's final PRD without claiming it preceded
-   merge.
+3. Complete issue #102's isolated opener guard, local tests, independent review,
+   hosted checks, and fresh-session autonomous Safari captures. Then complete and
+   record PR #76's bounded final-PRD review without claiming it preceded merge.
 4. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
 5. Continue issue #78's portfolio index under the issue #77 privacy boundary,

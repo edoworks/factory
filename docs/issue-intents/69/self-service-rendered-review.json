@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Enable self-service rendered Factory review",
+  "body_file": "self-service-rendered-review-body.md",
+  "body_sha256": "2bac554ddf541c21400381f89727d023ce032df80a88f3b6c3ac49325b87af74",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["Factory development environment issue #69", "Checksum-bound Factory OpenCode policy", "Installed Safari and fixed screenshot utility"],
+  "authority_constraints": ["Factory GitHub public review pages only", "No authentication or browser mutation", "No GitHub writes", "Temporary screenshots only"],
+  "source_provenance": ["development/opencode/opencode.jsonc at d4d1068", "tests/test_single_factory_contract.py at d4d1068", "OpenCode permission documentation", "Owner direction on 2026-09-25"],
+  "duplicate_review": ["Issue #101 covers OpenAI credential isolation", "Issue #87 covers issue closeout verification"],
+  "reprioritization_review": ["Rendered review is required for Factory integration and deletion-readiness evidence", "Manual link opening is an avoidable owner dependency"]
+}
