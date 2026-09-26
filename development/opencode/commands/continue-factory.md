@@ -93,15 +93,23 @@ agent: explore
   structured OpenCode tool accepts one approved public `edoworks/factory` URL
   field and launches Chrome Guest through fixed argv without a shell. It does not
   automate page interaction, downloads, credential inspection, or GitHub
-  mutation; it opens a new Guest instance, and captures remain
-  temporary and require privacy review. A second review found that OpenCode 1.18.19 would
+  mutation; it requests a new Guest instance, and captures remain temporary and
+  require privacy review. A second review found that OpenCode 1.18.19 would
   not discover the first `.mjs` tool and that duplicate tool-shaped exports would
   widen its name surface; the correction uses `.js` and one default tool export.
   The corrected source passed 81 Python tests and 20 pinned Node tests,
   `git diff --check`, launch-ready Factory doctor, and final independent review
-  with no material finding before isolation. Fresh isolated verification,
-  fresh-session navigation, screenshots, hosted checks, integration, and
-  closeout remain pending; no final rendered-review claim is made yet.
+  with no implementation finding before isolation. Isolated review found that a
+  later Safari-only issue comment conflicted with the Chrome Guest privacy
+  correction. On 2026-09-25 the owner explicitly authorized Chrome Guest,
+  superseding only that Safari restriction; canonical issue comment
+  `5842612613` records the reconciliation. The launcher receipt now reports
+  requested rather than observed Guest mode. Fresh autonomous navigation opened
+  issue #102, PR #76, and PR #76's exact PRD revision without Bash or approval.
+  Temporary captures confirmed Guest mode, signed-out rendering, and no private
+  account chrome. The bounded post-merge review of PR #76's exact 159-line PRD
+  found no overlap, clipping, unreadable wrapping, or later-state overclaim.
+  Hosted checks, integration, and closeout remain pending.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -110,9 +118,9 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Complete issue #102's isolated opener guard, local tests, independent review,
-   hosted checks, and fresh-session autonomous Chrome Guest captures. Then complete and
-   record PR #76's bounded final-PRD review without claiming it preceded merge.
+3. Commit issue #102's verified correction, push it through the guarded transport,
+   pass hosted checks, integrate it, then verify a post-integration fresh launch
+   before closeout.
 4. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
 5. Continue issue #78's portfolio index under the issue #77 privacy boundary,

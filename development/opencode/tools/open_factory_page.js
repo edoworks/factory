@@ -44,7 +44,7 @@ export function openFactoryPage(raw, launch = spawnSync) {
   const args = ["-n", "-b", CHROME_BUNDLE, "--args", "--guest", url];
   const result = launch(OPEN, args, { encoding: "utf8", shell: false, timeout: 10000 });
   if (result.error || result.status !== 0) fail("Chrome Guest failed to open the Factory page");
-  return { executable: OPEN, args };
+  return { launchAccepted: true, requestedBrowser: CHROME_BUNDLE, requestedMode: "guest", url };
 }
 
 const factoryPageTool = tool({
@@ -53,8 +53,7 @@ const factoryPageTool = tool({
     url: tool.schema.string().describe("Exact approved Factory GitHub issue, PR, commit, action, or revision-bound document URL"),
   },
   async execute(args) {
-    const receipt = openFactoryPage(args.url);
-    return JSON.stringify({ opened: true, browser: CHROME_BUNDLE, guest: true, url: receipt.args.at(-1) });
+    return JSON.stringify(openFactoryPage(args.url));
   },
 });
 

@@ -57,7 +57,12 @@ test("opens Chrome Guest with fixed argv and no shell", () => {
     ["-n", "-b", "com.google.Chrome", "--args", "--guest", url],
     { encoding: "utf8", shell: false, timeout: 10000 },
   ]]);
-  assert.deepEqual(receipt.args, ["-n", "-b", "com.google.Chrome", "--args", "--guest", url]);
+  assert.deepEqual(receipt, {
+    launchAccepted: true,
+    requestedBrowser: "com.google.Chrome",
+    requestedMode: "guest",
+    url,
+  });
 });
 
 test("exposes one structured URL argument", () => {

@@ -4,7 +4,7 @@ Date: 2026-09-25
 
 Tracker: `edoworks/factory#102`
 
-Status: local correction pending verification and integration
+Status: owner-authorized correction rendered locally, pending hosted verification and integration
 
 ## Impact
 
@@ -41,9 +41,10 @@ directly; no Bash browser command is allowed.
 
 The helper does not click, type, execute browser automation, download, submit
 forms, inspect or export credentials, or mutate GitHub. The fixed launch argv
-opens a new Chrome Guest instance rather than reusing the normal Chrome
-session. Screenshots use the existing fixed utility, remain temporary, must be
-inspected for private state, and are not repository evidence unless
+requests a new Chrome Guest instance rather than normal-profile reuse; the
+launch receipt does not prove that Chrome honored those arguments. Screenshots
+use the existing fixed utility, remain temporary, must confirm Guest mode and
+signed-out rendering, must be inspected for private state, and are not repository evidence unless
 separately reduced to a public-safe textual review record.
 
 ## Recurrence Guard
@@ -215,6 +216,40 @@ launch argument. The owner provenance for issue #102 permits Chrome or Safari,
 and Chrome is installed. The launcher therefore uses a new Chrome Guest instance
 with fixed argv. The exact argv test is the mechanical guard; fresh-session
 capture must confirm Guest mode and signed-out rendering before integration.
+
+## Browser Authority Reconciliation
+
+The canonical issue body and a later issue comment retained Safari-specific
+acceptance language after the Safari private-mode launch attempt failed closed.
+Independent isolated review correctly treated that later comment as controlling
+and rejected Chrome integration without explicit reconciliation. On 2026-09-25,
+the owner explicitly authorized the recommended Chrome Guest option for issue
+#102, superseding the Safari-only comment while retaining the frozen public
+`edoworks/factory` URL, no-interaction, no-credential-access, no-GitHub-mutation,
+and temporary-capture boundaries. The tracked authority comment records that
+decision verbatim for canonical issue readback before integration.
+
+The mechanical recurrence guard is both process and code based: browser changes
+must have an explicit canonical authority record, the launcher pins Chrome Guest
+argv without a shell, its receipt reports requested rather than observed mode,
+and fresh-session screenshots remain the acceptance evidence that Chrome honored
+the isolation request.
+
+## Fresh-Session Rendered Acceptance
+
+After the authority reconciliation was posted to canonical issue #102, the
+fresh Factory session discovered the admitted `open_factory_page` tool and
+opened issue #102, PR #76, and PR #76's exact 40-character PRD revision without
+a Bash command or approval prompt. Temporary Chrome captures showed the Guest
+badge, GitHub's signed-out `Sign in` and `Sign up` controls, the expected public
+`edoworks/factory` pages, and no normal-profile account chrome or private content.
+
+The exact `97e17b0883c6fdacd6ab2fd85ad3dfc70a7f8719` PRD rendered as 159 lines in
+GitHub Preview mode. Bounded fragment navigation reviewed the top, Entry
+Contract, Cutover States, and Acceptance sections. The rendered document had no
+overlap, clipping, unreadable wrapping, or later-state overclaim. This is a
+post-merge review of PR #76 and is not claimed to have preceded that merge.
+Screenshots remained temporary and were not added to repository evidence.
 
 ## Push-Revision Transcription 5-Whys
 
