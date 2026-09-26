@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Isolate OpenAI browser OAuth from inherited API keys",
+  "body_file": "openai-oauth-boundary-body.md",
+  "body_sha256": "cfebb3fb9ab8cd4dad3afa63b540a23716757bcfa33accb52072ae86816b89fb",
+  "classification": "enhancement",
+  "labels": ["enhancement"],
+  "priority": "P0",
+  "dependencies": ["Factory Development PRD entry contract", "OpenCode documented ChatGPT Plus/Pro browser OAuth"],
+  "authority_constraints": ["Repository-local launcher guard only", "No credential access or mutation", "No route or budget changes", "No product or release changes"],
+  "source_provenance": ["Redacted user-provided OpenCode error on 2026-09-25", "bin/factory-dev at d4d1068", "tests/test_factory_dev.py at d4d1068", "https://opencode.ai/docs/providers/#openai"],
+  "duplicate_review": ["Issue #87 addresses GitHub closeout, not OpenAI OAuth", "Issues #99 and #100 own separate hosted verification failures"],
+  "reprioritization_review": ["OAuth-only Factory launch should not inherit an API key independently of PR #98 blockers"]
+}

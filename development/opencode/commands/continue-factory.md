@@ -87,6 +87,24 @@ agent: explore
   Remote readback reports issue #93 closed, and the pinned closeout verifier
   returned exactly `CLOSED`. Storage tolerances and global-state ownership remain
   unchanged.
+- Issue #101 tracks the independent Factory OpenAI credential boundary. Its
+  frozen intent and remote readback match. The isolated branch starts from
+  canonical merge `0e36c03` and removes inherited `OPENAI_API_KEY` from the
+  OpenCode version probe and final child process. The guard does not inspect or
+  change saved credentials, prove the rejected key's source, or prove an
+  OAuth-backed request. Its frozen intent validates, remote issue readback is
+  `MATCH`, `git diff --check` passes, and isolated independent trust review found
+  no material issue. The loaded session admits verification only under the
+  original checkout. An external rerun from the isolated root, after lockfile-
+  bound dependency restoration, passed the full Python and pinned Node suites;
+  the first failed invocation and recurrence guard are recorded in the incident.
+  Factory doctor reports valid policy, matching active installation, no routing
+  contradiction, and `launch_ready: true`. Exact rendered review of issue #101,
+  PR #106, the revision-bound PRD paragraph, and both incident
+  Five-Whys sections passed at implementation head `2a914b9` without readability
+  or privacy defect. Hosted checks, integration, and a fresh user-controlled
+  OAuth request remain required.
+  Complete this boundary before another canonical Factory launch.
 - Issue #102 tracks self-service rendered Factory review. Its frozen intent and
   remote readback match. Independent review rejected the first Bash-carried URL
   design because quote-breaking expansion preceded validation. The corrected
@@ -125,14 +143,24 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. From a newly launched Factory session, verify doctor and autonomously open one
-   approved Factory page in signed-out Chrome Guest. Record that post-integration
-   receipt before claiming issue #102 completion or sending its notification.
-4. Continue issue #70 only with an explicitly active product or release workflow
+3. Complete PR #106's hosted checks and integration. Then use a fresh launch and
+   the user-owned browser OAuth connection for one controlled request; handle any
+   saved API-key credential only through interactive OpenCode `/connect` without
+   disclosing its value. Close issue #101 only after that live acceptance passes.
+4. From that policy-valid fresh Factory environment, verify doctor and
+   autonomously open one approved Factory page in signed-out Chrome Guest. Record
+   the post-integration receipt before claiming issue #102 completion or sending
+   its notification.
+5. Keep issue #103 as the umbrella authenticated-browser contract. Freeze and
+   create separate artifact, runtime/profile, broker/minimization, capture, and
+   activation child issues before implementation. No partial custom tool may be
+   discoverable and no dedicated profile or persistent runtime may be created
+   without its separate authority gate.
+6. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
-5. Continue issue #78's portfolio index under the issue #77 privacy boundary,
+7. Continue issue #78's portfolio index under the issue #77 privacy boundary,
    then continue issue #79's product-repository contract using that index.
-6. Keep issue #81 preservation and deletion-readiness work blocked on issues #78
+8. Keep issue #81 preservation and deletion-readiness work blocked on issues #78
    and #79. Do not delete, archive, unarchive, publish, or clean any target. Do
    not create the preservation repository until its exact provisioner is
    reviewed, merged, and launched from a fresh policy-valid session.
