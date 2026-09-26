@@ -57,9 +57,12 @@ from a resolved `gh` package root, rejects a group/world-writable executable,
 pins every allowed GitHub command to that executable and operations to `github.com`,
 and requires the authenticated `hellofoculoom` identity before issue transport.
 `bin/factory-dev workspace create ISSUE SLUG` is the sole supported workspace
-bootstrap after integration. It runs only from the primary checkout, verifies
-the owner identity and open issue, rejects transport-affecting Git configuration,
-fetches exact canonical `main` through pinned HTTPS credentials, creates a
+bootstrap after integration. It runs from the primary checkout or a registered,
+clean linked launcher already contained in canonical `main`, verifies the owner
+identity and open issue, rejects executable or transport-affecting Git
+configuration and active shared hooks, verifies linked launcher bytes against
+their committed blob, fetches exact canonical `main` through pinned HTTPS
+credentials, creates a
 linked `feature/ISSUE-SLUG` worktree under the Factory-owned workspace root, and
 records issue, resolved path, branch, base revision, and head in a symlink-safe
 local registry. `workspace register` exists only for an already clean linked
@@ -155,7 +158,15 @@ metadata, so identity remains deterministic without trusting global config. The
 commit is reset softly to the prior registered head, preserving staged changes,
 if the registry cannot record the new head. Workspace creation preflights branch
 absence and rolls back an exact branch or linked worktree created by a failed
-bootstrap before returning an error. The
+bootstrap before returning an error. Creation normally runs from the primary
+checkout. When that checkout is intentionally quarantined on older dirty source,
+a clean linked launcher may discover the primary only through their shared Git
+common directory after its exact HEAD is verified as contained in freshly fetched
+canonical `origin/main`. No repository path is accepted from the caller. The
+primary files remain untouched; only the canonical ref, exact new branch and
+worktree, shared Git metadata, and workspace registry may change. An unmerged or
+dirty linked launcher, unrelated common directory, unsafe repository config,
+closed target issue, or partial registration fails closed. The
 interactive push transport accepts one
 `feature/ISSUE-SLUG` branch and one full expected commit, requires the current
 local branch and registry to match, requires a clean post-commit worktree and an

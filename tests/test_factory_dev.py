@@ -277,7 +277,9 @@ class FactoryDevTests(unittest.TestCase):
             subprocess.run(["/usr/bin/git", "config", "user.email", "test@example.invalid"], cwd=primary, check=True)
             subprocess.run(["/usr/bin/git", "config", "user.name", "Factory Test"], cwd=primary, check=True)
             (primary / "file").write_text("base\n")
-            subprocess.run(["/usr/bin/git", "add", "file"], cwd=primary, check=True)
+            (primary / "bin").mkdir()
+            shutil.copy2(ROOT / "bin" / "factory-dev", primary / "bin" / "factory-dev")
+            subprocess.run(["/usr/bin/git", "add", "file", "bin/factory-dev"], cwd=primary, check=True)
             subprocess.run(["/usr/bin/git", "commit", "-m", "base"], cwd=primary, check=True, capture_output=True)
             subprocess.run(["/usr/bin/git", "remote", "add", "origin", "https://github.com/edoworks/factory.git"], cwd=primary, check=True)
             subprocess.run(["/usr/bin/git", "update-ref", "refs/remotes/origin/main", "HEAD"], cwd=primary, check=True)
@@ -285,11 +287,36 @@ class FactoryDevTests(unittest.TestCase):
             self.assertTrue(module.primary_checkout(Path("/usr/bin/git"), primary))
             self.assertFalse(module.primary_checkout(Path("/usr/bin/git"), linked))
             self.assertIsNotNone(module.linked_workspace(Path("/usr/bin/git"), linked))
-            module.workspace_issue_open = lambda issue, **kwargs: True
+            module.workspace_issue_open = lambda issue, gh=None: True
             record = module.workspace_record(primary, linked, "109")
             state = temporary / "workspaces.json"
             state.write_text(json.dumps({"schema_version": 2, "workspaces": [record]}) + "\n")
             module.workspace_state_path = lambda: state
+            self.assertEqual(module.workspace_repository(Path("/usr/bin/git"), linked, json.loads(state.read_text())), primary)
+            with self.assertRaisesRegex(RuntimeError, "not registered"):
+                module.workspace_repository(Path("/usr/bin/git"), linked, {"schema_version": 2, "workspaces": []})
+            subprocess.run(["/usr/bin/git", "config", "extensions.worktreeConfig", "true"], cwd=primary, check=True)
+            subprocess.run(["/usr/bin/git", "config", "--worktree", "filter.issue114.clean", "/usr/bin/false"], cwd=linked, check=True)
+            with self.assertRaisesRegex(RuntimeError, "executable or transport-affecting"):
+                module.assert_safe_git_config(Path("/usr/bin/git"), linked, module.safe_git_environment(Path("/usr/bin/false")))
+            subprocess.run(["/usr/bin/git", "config", "--worktree", "--unset", "filter.issue114.clean"], cwd=linked, check=True)
+            replacements = primary / ".git" / "refs" / "replace"
+            replacements.mkdir(parents=True)
+            (replacements / ("0" * 40)).write_text(("1" * 40) + "\n")
+            with self.assertRaisesRegex(RuntimeError, "replacement objects"):
+                module.assert_safe_git_config(Path("/usr/bin/git"), linked, module.safe_git_environment(Path("/usr/bin/false")))
+            shutil.rmtree(replacements)
+            packed_refs = primary / ".git" / "packed-refs"
+            packed_original = packed_refs.read_bytes() if packed_refs.exists() else None
+            base = module.git_value(Path("/usr/bin/git"), ["rev-parse", "HEAD"], linked)
+            with packed_refs.open("a") as handle:
+                handle.write(f"{base} refs/replace/{base}\n")
+            with self.assertRaisesRegex(RuntimeError, "replacement objects"):
+                module.assert_safe_git_config(Path("/usr/bin/git"), linked, module.safe_git_environment(Path("/usr/bin/false")))
+            if packed_original is None:
+                packed_refs.unlink()
+            else:
+                packed_refs.write_bytes(packed_original)
             (linked / "dirty").write_text("dirty\n")
             audit = module.workspace_audit(primary)
             self.assertEqual(audit["workspaces"][0]["status"], "active")
@@ -297,15 +324,155 @@ class FactoryDevTests(unittest.TestCase):
             module.git_status = lambda *args: module.fail("Git status failed")
             self.assertEqual(module.workspace_audit(primary)["workspaces"][0]["status"], "invalid")
             module.git_status = original_status
-            with self.assertRaisesRegex(RuntimeError, "primary checkout"):
-                module.workspace_command(linked, ["create", "110", "other"])
+            module.WORKSPACE_ROOT = temporary / "managed"
             gh = temporary / "gh"
             gh.write_text("#!/bin/sh\nif [ \"$1\" = api ]; then printf 'hellofoculoom\\n'; else printf 'OPEN\\n'; fi\n")
             gh.chmod(0o755)
             module.trusted_github_cli = lambda: gh
             module.workspace_issue_state = lambda issue, gh=None: "OPEN"
+            with self.assertRaisesRegex(RuntimeError, "launcher must be clean"):
+                module.workspace_command(linked, ["create", "110", "other"])
+            (linked / "dirty").unlink()
+            (primary / "file").write_text("preserved dirty primary\n")
+            (primary / "untracked").write_text("preserved\n")
+            subprocess.run(["/usr/bin/git", "remote", "set-url", "origin", "https://example.invalid/other.git"], cwd=primary, check=True)
+            with self.assertRaisesRegex(RuntimeError, "origin is not the pinned"):
+                module.workspace_command(linked, ["create", "110", "wrong-origin"])
+            subprocess.run(["/usr/bin/git", "remote", "set-url", "origin", "https://github.com/edoworks/factory.git"], cwd=primary, check=True)
+
+            def snapshot_files(path):
+                return {
+                    str(item.relative_to(path)): item.read_bytes()
+                    for item in path.rglob("*")
+                    if item.is_file() and ".git" not in item.relative_to(path).parts
+                }
+
+            primary_snapshot = snapshot_files(primary)
+            original_run = module.subprocess.run
+            fetches = []
+
+            def no_network_fetch(args, *positional, **kwargs):
+                if "fetch" in [str(value) for value in args]:
+                    fetches.append([str(value) for value in args])
+                    return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+                return original_run(args, *positional, **kwargs)
+
+            module.subprocess.run = no_network_fetch
+            module.workspace_command(linked, ["create", "110", "other"])
+            created = module.WORKSPACE_ROOT / "110-other"
+            self.assertTrue(created.is_dir())
+            self.assertEqual(snapshot_files(primary), primary_snapshot)
+            self.assertEqual(len(fetches), 1)
+            self.assertIn("https://github.com/edoworks/factory.git", fetches[0])
+            self.assertIn("+refs/heads/main:refs/remotes/origin/main", fetches[0])
+            registered = json.loads(state.read_text())["workspaces"]
+            self.assertEqual(registered[-1]["issue"], "110")
+            issue_checks = []
+
+            def closes_during_create(issue, gh=None):
+                issue_checks.append(issue)
+                return len(issue_checks) == 1
+
+            module.workspace_issue_open = closes_during_create
+            with self.assertRaisesRegex(RuntimeError, "issue closed during workspace creation"):
+                module.workspace_command(linked, ["create", "111", "closing"])
+            self.assertFalse((module.WORKSPACE_ROOT / "111-closing").exists())
+            self.assertIsNone(module.git_value(Path("/usr/bin/git"), ["rev-parse", "refs/heads/feature/111-closing"], primary))
+            module.workspace_issue_open = lambda issue, gh=None: True
+            original_save = module.save_workspace_state
+            module.save_workspace_state = lambda value: module.fail("injected registry failure")
+            try:
+                with self.assertRaisesRegex(RuntimeError, "injected registry failure"):
+                    module.workspace_command(linked, ["create", "112", "registry-failure"])
+            finally:
+                module.save_workspace_state = original_save
+            self.assertFalse((module.WORKSPACE_ROOT / "112-registry-failure").exists())
+            self.assertIsNone(module.git_value(Path("/usr/bin/git"), ["rev-parse", "refs/heads/feature/112-registry-failure"], primary))
+            tree = module.git_value(Path("/usr/bin/git"), ["rev-parse", "origin/main^{tree}"], primary)
+            raced = subprocess.run(["/usr/bin/git", "commit-tree", tree, "-p", module.git_value(Path("/usr/bin/git"), ["rev-parse", "origin/main"], primary), "-m", "rollback race"], cwd=primary, check=True, text=True, capture_output=True).stdout.strip()
+            module.save_workspace_state = lambda value: module.fail("injected registry failure")
+
+            def move_branch_before_delete(args, *positional, **kwargs):
+                values = [str(value) for value in args]
+                if "fetch" in values:
+                    return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+                if "update-ref" in values and "-d" in values and "refs/heads/feature/114-rollback-race" in values:
+                    original_run(["/usr/bin/git", "update-ref", "refs/heads/feature/114-rollback-race", raced], cwd=primary, check=True)
+                return original_run(args, *positional, **kwargs)
+
+            module.subprocess.run = move_branch_before_delete
+            try:
+                with self.assertRaisesRegex(RuntimeError, "rollback failed"):
+                    module.workspace_command(linked, ["create", "114", "rollback-race"])
+            finally:
+                module.save_workspace_state = original_save
+                module.subprocess.run = no_network_fetch
+            self.assertEqual(module.git_value(Path("/usr/bin/git"), ["rev-parse", "refs/heads/feature/114-rollback-race"], primary), raced)
+            subprocess.run(["/usr/bin/git", "branch", "feature/113-collision", "origin/main"], cwd=primary, check=True)
+            with self.assertRaisesRegex(RuntimeError, "branch already exists"):
+                module.workspace_command(linked, ["create", "113", "collision"])
+            self.assertEqual(module.git_value(Path("/usr/bin/git"), ["rev-parse", "refs/heads/feature/113-collision"], primary), module.git_value(Path("/usr/bin/git"), ["rev-parse", "origin/main"], primary))
+            hook = primary / ".git" / "hooks" / "post-checkout"
+            hook.write_text("#!/bin/sh\nexit 0\n")
+            hook.chmod(0o755)
+            with self.assertRaisesRegex(RuntimeError, "active Git hook"):
+                module.workspace_command(linked, ["create", "111", "hooked"])
+            hook.unlink()
+            launcher = linked / "bin" / "factory-dev"
+            launcher.write_text(launcher.read_text() + "\n# hidden modification\n")
+            subprocess.run(["/usr/bin/git", "update-index", "--assume-unchanged", "bin/factory-dev"], cwd=linked, check=True)
+            with self.assertRaisesRegex(RuntimeError, "does not match its committed HEAD"):
+                module.workspace_command(linked, ["create", "111", "modified"])
+            module.subprocess.run = original_run
             with self.assertRaisesRegex(RuntimeError, "closed"):
                 module.workspace_command(primary, ["retire", linked])
+
+    def test_linked_workspace_bootstrap_rejects_unmerged_launcher(self):
+        module = self.load_command_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            temporary = Path(temporary).resolve()
+            primary = temporary / "factory"
+            linked = temporary / "launcher"
+            primary.mkdir()
+            subprocess.run(["/usr/bin/git", "init", "-b", "main"], cwd=primary, check=True, capture_output=True)
+            subprocess.run(["/usr/bin/git", "config", "user.email", "test@example.invalid"], cwd=primary, check=True)
+            subprocess.run(["/usr/bin/git", "config", "user.name", "Factory Test"], cwd=primary, check=True)
+            (primary / "file").write_text("base\n")
+            (primary / "bin").mkdir()
+            shutil.copy2(ROOT / "bin" / "factory-dev", primary / "bin" / "factory-dev")
+            subprocess.run(["/usr/bin/git", "add", "file", "bin/factory-dev"], cwd=primary, check=True)
+            subprocess.run(["/usr/bin/git", "commit", "-m", "base"], cwd=primary, check=True, capture_output=True)
+            subprocess.run(["/usr/bin/git", "remote", "add", "origin", "https://github.com/edoworks/factory.git"], cwd=primary, check=True)
+            subprocess.run(["/usr/bin/git", "update-ref", "refs/remotes/origin/main", "HEAD"], cwd=primary, check=True)
+            subprocess.run(["/usr/bin/git", "worktree", "add", "-b", "feature/114-bootstrap", linked, "HEAD"], cwd=primary, check=True, capture_output=True)
+            (linked / "file").write_text("unmerged\n")
+            subprocess.run(["/usr/bin/git", "add", "file"], cwd=linked, check=True)
+            subprocess.run(["/usr/bin/git", "commit", "-m", "unmerged"], cwd=linked, check=True, capture_output=True)
+            state = temporary / "workspaces.json"
+            module.workspace_issue_open = lambda issue, **kwargs: True
+            record = module.workspace_record(primary, linked, "114", require_open=False)
+            state.write_text(json.dumps({"schema_version": 2, "workspaces": [record]}) + "\n")
+            module.workspace_state_path = lambda: state
+            module.WORKSPACE_ROOT = temporary / "managed"
+            gh = temporary / "gh"
+            gh.write_text("#!/bin/sh\nprintf 'hellofoculoom\\n'\n")
+            gh.chmod(0o755)
+            module.trusted_github_cli = lambda: gh
+            original_run = module.subprocess.run
+
+            def no_network_fetch(args, *positional, **kwargs):
+                if "fetch" in [str(value) for value in args]:
+                    return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+                return original_run(args, *positional, **kwargs)
+
+            module.subprocess.run = no_network_fetch
+            try:
+                with self.assertRaisesRegex(RuntimeError, "not contained in canonical main"):
+                    module.workspace_command(linked, ["create", "115", "next"])
+            finally:
+                module.subprocess.run = original_run
+            self.assertFalse((module.WORKSPACE_ROOT / "115-next").exists())
+            self.assertEqual(json.loads(state.read_text())["workspaces"], [record])
 
     def test_ancestor_override_and_unlisted_policy_files_fail_closed(self):
         root, fake = self.fixture()
