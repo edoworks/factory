@@ -376,8 +376,26 @@ def _workspace_command(root, args):
         fetch = subprocess.run([str(git), "-c", "credential.helper=", "-c", f"credential.helper=!{gh} auth git-credential", "-C", str(root), "fetch", "--no-tags", "https://github.com/edoworks/factory.git", "+refs/heads/main:refs/remotes/origin/main"], text=True, capture_output=True, env=env, check=False)
         if fetch.returncode:
             fail(fetch.stderr.strip() or "canonical main fetch failed")
+        branch_ref = f"refs/heads/{branch}"
+        branch_exists = subprocess.run([str(git), "-C", str(root), "show-ref", "--verify", "--quiet", branch_ref], env=env, check=False)
+        if branch_exists.returncode == 0:
+            fail("workspace branch already exists")
+        if branch_exists.returncode != 1:
+            fail("workspace branch preflight failed")
         result = subprocess.run([str(git), "-C", str(root), "worktree", "add", "-b", f"feature/{issue}-{slug}", str(destination), "origin/main"], text=True, capture_output=True, env=env, check=False)
         if result.returncode:
+            cleanup_errors = []
+            if destination.exists() or destination.is_symlink():
+                removed = subprocess.run([str(git), "-C", str(root), "worktree", "remove", str(destination)], text=True, capture_output=True, env=env, check=False)
+                if removed.returncode != 0:
+                    cleanup_errors.append(removed.stderr.strip() or "partial worktree removal failed")
+            created_branch = subprocess.run([str(git), "-C", str(root), "show-ref", "--verify", "--quiet", branch_ref], env=env, check=False)
+            if created_branch.returncode == 0:
+                deleted = subprocess.run([str(git), "-C", str(root), "branch", "-D", branch], text=True, capture_output=True, env=env, check=False)
+                if deleted.returncode != 0:
+                    cleanup_errors.append(deleted.stderr.strip() or "partial branch removal failed")
+            if cleanup_errors:
+                fail(f"linked worktree creation failed ({result.stderr.strip()}); rollback failed: {'; '.join(cleanup_errors)}")
             fail(result.stderr.strip() or "linked worktree creation failed")
         try:
             if not workspace_issue_open(issue, gh):

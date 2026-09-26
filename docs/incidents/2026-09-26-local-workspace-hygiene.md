@@ -58,6 +58,10 @@ after lock acquisition; the transport now proves registry presence before any
 mutation lock is created, preserving the intended fail-closed diagnostic. The
 same correction validates and carries forward registered commit identity so
 suppressed global Git configuration cannot make the guarded commit unusable. The
+independent exact-head review then found partial-mutation gaps. Guarded commit
+now soft-resets to the prior registered head if registry persistence fails, and
+workspace creation preflights branch absence and removes only the exact branch
+or linked worktree created by a failed attempt. The
 remaining missing-package result was an environment prerequisite:
 the pinned `npm ci --prefix development/opencode` step must run before the Node
 suite, as already enforced by hosted checks.

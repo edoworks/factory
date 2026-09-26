@@ -152,6 +152,10 @@ worktree, verifies the issue remains open, preserves hooks, and atomically
 advances the registry's exact head. It suppresses ambient Git configuration and
 validates and carries forward the registered HEAD's author and committer
 metadata, so identity remains deterministic without trusting global config. The
+commit is reset softly to the prior registered head, preserving staged changes,
+if the registry cannot record the new head. Workspace creation preflights branch
+absence and rolls back an exact branch or linked worktree created by a failed
+bootstrap before returning an error. The
 interactive push transport accepts one
 `feature/ISSUE-SLUG` branch and one full expected commit, requires the current
 local branch and registry to match, requires a clean post-commit worktree and an

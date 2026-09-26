@@ -99,12 +99,28 @@ export function commitFeature(issue, args, environment = process.env) {
   if (staged.status !== 1) fail("staged changes could not be inspected");
   const result = spawnSync(git, ["commit", "-m", args[1]], { cwd, encoding: "utf8", env });
   if (result.status !== 0) fail(result.stderr.trim() || "git commit failed");
-  const committed = spawnSync(git, ["rev-parse", "HEAD"], { cwd, encoding: "utf8", env });
-  if (committed.status !== 0 || !/^[0-9a-f]{40}$/.test(committed.stdout.trim())) fail("committed HEAD could not be recorded");
-  record.head = committed.stdout.trim();
+  const priorHead = record.head;
   const temporary = `${statePath}.tmp-${process.pid}`;
-  writeFileSync(temporary, `${JSON.stringify(state, null, 2)}\n`, { mode: 0o600, flag: "wx" });
-  renameSync(temporary, statePath);
+  let temporaryCreated = false;
+  try {
+    const committed = spawnSync(git, ["rev-parse", "HEAD"], { cwd, encoding: "utf8", env });
+    if (committed.status !== 0 || !/^[0-9a-f]{40}$/.test(committed.stdout.trim())) fail("committed HEAD could not be recorded");
+    record.head = committed.stdout.trim();
+    const descriptor = openSync(temporary, "wx", 0o600);
+    temporaryCreated = true;
+    try { writeFileSync(descriptor, `${JSON.stringify(state, null, 2)}\n`); } finally { closeSync(descriptor); }
+    renameSync(temporary, statePath);
+    temporaryCreated = false;
+  } catch (error) {
+    let cleanupError;
+    if (temporaryCreated) {
+      try { unlinkSync(temporary); } catch (cleanup) { if (cleanup.code !== "ENOENT") cleanupError = cleanup; }
+    }
+    const rollback = spawnSync(git, ["reset", "--soft", priorHead], { cwd, encoding: "utf8", env });
+    if (rollback.status !== 0) fail(`registry update failed (${error.message}); commit rollback failed: ${rollback.stderr.trim()}`);
+    if (cleanupError) fail(`registry update failed (${error.message}); temporary cleanup failed after commit rollback: ${cleanupError.message}`);
+    throw error;
+  }
   return result.stdout;
   } finally {
     unlinkSync(lockPath);

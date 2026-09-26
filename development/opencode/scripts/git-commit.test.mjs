@@ -24,6 +24,7 @@ case "$1" in
   config) if [ "$UNSAFE_CONFIG" = 1 ]; then printf 'url.bad.insteadOf https://github.com/\n'; exit 0; fi; if [ "$HOOKS_CONFIG" = 1 ]; then printf 'core.hookspath /tmp/none\n'; exit 0; fi; exit 1;;
   diff) if [ "$3" = --quiet ]; then exit 1; fi; exit 0;;
   commit) exit 0;;
+  reset) exit 0;;
   *) exit 1;;
 esac
 `);
@@ -45,6 +46,8 @@ esac
     await writeFile(`${state}.lock`, `${process.pid}\n`);
     assert.throws(() => commitFeature("109", ["-m", "guard"], env), /locked/);
     await unlink(`${state}.lock`);
+    await writeFile(`${state}.tmp-${process.pid}`, "occupied\n");
+    assert.throws(() => commitFeature("109", ["-m", "guard"], env), /EEXIST/);
   } finally {
     process.chdir(previous);
   }
