@@ -91,9 +91,9 @@ agent: explore
   remote readback match. Independent review rejected the first Bash-carried URL
   design because quote-breaking expansion preceded validation. The corrected
   structured OpenCode tool accepts one approved public `edoworks/factory` URL
-  field and launches Safari through fixed argv without a shell. It does not
+  field and launches Chrome Guest through fixed argv without a shell. It does not
   automate page interaction, downloads, credential inspection, or GitHub
-  mutation; it opens a new private Safari instance, and captures remain
+  mutation; it opens a new Guest instance, and captures remain
   temporary and require privacy review. A second review found that OpenCode 1.18.19 would
   not discover the first `.mjs` tool and that duplicate tool-shaped exports would
   widen its name surface; the correction uses `.js` and one default tool export.
@@ -111,7 +111,7 @@ agent: explore
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
 3. Complete issue #102's isolated opener guard, local tests, independent review,
-   hosted checks, and fresh-session autonomous Safari captures. Then complete and
+   hosted checks, and fresh-session autonomous Chrome Guest captures. Then complete and
    record PR #76's bounded final-PRD review without claiming it preceded merge.
 4. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.

@@ -99,13 +99,13 @@ forms, with trailing repository overrides denied. Rendered Factory
 documentation review uses a checksum-bound structured OpenCode tool with one URL
 field. It accepts only public `edoworks/factory` repository, issue, PR, commit,
 action, or revision-bound document paths; validates the exact authority, query,
-fragment, and path; and invokes `/usr/bin/open` with Safari's fixed bundle
-identifier, a new instance, and its fixed private-window argument through an
-argv array without a shell. Direct wildcard browser
+fragment, and path; and invokes `/usr/bin/open` with Chrome's fixed bundle
+identifier, a new instance, and its fixed Guest argument through an argv array
+without a shell. Direct wildcard browser
 opening remains denied. The screenshot utility remains pinned to its fixed
 home-directory installation. The tool does not click, type, submit, download,
-run browser automation, or inspect or export credentials. The private instance
-does not reuse the normal Safari session, and captures remain temporary and must
+run browser automation, or inspect or export credentials. The Guest instance
+does not reuse the normal Chrome session, and captures remain temporary and must
 be checked for private state before recording only a public-safe textual review
 result. Because OpenCode loads policy only at startup, the self-service
 path must be exercised from a fresh Factory launch after integration.

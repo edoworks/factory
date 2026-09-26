@@ -45,7 +45,7 @@ test("rejects unapproved authorities, repositories, paths, and encodings", () =>
   for (const url of rejected) assert.throws(() => validateFactoryPageUrl(url));
 });
 
-test("opens Safari with fixed argv and no shell", () => {
+test("opens Chrome Guest with fixed argv and no shell", () => {
   const calls = [];
   const url = "https://github.com/edoworks/factory/issues/102#verification";
   const receipt = openFactoryPage(url, (...args) => {
@@ -54,10 +54,10 @@ test("opens Safari with fixed argv and no shell", () => {
   });
   assert.deepEqual(calls, [[
     "/usr/bin/open",
-    ["-n", "-b", "com.apple.Safari", "--args", "-Private", url],
+    ["-n", "-b", "com.google.Chrome", "--args", "--guest", url],
     { encoding: "utf8", shell: false, timeout: 10000 },
   ]]);
-  assert.deepEqual(receipt.args, ["-n", "-b", "com.apple.Safari", "--args", "-Private", url]);
+  assert.deepEqual(receipt.args, ["-n", "-b", "com.google.Chrome", "--args", "--guest", url]);
 });
 
 test("exposes one structured URL argument", () => {
@@ -68,7 +68,7 @@ test("exposes one structured URL argument", () => {
   );
 });
 
-test("fails closed when Safari launch fails", () => {
+test("fails closed when Chrome Guest launch fails", () => {
   assert.throws(
     () => openFactoryPage(
       "https://github.com/edoworks/factory/issues/102",

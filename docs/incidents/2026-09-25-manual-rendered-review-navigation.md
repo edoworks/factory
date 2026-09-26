@@ -35,13 +35,13 @@ including the still-pending post-merge review of PR #76's final PRD.
 `tools/open_factory_page.js` exposes one structured URL field, rejects unsafe
 raw characters and encoded paths, parses the authority, and allowlists only
 public Factory repository, issue, PR, commit, action, and revision-bound
-document paths. It invokes `/usr/bin/open` with the fixed Safari bundle
-identifier through an argv array and no shell. OpenCode admits the custom tool
+document paths. It invokes `/usr/bin/open` with the fixed Chrome bundle and
+Guest argument through an argv array and no shell. OpenCode admits the custom tool
 directly; no Bash browser command is allowed.
 
 The helper does not click, type, execute browser automation, download, submit
 forms, inspect or export credentials, or mutate GitHub. The fixed launch argv
-opens a new private Safari instance rather than reusing the normal Safari
+opens a new Chrome Guest instance rather than reusing the normal Chrome
 session. Screenshots use the existing fixed utility, remain temporary, must be
 inspected for private state, and are not repository evidence unless
 separately reduced to a public-safe textual review record.
@@ -50,10 +50,10 @@ separately reduced to a public-safe textual review record.
 
 Pinned Node tests cover accepted review paths, alternate authorities, sibling
 and lookalike repositories, settings and branch-relative document paths,
-encoded escapes, the one-field tool schema, exact Safari argv, and launch
+encoded escapes, the one-field tool schema, exact Chrome Guest argv, and launch
 failure. Python contract tests require the structured tool permission and reject
 every Bash opener. Full suites, Factory doctor, independent trust review, and a
-fresh-session autonomous Safari capture are required before closeout.
+fresh-session autonomous Chrome Guest capture is required before closeout.
 
 ## Initial Verification Failure 5-Whys
 
@@ -114,7 +114,7 @@ checks afterward. The explicit default-port vector is the recurrence guard.
 
 The correction replaces the Bash permission with a one-field custom OpenCode
 tool, rejects every percent-bearing path and all but the exact `plain=1` query,
-constrains fragments, and launches a new private Safari instance. The tool calls
+constrains fragments, and launches a new Chrome Guest instance. The tool calls
 `/usr/bin/open` directly with `shell: false`; no quoting convention is part of
 the authority boundary.
 
@@ -205,6 +205,13 @@ the root-pinning assertion while allowing independently named worktrees.
 5. Root cause supported by independent review: the transport constrained the
    destination but did not isolate ambient browser authentication.
 
-The launcher now requests a new Safari instance with the fixed `-Private`
-argument before the validated URL. The exact argv test is the mechanical guard;
-fresh-session capture must confirm the private window before integration.
+The first attempted correction requested a new Safari instance with a fixed
+`-Private` argument before the validated URL. Fresh-session capture proved that
+the installed Safari ignored that argument, reused authenticated state, and
+displayed account chrome, so the acceptance gate failed closed.
+
+Apple documents Private Browsing as a UI operation rather than a supported
+launch argument. The owner provenance for issue #102 permits Chrome or Safari,
+and Chrome is installed. The launcher therefore uses a new Chrome Guest instance
+with fixed argv. The exact argv test is the mechanical guard; fresh-session
+capture must confirm Guest mode and signed-out rendering before integration.

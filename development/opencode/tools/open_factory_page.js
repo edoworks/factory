@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { tool } from "@opencode-ai/plugin";
 
 const OPEN = "/usr/bin/open";
-const SAFARI_BUNDLE = "com.apple.Safari";
+const CHROME_BUNDLE = "com.google.Chrome";
 const REPOSITORY_PATH = "/edoworks/factory";
 const fail = (message) => { throw new Error(message); };
 
@@ -41,20 +41,20 @@ export function validateFactoryPageUrl(raw) {
 
 export function openFactoryPage(raw, launch = spawnSync) {
   const url = validateFactoryPageUrl(raw);
-  const args = ["-n", "-b", SAFARI_BUNDLE, "--args", "-Private", url];
+  const args = ["-n", "-b", CHROME_BUNDLE, "--args", "--guest", url];
   const result = launch(OPEN, args, { encoding: "utf8", shell: false, timeout: 10000 });
-  if (result.error || result.status !== 0) fail("Safari failed to open the Factory page");
+  if (result.error || result.status !== 0) fail("Chrome Guest failed to open the Factory page");
   return { executable: OPEN, args };
 }
 
 const factoryPageTool = tool({
-  description: "Open one validated public edoworks/factory GitHub review page in Safari without browser interaction.",
+  description: "Open one validated public edoworks/factory GitHub review page in Chrome Guest without browser interaction.",
   args: {
     url: tool.schema.string().describe("Exact approved Factory GitHub issue, PR, commit, action, or revision-bound document URL"),
   },
   async execute(args) {
     const receipt = openFactoryPage(args.url);
-    return JSON.stringify({ opened: true, browser: SAFARI_BUNDLE, private: true, url: receipt.args.at(-1) });
+    return JSON.stringify({ opened: true, browser: CHROME_BUNDLE, guest: true, url: receipt.args.at(-1) });
   },
 });
 
