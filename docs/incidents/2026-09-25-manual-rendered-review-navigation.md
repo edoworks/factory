@@ -251,6 +251,26 @@ overlap, clipping, unreadable wrapping, or later-state overclaim. This is a
 post-merge review of PR #76 and is not claimed to have preceded that merge.
 Screenshots remained temporary and were not added to repository evidence.
 
+## Hosted Dependency Installation 5-Whys
+
+1. Why did PR #104's first Factory policy job fail in 11 seconds? The clean
+   hosted checkout reached the Node suite without an installed
+   `@opencode-ai/plugin` package required by the discovered custom tool.
+2. Why did the local Node suite pass? The development checkout already contained
+   generated `development/opencode/node_modules` state.
+3. Why did the hosted checkout lack that state? `node_modules` is correctly
+   ignored, but the workflow installed only XcodeGen before running Node tests.
+4. Why did the existing lockfile not prevent the failure? `package-lock.json`
+   pins resolution but does not install packages by itself.
+5. Root cause supported by the workflow order and clean-checkout failure: the
+   hosted gate imported a newly dependency-bearing tool without first restoring
+   its repository-declared, lockfile-bound development dependencies.
+
+The correction runs `npm ci --prefix development/opencode` before the Node suite.
+A Python contract test requires that exact install command and verifies it
+precedes the exact hosted Node command. The failed job changed no repository or
+external state; hosted checks must rerun on the corrected head.
+
 ## Push-Revision Transcription 5-Whys
 
 1. Why did the first corrected-head push fail? The supplied expected commit did

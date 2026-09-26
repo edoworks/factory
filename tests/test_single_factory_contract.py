@@ -179,6 +179,14 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertIn("auto mode", prd)
         self.assertIn("fixed home-directory installation", normalized_prd)
 
+    def test_hosted_node_suite_installs_pinned_tool_dependency_first(self):
+        workflow = (ROOT / ".github" / "workflows" / "checks.yml").read_text()
+        install = "npm ci --prefix development/opencode"
+        suite = "node --test development/opencode/plugins/cost-router.test.mjs development/opencode/scripts/*.test.mjs"
+        self.assertIn(install, workflow)
+        self.assertIn(suite, workflow)
+        self.assertLess(workflow.index(install), workflow.index(suite))
+
     def test_issue_intent_hash_command_is_deterministic(self):
         body = ROOT / "docs" / "FactoryDevelopment-PRD.md"
         result = subprocess.run(

@@ -33,6 +33,9 @@ jobs:
           bash -n bin/factory-uninstall
           python3 -c 'compile(open("bin/factory-dev").read(), "bin/factory-dev", "exec")'
 
+      - name: Install pinned OpenCode development dependencies
+        run: npm ci --prefix development/opencode
+
       - name: Test OpenCode cost router
         run: node --test development/opencode/plugins/cost-router.test.mjs development/opencode/scripts/*.test.mjs
 

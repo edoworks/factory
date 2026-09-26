@@ -109,7 +109,10 @@ agent: explore
   Temporary captures confirmed Guest mode, signed-out rendering, and no private
   account chrome. The bounded post-merge review of PR #76's exact 159-line PRD
   found no overlap, clipping, unreadable wrapping, or later-state overclaim.
-  Hosted checks, integration, and closeout remain pending.
+  PR #104's first Factory policy job failed because its clean checkout did not
+  install the pinned OpenCode tool dependency before the Node suite. The local
+  correction adds lockfile-bound installation and an order assertion. Corrected
+  hosted checks, integration, and closeout remain pending.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 

@@ -17,5 +17,8 @@ acceptance from observed Guest mode. Fresh autonomous opening of issue #102, PR
 Temporary captures confirmed Chrome Guest, signed-out GitHub rendering, no
 normal-profile account chrome, and no private content. The bounded post-merge
 review of PR #76's 159-line exact PRD found no overlap, clipping, unreadable
-wrapping, or later-state overclaim. Hosted checks, integration, and closeout
-remain pending.
+wrapping, or later-state overclaim. PR #104's first Factory policy job failed in
+a clean checkout because the workflow did not install the already pinned
+OpenCode tool dependency before importing the tool in its Node suite. The local
+correction adds a lockfile-bound `npm ci` step and a mechanical order assertion.
+Corrected hosted checks, integration, and closeout remain pending.
