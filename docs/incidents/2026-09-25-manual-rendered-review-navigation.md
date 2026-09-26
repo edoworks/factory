@@ -215,3 +215,20 @@ launch argument. The owner provenance for issue #102 permits Chrome or Safari,
 and Chrome is installed. The launcher therefore uses a new Chrome Guest instance
 with fixed argv. The exact argv test is the mechanical guard; fresh-session
 capture must confirm Guest mode and signed-out rendering before integration.
+
+## Push-Revision Transcription 5-Whys
+
+1. Why did the first corrected-head push fail? The supplied expected commit did
+   not equal `HEAD`.
+2. Why was the expected commit wrong? A full identifier was manually completed
+   from the abbreviated commit output instead of read from Git.
+3. Why did no incorrect revision reach GitHub? The repository-owned push helper
+   resolves `HEAD^{commit}` and rejects a mismatch before transport.
+4. Why was manual completion unnecessary? `git show --format=%H HEAD` provides
+   the exact required identifier under the admitted read-only command policy.
+5. Root cause supported by the helper receipt: a deterministic identifier was
+   transcribed rather than consumed from its authoritative Git output.
+
+The failed push changed no remote state. The recurrence guard is to read the
+full `HEAD` identifier immediately before every guarded push and pass that exact
+value unchanged; the helper's mismatch check remains the mechanical backstop.
