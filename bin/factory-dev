@@ -92,14 +92,15 @@ def command_output(args, cwd, environment=None):
     return result.stdout.strip() if result.returncode == 0 else None
 
 
-def git_status(git, cwd):
+def git_status(git, cwd, environment=None):
+    environment = environment or {**clean_network_environment(), "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": "/dev/null"}
     result = subprocess.run(
-        [str(git), "status", "--porcelain"],
+        [str(git), "-c", "core.fsmonitor=false", "status", "--porcelain", "--untracked-files=all"],
         cwd=cwd,
         text=True,
         capture_output=True,
         check=False,
-        env={**clean_network_environment(), "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": "/dev/null"},
+        env=environment,
     )
     if result.returncode != 0:
         fail(result.stderr.strip() or "Git status failed")
@@ -130,7 +131,12 @@ def load_workspace_state():
         value = json.loads(path.read_text())
     except (OSError, json.JSONDecodeError) as error:
         fail(f"workspace registry is invalid: {error}")
-    if value.get("schema_version") != 2 or not isinstance(value.get("workspaces"), list):
+    validate_workspace_state(value)
+    return value
+
+
+def validate_workspace_state(value):
+    if not isinstance(value, dict) or value.get("schema_version") != 2 or not isinstance(value.get("workspaces"), list):
         fail("workspace registry schema is invalid")
     required = {"issue", "branch", "path", "base_revision", "head"}
     seen = {"issue": set(), "branch": set(), "path": set()}
@@ -141,21 +147,36 @@ def load_workspace_state():
             if record[field] in seen[field]:
                 fail(f"workspace registry contains duplicate {field}")
             seen[field].add(record[field])
-    return value
 
 
 def save_workspace_state(value):
+    validate_workspace_state(value)
     path = safe_state_path(workspace_state_path())
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     safe_state_path(path)
     temporary = path.with_name(f".{path.name}.tmp-{os.getpid()}")
     if temporary.exists() or temporary.is_symlink():
         fail("workspace registry temporary path already exists")
+    descriptor = None
     try:
-        temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
-        temporary.chmod(0o600)
+        flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        descriptor = os.open(temporary, flags, 0o600)
+        with os.fdopen(descriptor, "w") as stream:
+            descriptor = None
+            stream.write(json.dumps(value, indent=2, sort_keys=True) + "\n")
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(temporary, path)
+        directory = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
     except Exception:
+        if descriptor is not None:
+            os.close(descriptor)
         if temporary.is_file() and not temporary.is_symlink():
             temporary.unlink()
         raise
@@ -190,7 +211,7 @@ def clean_network_environment():
 
 def safe_git_environment(gh):
     environment = clean_network_environment()
-    environment.update({"GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": "/dev/null"})
+    environment.update({"GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_NO_REPLACE_OBJECTS": "1"})
     environment["FACTORY_DEV_GH"] = str(gh)
     return environment
 
@@ -219,11 +240,39 @@ def verify_github_identity(gh):
 
 
 def assert_safe_git_config(git, cwd, environment):
-    result = subprocess.run([str(git), "config", "--local", "--get-regexp", "^(url\\.|http\\.|include\\.|includeIf\\.|core\\.hookspath$)"], cwd=cwd, text=True, capture_output=True, check=False, env=environment)
-    if result.returncode == 0:
-        fail("repository Git config contains transport-affecting settings")
-    if result.returncode != 1:
-        fail("repository Git config inspection failed")
+    prohibited = "^(url\\.|http\\.|include\\.|includeIf\\.|filter\\.|credential\\.|protocol\\.|core\\.(hooksPath|fsmonitor|attributesFile)$)"
+    scopes = [["--local"], ["--worktree"]]
+    for scope in scopes:
+        result = subprocess.run([str(git), "config", *scope, "--get-regexp", prohibited], cwd=cwd, text=True, capture_output=True, check=False, env=environment)
+        if result.returncode == 0:
+            fail("repository Git config contains executable or transport-affecting settings")
+        if result.returncode not in {1, 128}:
+            fail("repository Git config inspection failed")
+    facts = git_facts(git, Path(cwd))
+    replacements = facts["common_dir"] / "refs" / "replace"
+    grafts = facts["common_dir"] / "info" / "grafts"
+    packed_refs = facts["common_dir"] / "packed-refs"
+    packed_replacements = False
+    if packed_refs.exists():
+        if packed_refs.is_symlink() or not packed_refs.is_file():
+            fail("repository packed refs are unsafe")
+        packed_replacements = any(line.partition(" ")[2].startswith("refs/replace/") for line in packed_refs.read_text().splitlines() if line and not line.startswith(("#", "^")))
+    if replacements.is_symlink() or (replacements.exists() and (not replacements.is_dir() or any(replacements.iterdir()))) or grafts.exists() or grafts.is_symlink() or packed_replacements:
+        fail("repository replacement objects or grafts are prohibited")
+    hooks = facts["common_dir"] / "hooks"
+    if hooks.exists():
+        if hooks.is_symlink() or not hooks.is_dir():
+            fail("repository hooks path is unsafe")
+        for hook in hooks.iterdir():
+            if hook.is_symlink() or (hook.is_file() and not hook.name.endswith(".sample")):
+                fail("repository contains an active Git hook")
+
+
+def launcher_matches_head(git, root, environment):
+    launcher = root / "bin" / "factory-dev"
+    result = subprocess.run([str(git), "show", "HEAD:bin/factory-dev"], cwd=root, capture_output=True, check=False, env=environment)
+    if result.returncode != 0 or result.stdout != launcher.read_bytes():
+        fail("linked workspace launcher does not match its committed HEAD")
 
 
 def git_facts(git, target):
@@ -245,6 +294,26 @@ def primary_checkout(git, target):
     facts = git_facts(git, target)
     dotgit = facts["path"] / ".git"
     return not dotgit.is_symlink() and dotgit.is_dir() and facts["git_dir"] == facts["common_dir"] == dotgit.resolve()
+
+
+def workspace_repository(git, root, state):
+    if primary_checkout(git, root):
+        return root
+    facts = linked_workspace(git, root)
+    if not facts:
+        fail("workspace create requires the canonical repository")
+    primary = safe_directory(facts["common_dir"].parent, Path("/"))
+    if not primary_checkout(git, primary):
+        fail("workspace primary checkout could not be verified")
+    primary_facts = git_facts(git, primary)
+    if primary_facts["common_dir"] != facts["common_dir"]:
+        fail("workspace primary checkout does not share repository metadata")
+    record = next((item for item in state["workspaces"] if Path(item["path"]) == root), None)
+    if not record:
+        fail("linked workspace launcher is not registered")
+    current = workspace_record(primary, root, record["issue"], require_open=False)
+    record_matches_live(record, current, git)
+    return primary
 
 
 def linked_workspace(git, target):
@@ -279,7 +348,7 @@ def record_matches_live(record, current, git):
         [str(git), "merge-base", "--is-ancestor", record["base_revision"], current["head"]],
         cwd=current["path"],
         check=False,
-        env={**clean_network_environment(), "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": "/dev/null"},
+        env={**clean_network_environment(), "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_NO_REPLACE_OBJECTS": "1"},
     )
     if ancestry.returncode != 0:
         fail("workspace HEAD does not contain its registered base revision")
@@ -303,14 +372,39 @@ def workspace_audit(root, target=None):
     return {"schema_version": 2, "command": "factory-dev workspace audit", "workspaces": records}
 
 
+def secure_workspace_root():
+    WORKSPACE_ROOT.mkdir(parents=True, exist_ok=True, mode=0o700)
+    resolved = WORKSPACE_ROOT.resolve(strict=True)
+    details = resolved.stat()
+    if resolved != WORKSPACE_ROOT or details.st_uid != os.getuid() or details.st_mode & 0o077:
+        fail("worktree root is not private and canonical")
+    return (details.st_dev, details.st_ino)
+
+
+def rollback_created_workspace(git, repository, destination, branch, expected_head, environment):
+    facts = linked_workspace(git, destination) if destination.exists() and not destination.is_symlink() else None
+    if not facts or facts["common_dir"] != git_facts(git, repository)["common_dir"] or facts["branch"] != branch or facts["head"] != expected_head:
+        fail("created workspace changed before rollback")
+    if git_status(git, destination, environment):
+        fail("created workspace became dirty before rollback")
+    removed = subprocess.run([str(git), "-c", "core.hooksPath=/dev/null", "-C", str(repository), "worktree", "remove", str(destination)], text=True, capture_output=True, env=environment, check=False)
+    if removed.returncode != 0:
+        fail(removed.stderr.strip() or "created worktree rollback failed")
+    branch_head = git_value(git, ["rev-parse", f"refs/heads/{branch}"], repository, environment)
+    if branch_head != expected_head:
+        fail("created branch changed before rollback")
+    deleted = subprocess.run([str(git), "-C", str(repository), "update-ref", "-d", f"refs/heads/{branch}", expected_head], text=True, capture_output=True, env=environment, check=False)
+    if deleted.returncode != 0:
+        fail(deleted.stderr.strip() or "created branch rollback failed")
+
+
 def _workspace_command(root, args):
     if not args or args[0] not in {"register", "create", "audit", "retire"}:
         fail("usage: factory-dev workspace register|create|audit|retire")
     action = args.pop(0)
     git = Path("/usr/bin/git").resolve(strict=True)
     state = load_workspace_state()
-    if action == "create" and not primary_checkout(git, root):
-        fail("workspace create requires the primary checkout")
+    repository = workspace_repository(git, root, state) if action == "create" else root
     if action == "audit":
         if len(args) > 1:
             fail("usage: factory-dev workspace audit [PATH]")
@@ -350,11 +444,11 @@ def _workspace_command(root, args):
         if not re.fullmatch(r"[0-9]+", issue) or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
             fail("issue and slug are unsafe")
         branch = f"feature/{issue}-{slug}"
-        if any(item["issue"] == issue or item["branch"] == branch for item in state["workspaces"]):
-            fail("workspace issue or branch is already registered")
+        destination = WORKSPACE_ROOT / f"{issue}-{slug}"
+        if any(item["issue"] == issue or item["branch"] == branch or item["path"] == str(destination) for item in state["workspaces"]):
+            fail("workspace issue, branch, or path is already registered")
         if not workspace_issue_open(issue):
             fail("issue is not open")
-        destination = WORKSPACE_ROOT / f"{issue}-{slug}"
         probe = Path(destination.anchor)
         for part in destination.parts[1:-1]:
             probe /= part
@@ -362,54 +456,62 @@ def _workspace_command(root, args):
                 fail(f"worktree root contains a symlink: {probe}")
         if destination.exists() or destination.is_symlink():
             fail("workspace destination already exists")
-        WORKSPACE_ROOT.mkdir(parents=True, exist_ok=True, mode=0o700)
-        WORKSPACE_ROOT.chmod(0o700)
         gh = trusted_github_cli()
         if not gh:
             fail("workspace create requires the trusted GitHub CLI")
         verify_github_identity(gh)
         env = safe_git_environment(gh)
-        remote = git_value(git, ["-C", str(root), "remote", "get-url", "origin"], root, env)
+        assert_safe_git_config(git, repository, env)
+        if repository != root:
+            assert_safe_git_config(git, root, env)
+            launcher_matches_head(git, root, env)
+            if git_status(git, root, env):
+                fail("linked workspace launcher must be clean")
+        root_identity = secure_workspace_root()
+        remote = git_value(git, ["-C", str(repository), "remote", "get-url", "origin"], repository, env)
         if remote != "https://github.com/edoworks/factory.git":
             fail("origin is not the pinned canonical GitHub transport")
-        assert_safe_git_config(git, root, env)
-        fetch = subprocess.run([str(git), "-c", "credential.helper=", "-c", f"credential.helper=!{gh} auth git-credential", "-C", str(root), "fetch", "--no-tags", "https://github.com/edoworks/factory.git", "+refs/heads/main:refs/remotes/origin/main"], text=True, capture_output=True, env=env, check=False)
+        fetch = subprocess.run([str(git), "-c", "credential.helper=", "-c", f"credential.helper=!{gh} auth git-credential", "-C", str(repository), "fetch", "--no-tags", "https://github.com/edoworks/factory.git", "+refs/heads/main:refs/remotes/origin/main"], text=True, capture_output=True, env=env, check=False)
         if fetch.returncode:
             fail(fetch.stderr.strip() or "canonical main fetch failed")
+        if repository != root:
+            source_head = git_value(git, ["rev-parse", "HEAD"], root, env)
+            merged = subprocess.run([str(git), "merge-base", "--is-ancestor", source_head, "origin/main"], cwd=repository, env=env, check=False)
+            if merged.returncode != 0:
+                fail("linked workspace launcher is not contained in canonical main")
+        base_head = git_value(git, ["rev-parse", "origin/main"], repository, env)
+        if not re.fullmatch(r"[0-9a-f]{40}", base_head or ""):
+            fail("canonical main revision is unavailable")
         branch_ref = f"refs/heads/{branch}"
-        branch_exists = subprocess.run([str(git), "-C", str(root), "show-ref", "--verify", "--quiet", branch_ref], env=env, check=False)
+        branch_exists = subprocess.run([str(git), "-C", str(repository), "show-ref", "--verify", "--quiet", branch_ref], env=env, check=False)
         if branch_exists.returncode == 0:
             fail("workspace branch already exists")
         if branch_exists.returncode != 1:
             fail("workspace branch preflight failed")
-        result = subprocess.run([str(git), "-C", str(root), "worktree", "add", "-b", f"feature/{issue}-{slug}", str(destination), "origin/main"], text=True, capture_output=True, env=env, check=False)
+        if secure_workspace_root() != root_identity:
+            fail("worktree root changed during workspace creation")
+        result = subprocess.run([str(git), "-c", "core.hooksPath=/dev/null", "-C", str(repository), "worktree", "add", "-b", branch, str(destination), base_head], text=True, capture_output=True, env=env, check=False)
         if result.returncode:
-            cleanup_errors = []
-            if destination.exists() or destination.is_symlink():
-                removed = subprocess.run([str(git), "-C", str(root), "worktree", "remove", str(destination)], text=True, capture_output=True, env=env, check=False)
-                if removed.returncode != 0:
-                    cleanup_errors.append(removed.stderr.strip() or "partial worktree removal failed")
-            created_branch = subprocess.run([str(git), "-C", str(root), "show-ref", "--verify", "--quiet", branch_ref], env=env, check=False)
-            if created_branch.returncode == 0:
-                deleted = subprocess.run([str(git), "-C", str(root), "branch", "-D", branch], text=True, capture_output=True, env=env, check=False)
-                if deleted.returncode != 0:
-                    cleanup_errors.append(deleted.stderr.strip() or "partial branch removal failed")
-            if cleanup_errors:
-                fail(f"linked worktree creation failed ({result.stderr.strip()}); rollback failed: {'; '.join(cleanup_errors)}")
+            if destination.exists() or git_value(git, ["rev-parse", branch_ref], repository, env):
+                fail(f"linked worktree creation failed with ambiguous partial state retained: {result.stderr.strip()}")
             fail(result.stderr.strip() or "linked worktree creation failed")
         try:
+            if secure_workspace_root() != root_identity:
+                fail("worktree root changed during workspace creation")
+            record = workspace_record(repository, destination, issue, require_open=False)
+            if record["head"] != base_head or record["base_revision"] != base_head:
+                fail("created workspace is not bound to canonical main")
+            if git_status(git, destination, env):
+                fail("created workspace is not clean")
             if not workspace_issue_open(issue, gh):
                 fail("issue closed during workspace creation")
-            record = workspace_record(root, destination, issue, require_open=False)
             state["workspaces"].append(record)
             save_workspace_state(state)
         except Exception as error:
-            removed = subprocess.run([str(git), "-C", str(root), "worktree", "remove", str(destination)], text=True, capture_output=True, env=env, check=False)
-            if removed.returncode != 0:
-                fail(f"workspace creation failed ({error}); rollback failed: {removed.stderr.strip()}")
-            branch_removed = subprocess.run([str(git), "-C", str(root), "branch", "-D", branch], text=True, capture_output=True, env=env, check=False)
-            if branch_removed.returncode != 0:
-                fail(f"workspace creation failed ({error}); branch rollback failed: {branch_removed.stderr.strip()}")
+            try:
+                rollback_created_workspace(git, repository, destination, branch, base_head, env)
+            except Exception as rollback_error:
+                fail(f"workspace creation failed ({error}); rollback failed: {rollback_error}")
             raise
         print(json.dumps({"schema_version": 1, "command": "factory-dev workspace create", "workspace": record}, sort_keys=True))
         return 0

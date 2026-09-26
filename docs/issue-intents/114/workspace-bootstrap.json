@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Bootstrap workspaces from a quarantined primary checkout",
+  "body_file": "workspace-bootstrap-body.md",
+  "body_sha256": "b6981009d7242dec90e1ce8674827e7650905e6dc60275d98cbb8ac61dd9f56c",
+  "classification": "enhancement",
+  "labels": ["enhancement", "factory", "gate"],
+  "priority": "P0",
+  "dependencies": ["Merged issue #109 workspace guard", "Preserved quarantined primary checkout", "Open blocked successor issue #113"],
+  "authority_constraints": ["No raw manual Git worktree creation", "No primary-checkout file changes or cleanup", "No force operations, release publication, credential disclosure, or provider changes"],
+  "source_provenance": ["Issue #109 and PR #110 implementation evidence", "Workspace registry receipt", "Issue #113 bootstrap blocker receipt"],
+  "duplicate_review": ["Issue #109 owns workspace isolation", "Issue #111 owns in-workspace verification", "Issue #113 owns research-gate correction"],
+  "reprioritization_review": ["P0 because every new write-capable issue workspace is blocked"]
+}

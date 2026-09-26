@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generation": "1790335243580-66796",
-  "refreshed_at": "2026-09-25T11:20:43.573Z",
+  "generation": "1790421641508-3284",
+  "refreshed_at": "2026-09-26T11:20:41.503Z",
   "providers": [
     "openai",
     "opencode",
