@@ -4,7 +4,7 @@ Date: 2026-09-25
 
 Tracker: `edoworks/factory#102`
 
-Status: owner-authorized correction rendered locally, pending hosted verification and integration
+Status: integrated; post-integration fresh-launch acceptance remains pending
 
 ## Impact
 
@@ -269,7 +269,31 @@ Screenshots remained temporary and were not added to repository evidence.
 The correction runs `npm ci --prefix development/opencode` before the Node suite.
 A Python contract test requires that exact install command and verifies it
 precedes the exact hosted Node command. The failed job changed no repository or
-external state; hosted checks must rerun on the corrected head.
+external state. Corrected hosted run `36214255479` passed the Factory policy,
+iPhone, and iPad jobs. PR #104 merged exact head
+`5780f09f8fd1e6150f69f05a740e923268984a51` as
+`58f2406795309af0608d7138c7d9e60bab1f406d`.
+
+## Closeout Sequencing 5-Whys
+
+1. Why did canonical issue #102 close before post-integration fresh-launch
+   acceptance? PR #104 used `Closes #102`, so GitHub closed it at merge.
+2. Why was one acceptance step still pending? OpenCode loads configuration only
+   at process startup, and the reviewing session started before the merge.
+3. Why could pre-merge fresh capture not prove the final temporal requirement?
+   It proved tool discovery and isolation at the exact feature behavior, but not
+   startup after canonical integration.
+4. Why did the pinned closeout verifier still return `CLOSED`? It verifies remote
+   issue state, not the ordering or completeness of repository acceptance evidence.
+5. Root cause supported by the merge and session receipts: the implementation PR
+   coupled integration to issue closure even though one acceptance gate was
+   intentionally post-integration and process-bound.
+
+The issue state is not treated as completion evidence. The continuation command
+retains the fresh-launch blocker, and completion notification remains prohibited
+until a newly launched Factory session verifies the merged opener. Future work
+with a post-integration gate must use a non-closing PR reference and close through
+the repository-owned issue workflow only after that gate passes.
 
 ## Push-Revision Transcription 5-Whys
 
