@@ -17,7 +17,10 @@ agent: explore
   primary path set remains unchanged. The permanent correction accepts no
   repository path: a clean linked launcher must share verified Git metadata with
   the discovered primary and have its exact HEAD contained in freshly fetched
-  canonical `origin/main` before creating a new issue workspace.
+  canonical `origin/main` before creating a new issue workspace. PR #115 head
+  `a5dcb77` passed local verification, independent trust review with no remaining
+  material findings, rendered issue and PR review, and all three hosted checks;
+  merge, fresh successor creation, and closeout remain.
 - Issue #113 owns correction of the first Rubberduck report. Independent review
   found no candidate qualifies for `INVESTIGATE NOW`; it remains blocked until
   issue #114 integrates and a fresh registered #113 workspace is created.
@@ -157,10 +160,10 @@ agent: explore
 
 ## Restart
 
-1. Complete issue #114 only from its registered linked worktree: run full local
-   tests, independent trust review, rendered PRD/issue/incident/continuation
-   review, hosted checks, merge, closeout, and a fresh-session successor creation
-   receipt. Do not use the one-time bootstrap path again.
+1. Merge green PR #115 without bypass, then verify issue #114 closeout and create
+   a fresh registered issue #113 workspace from the merged launcher. Capture the
+   successor creation and audit receipts before completion notification. Do not
+   use the one-time bootstrap path again.
 2. Create a fresh registered issue #113 workspace from canonical `main`, then
    reconstruct and correct the preserved Rubberduck report, add its deterministic
    gate/ledger validator, update the PRD, and complete local, hosted, independent,

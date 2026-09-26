@@ -14,5 +14,7 @@ critical, high, or medium findings. Approved catalog refresh generation
 policy. Local verification passes: 86 Python tests, 16 Node tests, pinned
 TypeScript 5.8.2 check, policy-valid doctor with no routing contradictions, and
 `git diff --check`. The canonical issue body was rendered and visually verified
-in Safari. PR rendering, hosted checks, integration, successor creation proof,
-and closeout remain pending.
+in Safari. PR #115 was rendered and visually verified at exact head
+`a5dcb77769f5d3f0bf182354b27967ab059128a9`; its Factory policy, iPhone, and
+iPad hosted checks all passed. Integration, fresh-session successor creation
+proof, and closeout remain pending.
