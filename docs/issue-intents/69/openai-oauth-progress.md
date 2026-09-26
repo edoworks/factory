@@ -8,9 +8,11 @@ credentials. The frozen intent validates, remote issue readback returns `MATCH`,
 After the invocation correction below, the full Python and pinned Node suites
 passed from the isolated root. Factory doctor reports valid policy, matching
 active installation, no routing contradiction, and `launch_ready: true`. Exact
-rendered review, hosted checks, integration, and a fresh user-controlled
-OAuth-backed request remain required. Do not close issue #101 from doctor
-evidence alone.
+rendered review of issue #101, PR #106, the exact-revision PRD paragraph, and
+both incident Five-Whys sections passed at implementation head `2a914b9` without
+clipping, unreadable wrapping, or exposed credential material. Hosted checks,
+integration, and a fresh user-controlled OAuth-backed request remain required.
+Do not close issue #101 from doctor evidence alone.
 
 The first external clean-worktree verification attempt failed closed because
 Python was launched from an unrelated checkout and the clean worktree's pinned
