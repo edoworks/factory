@@ -148,7 +148,7 @@ class FactoryDevTests(unittest.TestCase):
     def test_node_provenance_rejects_broken_and_writable_binaries(self):
         module = self.load_command_module()
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve()
             package = root / "Cellar" / "node"
             broken = package / "1.0" / "bin" / "node"
             malformed = package / "1.5" / "bin" / "node"
@@ -244,7 +244,7 @@ class FactoryDevTests(unittest.TestCase):
     def test_workspace_registry_rejects_symlink_state_and_uses_injected_issue_check(self):
         module = self.load_command_module()
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve()
             real = root / "real.json"
             link = root / "workspaces.json"
             real.write_text('{"schema_version": 2, "workspaces": []}\n')
