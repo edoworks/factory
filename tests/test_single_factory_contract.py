@@ -82,13 +82,17 @@ class SingleFactoryContractTests(unittest.TestCase):
         permissions = config["permission"]["bash"]
 
         self.assertNotIn("@frankhommers/opencode-yolo", plugins)
+        self.assertEqual(config["permission"]["open_factory_page"], "allow")
+        tools = ROOT / "development" / "opencode" / "tools"
+        self.assertTrue((tools / "open_factory_page.js").is_file())
+        self.assertFalse((tools / "open_factory_page.mjs").exists())
         self.assertEqual(permissions["*"], "deny")
         self.assertEqual(permissions["python3 -m unittest*"], "deny")
         self.assertEqual(permissions["node --test*"], "deny")
         self.assertEqual(permissions["{env:FACTORY_DEV_NODE} --test*"], "deny")
         self.assertEqual(permissions["python3 -m unittest discover -s {env:FACTORY_DEV_OPENCODE_ROOT}/../../tests"], "allow")
         self.assertEqual(
-            permissions["{env:FACTORY_DEV_NODE} --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/import-routing-catalog.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs"],
+            permissions["{env:FACTORY_DEV_NODE} --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/import-routing-catalog.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/open-factory-page.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs"],
             "allow",
         )
         self.assertEqual(
@@ -105,7 +109,6 @@ class SingleFactoryContractTests(unittest.TestCase):
             "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs close *",
             "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.mjs feature/* *",
             "{env:FACTORY_DEV_OPENCODE_ROOT}/../../bin/factory-dev refresh-catalog",
-            "open https://github.com/edoworks/factory/*",
         }
         self.assertEqual(
             {pattern for pattern, action in permissions.items() if action == "ask"},
@@ -114,6 +117,19 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertEqual(
             permissions["python3 ~/.agents/skills/macos-screenshot/scripts/screenshot.py *"],
             "allow",
+        )
+        self.assertNotIn("open https://github.com/edoworks/factory/*", permissions)
+        self.assertFalse(any("/scripts/open-factory-page.mjs" in pattern for pattern in permissions))
+        self.assertFalse(
+            any(
+                action in {"allow", "ask"}
+                and (
+                    pattern.startswith("open ")
+                    or "/usr/bin/open" in pattern
+                    or "osascript" in pattern
+                )
+                for pattern, action in permissions.items()
+            )
         )
         for command in ("hash *", "validate *", "verify-remote *"):
             self.assertEqual(
@@ -157,14 +173,19 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertEqual(permissions["{env:FACTORY_DEV_GH} issue * --repo edoworks/factory *-R*"], "deny")
         self.assertEqual(permissions["{env:FACTORY_DEV_GH} issue *https://*"], "deny")
         self.assertEqual(permissions["{env:FACTORY_DEV_GH} issue *http://*"], "deny")
-        self.assertEqual(
-            permissions["open https://github.com/edoworks/factory/* *"], "deny"
-        )
-
         prd = (ROOT / "docs" / "FactoryDevelopment-PRD.md").read_text()
+        normalized_prd = " ".join(prd.split())
         self.assertIn("interactive `ask` operations", prd)
         self.assertIn("auto mode", prd)
-        self.assertIn("fixed home-directory installation", prd)
+        self.assertIn("fixed home-directory installation", normalized_prd)
+
+    def test_hosted_node_suite_installs_pinned_tool_dependency_first(self):
+        workflow = (ROOT / ".github" / "workflows" / "checks.yml").read_text()
+        install = "npm ci --prefix development/opencode"
+        suite = "node --test development/opencode/plugins/cost-router.test.mjs development/opencode/scripts/*.test.mjs"
+        self.assertIn(install, workflow)
+        self.assertIn(suite, workflow)
+        self.assertLess(workflow.index(install), workflow.index(suite))
 
     def test_issue_intent_hash_command_is_deterministic(self):
         body = ROOT / "docs" / "FactoryDevelopment-PRD.md"

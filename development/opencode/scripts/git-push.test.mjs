@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { chmod, mkdtemp, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
+import { fileURLToPath } from "node:url";
 import { pushFeature } from "./git-push.mjs";
 
 test("feature push pins identity remote and refspec", async () => {
@@ -21,7 +22,7 @@ test("feature push pins identity remote and refspec", async () => {
   assert.equal(observed.git_dir, "");
   assert.equal(observed.global, "/dev/null");
   assert.equal(observed.proxy, "");
-  assert.match(observed.cwd, /\/factory$/);
+  assert.equal(observed.cwd, resolve(dirname(fileURLToPath(import.meta.url)), "../../.."));
   assert.deepEqual(observed.args.slice(-4), ["push", "--no-follow-tags", "https://github.com/edoworks/factory.git", `${commit}:refs/heads/feature/transport-guard`]);
   assert.match(observed.args[3], /^credential\.helper=!.*\/gh auth git-credential$/);
   assert.throws(() => pushFeature("main", commit, environment), /lowercase feature name/);

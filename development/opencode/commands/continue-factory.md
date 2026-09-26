@@ -87,6 +87,32 @@ agent: explore
   Remote readback reports issue #93 closed, and the pinned closeout verifier
   returned exactly `CLOSED`. Storage tolerances and global-state ownership remain
   unchanged.
+- Issue #102 tracks self-service rendered Factory review. Its frozen intent and
+  remote readback match. Independent review rejected the first Bash-carried URL
+  design because quote-breaking expansion preceded validation. The corrected
+  structured OpenCode tool accepts one approved public `edoworks/factory` URL
+  field and launches Chrome Guest through fixed argv without a shell. It does not
+  automate page interaction, downloads, credential inspection, or GitHub
+  mutation; it requests a new Guest instance, and captures remain temporary and
+  require privacy review. A second review found that OpenCode 1.18.19 would
+  not discover the first `.mjs` tool and that duplicate tool-shaped exports would
+  widen its name surface; the correction uses `.js` and one default tool export.
+  The corrected source passed 81 Python tests and 20 pinned Node tests,
+  `git diff --check`, launch-ready Factory doctor, and final independent review
+  with no implementation finding before isolation. Isolated review found that a
+  later Safari-only issue comment conflicted with the Chrome Guest privacy
+  correction. On 2026-09-25 the owner explicitly authorized Chrome Guest,
+  superseding only that Safari restriction; canonical issue comment
+  `5842612613` records the reconciliation. The launcher receipt now reports
+  requested rather than observed Guest mode. Fresh autonomous navigation opened
+  issue #102, PR #76, and PR #76's exact PRD revision without Bash or approval.
+  Temporary captures confirmed Guest mode, signed-out rendering, and no private
+  account chrome. The bounded post-merge review of PR #76's exact 159-line PRD
+  found no overlap, clipping, unreadable wrapping, or later-state overclaim.
+  PR #104's first Factory policy job failed because its clean checkout did not
+  install the pinned OpenCode tool dependency before the Node suite. The local
+  correction adds lockfile-bound installation and an order assertion. Corrected
+  hosted checks, integration, and closeout remain pending.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -95,9 +121,9 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. If an authorized exact-page open becomes available, complete and record the
-   bounded rendered review of PR #76's final PRD without claiming it preceded
-   merge.
+3. Commit issue #102's verified correction, push it through the guarded transport,
+   pass hosted checks, integrate it, then verify a post-integration fresh launch
+   before closeout.
 4. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
 5. Continue issue #78's portfolio index under the issue #77 privacy boundary,
