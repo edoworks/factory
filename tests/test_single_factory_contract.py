@@ -92,7 +92,7 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertEqual(permissions["{env:FACTORY_DEV_NODE} --test*"], "deny")
         self.assertEqual(permissions["python3 -m unittest discover -s {env:FACTORY_DEV_OPENCODE_ROOT}/../../tests"], "allow")
         self.assertEqual(
-            permissions["{env:FACTORY_DEV_NODE} --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/import-routing-catalog.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/open-factory-page.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs"],
+            permissions["{env:FACTORY_DEV_NODE} --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-commit.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/import-routing-catalog.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/open-factory-page.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs"],
             "allow",
         )
         self.assertEqual(
@@ -107,7 +107,10 @@ class SingleFactoryContractTests(unittest.TestCase):
             "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs create *",
             "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs comment *",
             "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-intent.mjs close *",
+            "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-commit.mjs [0-9]* -m *",
             "{env:FACTORY_DEV_NODE} {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.mjs feature/* *",
+            "{env:FACTORY_DEV_OPENCODE_ROOT}/../../bin/factory-dev workspace create *",
+            "{env:FACTORY_DEV_OPENCODE_ROOT}/../../bin/factory-dev workspace retire *",
             "{env:FACTORY_DEV_OPENCODE_ROOT}/../../bin/factory-dev refresh-catalog",
         }
         self.assertEqual(
@@ -178,6 +181,11 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertIn("interactive `ask` operations", prd)
         self.assertIn("auto mode", prd)
         self.assertIn("fixed home-directory installation", normalized_prd)
+        self.assertIn("primary Factory checkout read-only", normalized_prd)
+        self.assertEqual(permissions["git commit*"], "deny")
+        self.assertEqual(permissions["git worktree*"], "deny")
+        self.assertEqual(permissions["{env:FACTORY_DEV_OPENCODE_ROOT}/../../bin/factory-dev workspace register *"], "allow")
+        self.assertEqual(permissions["{env:FACTORY_DEV_OPENCODE_ROOT}/../../bin/factory-dev workspace audit*"], "allow")
 
     def test_hosted_node_suite_installs_pinned_tool_dependency_first(self):
         workflow = (ROOT / ".github" / "workflows" / "checks.yml").read_text()

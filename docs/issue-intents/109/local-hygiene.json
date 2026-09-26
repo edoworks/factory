@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Enforce issue-isolated local Factory workspaces",
+  "body_file": "local-hygiene-body.md",
+  "body_sha256": "7749cb06b5b46376610914dfe2f114cd25c8cc831c90d56e5cd45886a405492f",
+  "classification": "enhancement",
+  "labels": ["enhancement", "factory"],
+  "priority": "P0",
+  "dependencies": ["Canonical GitHub main", "Issue #69 mixed-WIP containment ledger", "Open PR #98", "Issues #103 and #108"],
+  "authority_constraints": ["No force push or reset-hard", "No broad clean or deletion of uncontained WIP", "No tag or release publication", "Preserve credentials and private local paths"],
+  "source_provenance": ["Current /Users/hello/factory branch and worktree state", "Factory development policy", "Canonical GitHub main and PR #98 metadata"],
+  "duplicate_review": ["Issue #108 owns version freshness", "Issue #103 owns authenticated browser review", "Issue #69 does not enforce isolated local workspace admission"],
+  "reprioritization_review": ["Must precede issue #108 integration and further write-capable Factory work"]
+}

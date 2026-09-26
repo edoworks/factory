@@ -50,6 +50,12 @@ class FactoryDevTests(unittest.TestCase):
             "\"$1\" \"$XDG_CONFIG_HOME\" \"$GH_CONFIG_DIR\" \"$FACTORY_DEV_GH\" \"$FACTORY_DEV_NODE\" \"$PATH\" \"$GH_HOST\" \"$GH_TOKEN\" \"$GITHUB_TOKEN\" \"$GH_ENTERPRISE_TOKEN\" \"$GH_HTTP_UNIX_SOCKET\" \"$NODE_OPTIONS\" \"${OPENAI_API_KEY+yes}\" \"$OPENCODE_CONFIG\" \"$OPENCODE_CONFIG_DIR\" \"$OPENCODE_CONFIG_CONTENT\" \"$OPENCODE_PERMISSION\" \"$OPENCODE_PURE\" \"$OPENCODE_FUTURE_FLAG\" \"$OPENCODE_DISABLE_AUTOUPDATE\" \"$OPENCODE_DISABLE_MODELS_FETCH\"; fi\n"
         )
         fake.chmod(fake.stat().st_mode | stat.S_IXUSR)
+        subprocess.run(["/usr/bin/git", "init", "-b", "main"], cwd=temporary, check=True, capture_output=True)
+        subprocess.run(["/usr/bin/git", "config", "user.email", "test@example.invalid"], cwd=temporary, check=True)
+        subprocess.run(["/usr/bin/git", "config", "user.name", "Factory Test"], cwd=temporary, check=True)
+        subprocess.run(["/usr/bin/git", "add", "bin", "development", "VERSION"], cwd=temporary, check=True)
+        subprocess.run(["/usr/bin/git", "commit", "-m", "fixture"], cwd=temporary, check=True, capture_output=True)
+        subprocess.run(["/usr/bin/git", "update-ref", "refs/remotes/origin/main", "HEAD"], cwd=temporary, check=True)
         return temporary, fake
 
     def update_manifest(self, root, relative):
@@ -110,12 +116,13 @@ class FactoryDevTests(unittest.TestCase):
         self.assertEqual(receipt["policy_digest"], repeated["policy_digest"])
         self.assertEqual(receipt["policy_status"], "valid")
         self.assertEqual(receipt["routing_contradictions"], [])
-        self.assertTrue(receipt["launch_ready"])
+        self.assertTrue(receipt["doctor_ready"])
+        self.assertFalse(receipt["launch_ready"])
 
     def test_github_cli_provenance_rejects_escape_and_writable_binary(self):
         module = self.load_command_module()
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve()
             package = root / "Cellar" / "gh"
             binary = package / "1.0" / "bin" / "gh"
             binary.parent.mkdir(parents=True)
@@ -180,6 +187,7 @@ class FactoryDevTests(unittest.TestCase):
                 node,
                 "--test",
                 source / "scripts" / "continuation-command.test.mjs",
+                source / "scripts" / "git-commit.test.mjs",
                 source / "scripts" / "git-push.test.mjs",
                 source / "scripts" / "import-routing-catalog.test.mjs",
                 source / "scripts" / "issue-closeout.test.mjs",
@@ -232,6 +240,72 @@ class FactoryDevTests(unittest.TestCase):
         result, receipt = self.run_dev("doctor", root=root, opencode=fake)
         self.assertEqual(result.returncode, 1)
         self.assertTrue(any("predecessor references" in error for error in receipt["errors"]))
+
+    def test_workspace_registry_rejects_symlink_state_and_uses_injected_issue_check(self):
+        module = self.load_command_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            real = root / "real.json"
+            link = root / "workspaces.json"
+            real.write_text('{"schema_version": 2, "workspaces": []}\n')
+            link.symlink_to(real)
+            module.workspace_state_path = lambda: link
+            with self.assertRaisesRegex(RuntimeError, "symlink"):
+                module.load_workspace_state()
+            calls = []
+            result = types.SimpleNamespace(returncode=0, stdout="OPEN\n")
+            self.assertTrue(module.workspace_issue_open("109", gh=Path("/usr/bin/false"), runner=lambda *args, **kwargs: (calls.append(args), result)[1]))
+            self.assertEqual(len(calls), 1)
+            malformed = types.SimpleNamespace(returncode=0, stdout="UNKNOWN\n")
+            with self.assertRaisesRegex(RuntimeError, "invalid"):
+                module.workspace_issue_state("109", gh=Path("/usr/bin/false"), runner=lambda *args, **kwargs: malformed)
+            state = root / "state.json"
+            module.workspace_state_path = lambda: state
+            lock = module.acquire_workspace_lock()
+            with self.assertRaisesRegex(RuntimeError, "locked"):
+                module.acquire_workspace_lock()
+            lock.unlink()
+
+    def test_workspace_live_primary_linked_admission_and_dirty_audit(self):
+        module = self.load_command_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            temporary = Path(temporary).resolve()
+            primary = temporary / "factory"
+            linked = temporary / "worktree"
+            primary.mkdir()
+            subprocess.run(["/usr/bin/git", "init", "-b", "main"], cwd=primary, check=True, capture_output=True)
+            subprocess.run(["/usr/bin/git", "config", "user.email", "test@example.invalid"], cwd=primary, check=True)
+            subprocess.run(["/usr/bin/git", "config", "user.name", "Factory Test"], cwd=primary, check=True)
+            (primary / "file").write_text("base\n")
+            subprocess.run(["/usr/bin/git", "add", "file"], cwd=primary, check=True)
+            subprocess.run(["/usr/bin/git", "commit", "-m", "base"], cwd=primary, check=True, capture_output=True)
+            subprocess.run(["/usr/bin/git", "remote", "add", "origin", "https://github.com/edoworks/factory.git"], cwd=primary, check=True)
+            subprocess.run(["/usr/bin/git", "update-ref", "refs/remotes/origin/main", "HEAD"], cwd=primary, check=True)
+            subprocess.run(["/usr/bin/git", "worktree", "add", "-b", "feature/109-hygiene", linked, "HEAD"], cwd=primary, check=True, capture_output=True)
+            self.assertTrue(module.primary_checkout(Path("/usr/bin/git"), primary))
+            self.assertFalse(module.primary_checkout(Path("/usr/bin/git"), linked))
+            self.assertIsNotNone(module.linked_workspace(Path("/usr/bin/git"), linked))
+            module.workspace_issue_open = lambda issue, **kwargs: True
+            record = module.workspace_record(primary, linked, "109")
+            state = temporary / "workspaces.json"
+            state.write_text(json.dumps({"schema_version": 2, "workspaces": [record]}) + "\n")
+            module.workspace_state_path = lambda: state
+            (linked / "dirty").write_text("dirty\n")
+            audit = module.workspace_audit(primary)
+            self.assertEqual(audit["workspaces"][0]["status"], "active")
+            original_status = module.git_status
+            module.git_status = lambda *args: module.fail("Git status failed")
+            self.assertEqual(module.workspace_audit(primary)["workspaces"][0]["status"], "invalid")
+            module.git_status = original_status
+            with self.assertRaisesRegex(RuntimeError, "primary checkout"):
+                module.workspace_command(linked, ["create", "110", "other"])
+            gh = temporary / "gh"
+            gh.write_text("#!/bin/sh\nif [ \"$1\" = api ]; then printf 'hellofoculoom\\n'; else printf 'OPEN\\n'; fi\n")
+            gh.chmod(0o755)
+            module.trusted_github_cli = lambda: gh
+            module.workspace_issue_state = lambda issue, gh=None: "OPEN"
+            with self.assertRaisesRegex(RuntimeError, "closed"):
+                module.workspace_command(primary, ["retire", linked])
 
     def test_ancestor_override_and_unlisted_policy_files_fail_closed(self):
         root, fake = self.fixture()
@@ -308,7 +382,7 @@ class FactoryDevTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertTrue(any("unexpected" in error for error in receipt["routing_contradictions"]))
 
-    def test_launch_execs_with_local_config_isolation(self):
+    def test_launch_refuses_canonical_checkout(self):
         root, fake = self.fixture()
         self.make_launch_ready(root)
         fake_gh = root / "gh"
@@ -337,44 +411,51 @@ class FactoryDevTests(unittest.TestCase):
                 "PATH": f"{root}:{os.environ['PATH']}",
             },
         )
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        launched = json.loads(result.stdout.splitlines()[1])
-        self.assertEqual(launched["target"], str(root))
-        self.assertEqual(launched["config"], str(root / "development"))
-        self.assertEqual(launched["github"], "/tmp/user-config/gh")
-        trusted_gh = next(path.resolve() for path in (Path("/opt/homebrew/bin/gh"), Path("/usr/local/bin/gh"), Path("/usr/bin/gh"), Path("/home/linuxbrew/.linuxbrew/bin/gh")) if path.is_file())
-        self.assertEqual(launched["factory_gh"], str(trusted_gh))
-        self.assertNotEqual(launched["factory_gh"], str(fake_gh.resolve()))
-        self.assertEqual(launched["factory_node"], receipt["node_cli"])
-        self.assertEqual(launched["path"], "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/home/linuxbrew/.linuxbrew/bin")
-        self.assertEqual(launched["gh_host"], "")
-        self.assertEqual(launched["gh_token"], "")
-        self.assertEqual(launched["github_token"], "")
-        self.assertEqual(launched["enterprise_token"], "")
-        self.assertEqual(launched["http_socket"], "")
-        self.assertEqual(launched["node_options"], "")
-        self.assertEqual(launched["openai_key_present"], "")
-        self.assertNotIn("test-only-stale-key", result.stdout)
-        self.assertNotIn("test-only-stale-key", result.stderr)
-        self.assertEqual(launched["custom"], "")
-        self.assertEqual(launched["directory"], "")
-        self.assertEqual(launched["content"], "")
-        self.assertEqual(launched["permission"], "")
-        self.assertEqual(launched["pure"], "")
-        self.assertEqual(launched["future"], "")
-        self.assertEqual(launched["autoupdate"], "1")
-        self.assertEqual(launched["models_fetch"], "1")
-        self.assertTrue(
-            {
-                "OPENCODE_CONFIG",
-                "OPENCODE_CONFIG_CONTENT",
-                "OPENCODE_CONFIG_DIR",
-                "OPENCODE_FUTURE_FLAG",
-                "OPENCODE_PERMISSION",
-                "OPENCODE_PURE",
-            }.issubset(receipt["ignored_environment_overrides"]),
-        )
-        self.assertTrue(receipt["launch_ready"])
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("primary checkout is read-only", result.stdout)
+
+    def test_clean_registered_linked_launch_strips_git_overrides(self):
+        primary, _ = self.fixture()
+        self.make_launch_ready(primary)
+        subprocess.run(["/usr/bin/git", "add", "-A"], cwd=primary, check=True)
+        subprocess.run(["/usr/bin/git", "commit", "-m", "ready fixture"], cwd=primary, check=True, capture_output=True)
+        subprocess.run(["/usr/bin/git", "update-ref", "refs/remotes/origin/main", "HEAD"], cwd=primary, check=True)
+        linked = primary.parent / f"{primary.name}-linked"
+        self.addCleanup(shutil.rmtree, linked, True)
+        subprocess.run(["/usr/bin/git", "worktree", "add", "-b", "feature/109-launch-test", linked, "HEAD"], cwd=primary, check=True, capture_output=True)
+        head = subprocess.run(["/usr/bin/git", "rev-parse", "HEAD"], cwd=linked, check=True, text=True, capture_output=True).stdout.strip()
+        state = primary / "workspaces.json"
+        state.write_text(json.dumps({"schema_version": 2, "workspaces": [{"issue": "109", "branch": "feature/109-launch-test", "path": str(linked), "base_revision": head, "head": head}]}) + "\n")
+        gh = primary / "test-gh"
+        gh.write_text("#!/bin/sh\nif [ \"$1\" = api ]; then printf 'hellofoculoom\\n'; else printf 'OPEN\\n'; fi\n")
+        gh.chmod(0o755)
+        module = self.load_command_module()
+        module.repository_root = lambda: linked
+        module.workspace_state_path = lambda: state
+        module.trusted_github_cli = lambda: gh
+        captured = {}
+        original_execvpe = os.execvpe
+        original_environment = os.environ.copy()
+
+        class Executed(Exception):
+            pass
+
+        def capture_exec(file, args, environment):
+            captured.update({"file": file, "args": args, "environment": environment})
+            raise Executed()
+
+        try:
+            module.os.execvpe = capture_exec
+            os.environ.update({"FACTORY_DEV_OPENCODE": str(linked / "opencode"), "GIT_DIR": "/tmp/hostile", "GIT_WORK_TREE": "/tmp/hostile-tree"})
+            with self.assertRaises(Executed):
+                module.main(["launch"])
+        finally:
+            module.os.execvpe = original_execvpe
+            os.environ.clear()
+            os.environ.update(original_environment)
+        self.assertEqual(captured["args"], [str(linked / "opencode"), str(linked)])
+        self.assertNotIn("GIT_DIR", captured["environment"])
+        self.assertNotIn("GIT_WORK_TREE", captured["environment"])
 
     def test_refresh_catalog_imports_generated_evidence_and_restores_readiness(self):
         root, fake = self.fixture()
@@ -403,7 +484,7 @@ class FactoryDevTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(receipt["command"], "factory-dev refresh-catalog")
         self.assertEqual(receipt["catalog_import"]["generation"], generated["generation"])
-        self.assertTrue(receipt["launch_ready"])
+        self.assertTrue(receipt["doctor_ready"])
         self.assertEqual(json.loads(catalog.read_text())["generation"], generated["generation"])
         manifest = json.loads((root / "development" / "opencode" / "policy-manifest.json").read_text())
         self.assertEqual(manifest["files"]["model-routing/catalog.json"], hashlib.sha256(catalog.read_bytes()).hexdigest())
@@ -416,7 +497,7 @@ class FactoryDevTests(unittest.TestCase):
         self.make_benchmarks_ready(root)
         result, receipt = self.run_dev("refresh-catalog", root=root, opencode=fake)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertTrue(receipt["launch_ready"])
+        self.assertTrue(receipt["doctor_ready"])
         imported = root / "development" / "opencode" / "model-routing" / "catalog.json"
         tracked = ROOT / "development" / "opencode" / "model-routing" / "catalog.json"
         self.assertEqual(imported.read_bytes(), tracked.read_bytes())
