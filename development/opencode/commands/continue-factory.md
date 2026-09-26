@@ -143,11 +143,10 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Complete issue #101's local verification, independent review, exact rendered
-   review, hosted checks, and integration. Then use a fresh launch and the
-   user-owned browser OAuth connection for one controlled request; handle any
+3. Complete PR #106's hosted checks and integration. Then use a fresh launch and
+   the user-owned browser OAuth connection for one controlled request; handle any
    saved API-key credential only through interactive OpenCode `/connect` without
-   disclosing its value.
+   disclosing its value. Close issue #101 only after that live acceptance passes.
 4. From that policy-valid fresh Factory environment, verify doctor and
    autonomously open one approved Factory page in signed-out Chrome Guest. Record
    the post-integration receipt before claiming issue #102 completion or sending
