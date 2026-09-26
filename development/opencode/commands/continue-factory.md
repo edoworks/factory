@@ -97,7 +97,7 @@ agent: explore
   require privacy review. A second review found that OpenCode 1.18.19 would
   not discover the first `.mjs` tool and that duplicate tool-shaped exports would
   widen its name surface; the correction uses `.js` and one default tool export.
-  The corrected source passed 81 Python tests and 20 pinned Node tests,
+  The corrected source passed 82 Python tests and 20 pinned Node tests,
   `git diff --check`, launch-ready Factory doctor, and final independent review
   with no implementation finding before isolation. Isolated review found that a
   later Safari-only issue comment conflicted with the Chrome Guest privacy
@@ -111,8 +111,12 @@ agent: explore
   found no overlap, clipping, unreadable wrapping, or later-state overclaim.
   PR #104's first Factory policy job failed because its clean checkout did not
   install the pinned OpenCode tool dependency before the Node suite. The local
-  correction adds lockfile-bound installation and an order assertion. Corrected
-  hosted checks, integration, and closeout remain pending.
+  correction added lockfile-bound installation and an order assertion. Corrected
+  hosted run `36214255479` passed the Factory policy, iPhone, and iPad jobs. PR
+  #104 merged exact head `5780f09` as `58f2406`; issue #102 is closed and its
+  pinned closeout receipt is `CLOSED`. This process loaded policy before merge,
+  so post-integration fresh-launch acceptance and completion notification remain
+  pending.
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
@@ -121,9 +125,9 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Commit issue #102's verified correction, push it through the guarded transport,
-   pass hosted checks, integrate it, then verify a post-integration fresh launch
-   before closeout.
+3. From a newly launched Factory session, verify doctor and autonomously open one
+   approved Factory page in signed-out Chrome Guest. Record that post-integration
+   receipt before claiming issue #102 completion or sending its notification.
 4. Continue issue #70 only with an explicitly active product or release workflow
    after current lifecycle admission is recorded.
 5. Continue issue #78's portfolio index under the issue #77 privacy boundary,
