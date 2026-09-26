@@ -108,3 +108,24 @@ it off, retain the exact denial as evidence, derive cwd and dependency setup fro
 the repository first, batch only independently proven commands, and never ask
 the owner to repeat output already captured. In this session, the package-local
 type check remains an owner action because Bash explicitly denied it.
+
+## Stale Push Wrapper 5-Whys
+
+1. Why did the first guarded push reject the expected commit? The invoked wrapper
+   resolved and inspected the quarantined primary checkout, whose HEAD differs
+   from the issue #114 commit.
+2. Why did it inspect the primary? The session permission map admitted only the
+   wrapper path under `/Users/hello/factory`, and that older wrapper derives its
+   repository root from its own source location.
+3. Why was that wrapper attempted? Its command shape was allowed while the
+   workspace-owned merged wrapper was denied.
+4. Why was an allowed command not sufficient? Permission to execute a path does
+   not establish that path's revision or repository binding is correct.
+5. Root cause: executable provenance was inferred from the allowlist instead of
+   verified against the target workspace before invocation.
+
+No network mutation occurred because the stale wrapper failed its exact-HEAD
+guard. The mechanical recurrence guard is to inspect a repository-owned wrapper's
+root-binding behavior and revision before execution, and never substitute a
+quarantined-primary wrapper for the workspace-owned wrapper merely to match a
+permission pattern.
