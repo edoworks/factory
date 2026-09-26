@@ -102,9 +102,11 @@ agent: explore
   contradiction, and `launch_ready: true`. Exact rendered review of issue #101,
   PR #106, the revision-bound PRD paragraph, and both incident
   Five-Whys sections passed at implementation head `2a914b9` without readability
-  or privacy defect. Hosted checks, integration, and a fresh user-controlled
-  OAuth request remain required.
-  Complete this boundary before another canonical Factory launch.
+  or privacy defect. PR #106 merged final head `61e0565` as `28edd62`; hosted run
+  `36219860937` passed all three jobs. A fresh launch from that canonical merge
+  reported `launch_ready: true`, and the owner completed one OAuth-backed request
+  without disclosing credential material. Repository closeout integration and
+  issue-state verification remain required.
 - Issue #102 tracks self-service rendered Factory review. Its frozen intent and
   remote readback match. Independent review rejected the first Bash-carried URL
   design because quote-breaking expansion preceded validation. The corrected
@@ -143,11 +145,10 @@ agent: explore
 1. Run `bin/factory-dev doctor` and read its JSON receipt.
 2. Resolve integrity, predecessor-path, active-comparison, or routing blockers
    without changing provider budgets or fallback semantics without authority.
-3. Complete PR #106's hosted checks and integration. Then use a fresh launch and
-   the user-owned browser OAuth connection for one controlled request; handle any
-   saved API-key credential only through interactive OpenCode `/connect` without
-   disclosing its value. Close issue #101 only after that live acceptance passes.
-4. From that policy-valid fresh Factory environment, verify doctor and
+3. Integrate issue #101's post-merge OAuth acceptance record, close issue #101
+   through the repository-owned workflow, require the pinned verifier to return
+   `CLOSED`, and send its completion notification.
+4. From a policy-valid fresh Factory environment, verify doctor and
    autonomously open one approved Factory page in signed-out Chrome Guest. Record
    the post-integration receipt before claiming issue #102 completion or sending
    its notification.

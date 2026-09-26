@@ -2,7 +2,7 @@
 
 Date: 2026-09-25
 Tracker: `edoworks/factory#101`
-Status: isolated correction pending verification and integration
+Status: correction integrated; closeout evidence pending integration
 
 ## Evidence
 
@@ -56,9 +56,14 @@ the isolated repository root. Factory doctor reports valid policy, matching
 active installation, no routing contradiction, and `launch_ready: true`. Exact
 rendered review of issue #101, PR #106, the PRD paragraph, and both incident
 Five-Whys sections passed at implementation head `2a914b9` without clipping,
-unreadable wrapping, or exposed credential material. Hosted checks, integration,
-and a fresh user-controlled OAuth-backed model request remain required before
-completion.
+unreadable wrapping, or exposed credential material. PR #106 merged final head
+`61e0565` as `28edd62`; hosted run `36219860937` passed the Factory policy,
+iPhone, and iPad jobs. A fresh launch from merged canonical `main` reported
+revision `28edd62` and `launch_ready: true`, and the owner completed one
+OAuth-backed request without exposing credential material. This proves the
+accepted request path in that fresh launch, not the stored credential's internals
+or every future request. Repository closeout integration and issue-state
+verification remain required before completion.
 
 ## Clean-Worktree Verification Invocation 5-Whys
 
