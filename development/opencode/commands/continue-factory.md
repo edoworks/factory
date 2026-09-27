@@ -18,12 +18,19 @@ agent: explore
   repository path: a clean linked launcher must share verified Git metadata with
   the discovered primary and have its exact HEAD contained in freshly fetched
   canonical `origin/main` before creating a new issue workspace. PR #115 head
-  `a5dcb77` passed local verification, independent trust review with no remaining
-  material findings, rendered issue and PR review, and all three hosted checks;
-  merge, fresh successor creation, and closeout remain.
-- Issue #113 owns correction of the first Rubberduck report. Independent review
-  found no candidate qualifies for `INVESTIGATE NOW`; it remains blocked until
-  issue #114 integrates and a fresh registered #113 workspace is created.
+  `25470f2` passed local verification, independent trust review with no remaining
+  material findings, rendered issue and PR review, and all three hosted checks.
+  PR #115 merged as `0eb7484`; issue #114 is remotely closed and the registered
+  #113 successor starts at that merge. The pinned closeout receipt and completion
+  notification remain blocked by this session's space-containing path parsing.
+- Issue #113 owns correction of the first Rubberduck report. Its reconstructed
+  ledger keeps accessibility, field-service voice, and prior-authorization
+  candidates `WATCH` and generic browser/agent automation `REJECT`; no candidate
+  qualifies for `INVESTIGATE NOW`. The post-change doctor reports valid policy,
+  matching active installation, no errors or routing contradictions, and
+  expected dirty workspace admission. The validator, 97 Python tests, 22 Node
+  tests, and `git diff --check` pass after the policy-bytecode recurrence fix;
+  independent re-review, rendered review, PR, and hosted checks remain pending.
 - Issue #69 and PR #71 completed the repository-owned OpenCode development
   environment and `CANONICAL_FOR_NEW_WORK` state.
 - Issue #68 is the active consolidation map. PR #74 merged interactive Factory
@@ -160,14 +167,12 @@ agent: explore
 
 ## Restart
 
-1. Merge green PR #115 without bypass, then verify issue #114 closeout and create
-   a fresh registered issue #113 workspace from the merged launcher. Capture the
-   successor creation and audit receipts before completion notification. Do not
-   use the one-time bootstrap path again.
-2. Create a fresh registered issue #113 workspace from canonical `main`, then
-   reconstruct and correct the preserved Rubberduck report, add its deterministic
-   gate/ledger validator, update the PRD, and complete local, hosted, independent,
-   and rendered verification. Do not copy mixed policy-manifest hashes.
+1. From a fresh policy-valid session, require the pinned verifier to return
+   `CLOSED` for issue #114, retain the private successor audit receipt, and send
+   its completion notification. Do not use the one-time bootstrap path again.
+2. In the registered issue #113 workspace, complete independent and rendered
+   verification, then obtain all hosted checks before integration. Do not copy
+   mixed policy-manifest hashes.
 3. Reconstruct issue #108 from canonical `main` in its own registered worktree
    after the P0 bootstrap path is complete.
 4. Run `bin/factory-dev doctor` and read its JSON receipt.

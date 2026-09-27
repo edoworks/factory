@@ -48,6 +48,9 @@ jobs:
       - name: Validate public consolidation evidence
         run: python3 scripts/check_consolidation_evidence.py
 
+      - name: Validate Rubberduck research ledger
+        run: python3 development/opencode/scripts/validate-rubberduck.py
+
       - name: Run Python unit tests
         env:
           GITHUB_TOKEN: ${{ github.token }}
