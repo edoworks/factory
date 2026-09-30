@@ -20,6 +20,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install declared build dependency
         run: brew install xcodegen
@@ -47,6 +49,9 @@ jobs:
 
       - name: Validate public consolidation evidence
         run: python3 scripts/check_consolidation_evidence.py
+
+      - name: Validate Rubberduck research ledger
+        run: python3 development/opencode/scripts/validate-rubberduck.py
 
       - name: Run Python unit tests
         env:

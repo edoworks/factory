@@ -92,7 +92,7 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertEqual(permissions["{env:FACTORY_DEV_NODE} --test*"], "deny")
         self.assertEqual(permissions["python3 -m unittest discover -s {env:FACTORY_DEV_OPENCODE_ROOT}/../../tests"], "allow")
         self.assertEqual(
-            permissions["{env:FACTORY_DEV_NODE} --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-commit.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/import-routing-catalog.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/open-factory-page.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs"],
+            permissions["{env:FACTORY_DEV_NODE} --test {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/continuation-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-commit.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/git-push.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/import-routing-catalog.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/issue-closeout.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/open-factory-page.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/rubberduck-command.test.mjs {env:FACTORY_DEV_OPENCODE_ROOT}/plugins/cost-router.test.mjs"],
             "allow",
         )
         self.assertEqual(
@@ -194,6 +194,23 @@ class SingleFactoryContractTests(unittest.TestCase):
         self.assertIn(install, workflow)
         self.assertIn(suite, workflow)
         self.assertLess(workflow.index(install), workflow.index(suite))
+
+    def test_rubberduck_contract_is_in_pinned_node_suite(self):
+        config = json.loads((ROOT / "development" / "opencode" / "opencode.jsonc").read_text())
+        permissions = config["permission"]["bash"]
+        workflow = (ROOT / ".github" / "workflows" / "checks.yml").read_text()
+        self.assertIn(
+            "{env:FACTORY_DEV_OPENCODE_ROOT}/scripts/rubberduck-command.test.mjs",
+            next(pattern for pattern in permissions if "rubberduck-command.test.mjs" in pattern),
+        )
+        self.assertEqual(
+            permissions["python3 {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/validate-rubberduck.py"],
+            "allow",
+        )
+        full_checkout = "- uses: actions/checkout@v4\n        with:\n          fetch-depth: 0"
+        self.assertIn(full_checkout, workflow)
+        self.assertLess(workflow.index(full_checkout), workflow.index("Validate Rubberduck research ledger"))
+        self.assertIn("python3 development/opencode/scripts/validate-rubberduck.py", workflow)
 
     def test_issue_intent_hash_command_is_deterministic(self):
         body = ROOT / "docs" / "FactoryDevelopment-PRD.md"

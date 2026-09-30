@@ -26,6 +26,16 @@ product runtime.
   receipts.
 - Installation receipts that identify factory version, source revision,
   OpenCode version, tracked policy digest, and local override state.
+- Rubberduck opportunity research is a decision-evidence exercise, not product
+  qualification. Every candidate must pass the fixed `ai_essential`,
+  `independent_demand`, `two_week_test`, `distribution`, `recurrence`,
+  `economics`, `defensibility`, `risk`, and `validation_design` gates in the
+  repository-owned ledger; missing evidence stays `WATCH` or becomes `REJECT`.
+  `INVESTIGATE NOW` is permitted only when the deterministic validator sees a
+  published, source-bound pass assertion for every gate, classified report
+  claims bound to the same source inventory, exact candidate/gate evidence sets
+  and receipt summaries in validator-owned approvals, and recomputed policy-source
+  inventory and manifest integrity in hosted verification.
 
 Development policy may invoke tools to improve the runtime. Runtime commands
 and generated products must not import, download, or require that policy.

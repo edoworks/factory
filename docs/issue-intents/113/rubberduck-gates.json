@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repo": "edoworks/factory",
+  "title": "Validate Rubberduck opportunity research gates",
+  "body_file": "rubberduck-gates-body.md",
+  "body_sha256": "a0a7966d53b219ffbe6f34bc370a94e8fe2b85761cb62bdcec024c13b69eda7c",
+  "classification": "enhancement",
+  "labels": ["enhancement", "factory"],
+  "priority": "P1",
+  "dependencies": ["Merged issue #109 workspace guard", "Preserved first-pass Rubberduck report", "Current public primary and institutional sources"],
+  "authority_constraints": ["No product launch or private outreach", "No purchasing, release publication, deletion, or credential access", "No provider route or budget changes"],
+  "source_provenance": ["Quarantined-primary Rubberduck report and contract source", "WebAIM, W3C, provider, incumbent, and government sources", "Issue #113 workspace audit and doctor receipts"],
+  "duplicate_review": ["Issue #109 owns workspace isolation", "Issue #108 owns release freshness", "Issue #70 owns product and release decoupling"],
+  "reprioritization_review": ["Correct unsupported opportunity disposition before any product-selection or prototype decision"]
+}
