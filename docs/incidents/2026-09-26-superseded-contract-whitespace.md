@@ -86,3 +86,32 @@ launch nor a push can proceed. The operational recurrence rule is to use no raw
 commit in a linked workspace, verify the launcher source and target are the same
 admitted root, and run that root's doctor receipt after every hash-bound policy
 edit before handoff.
+
+## Exact-Head Catalog Freshness Blocker
+
+Exact-head verification at `b12b195f2c49921139196933b6a696f2abe0e909`
+passed all 21 pinned Node tests and 86 of 87 Python tests. The remaining Python
+test compared the tracked route-only catalog generation
+`1790421641508-3284` with approved generated user catalog generation
+`1790693125869-34347` and failed. Factory doctor independently reported the
+tracked catalog stale and kept `launch_ready` false.
+
+1. Why did the Python suite fail? The tracked catalog no longer matched the
+   available approved generated user evidence.
+2. Why did the files differ? The user catalog was refreshed on 2026-09-29,
+   while the issue branch retained the tracked snapshot from 2026-09-26.
+3. Why did the branch not remain launch-ready? Routing policy permits tracked
+   catalog evidence for at most 48 hours.
+4. Why was this discovered only after the recovery commit? The commit helper
+   validates the staged diff and workspace registry but does not claim that
+   time-dependent routing evidence is current.
+5. Why must the branch stop before push? Issue #116 requires the complete local
+   suite and launch-ready doctor on the exact head; a known stale-evidence
+   failure cannot be replaced by hosted or older-head results.
+
+The mechanical guard is unchanged: the catalog-equality test rejects drift,
+doctor rejects stale tracked evidence, and `bin/factory-dev refresh-catalog`
+imports only the approved route-relevant subset while updating its manifest
+digest atomically. After that import, the corrected files and this incident
+record require a guarded issue #116 commit and a fresh exact-head rerun before
+push.
