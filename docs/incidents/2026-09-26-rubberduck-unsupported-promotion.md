@@ -90,3 +90,53 @@ pinned Node command are asserted.
 The mechanical guard sets `sys.dont_write_bytecode` before loading the validator,
 retains the closed-world policy inventory, removes only the observed generated
 cache, and reruns the full suite from a cache-free tree.
+
+## Hosted Verification Failure: Shallow Evidence History
+
+PR #118's first hosted policy run failed with
+`INVALID: pre receipt revision is missing`. The validator was correct: its
+approved pre-change receipt names base revision
+`0eb7484bb34c07a750761cdce9959d083ef68773`, but the hosted checkout contained
+only the synthetic pull-request merge commit.
+
+1. Why did hosted validation fail after the same ledger passed locally? The
+   hosted checkout could not resolve the approved pre-change revision.
+2. Why could it not resolve that revision? `actions/checkout@v4` used its
+   default depth-one fetch for the policy job.
+3. Why did local verification not reveal the mismatch? The registered linked
+   workspace had complete local history.
+4. Why was checkout depth absent from the first recurrence guard? The guard
+   verified manifest closure and receipt content, but did not model the history
+   needed to verify receipt provenance in an ephemeral runner.
+5. Why must the validator not simply accept a missing revision? That would turn
+   a provenance check into a format-only claim and allow unavailable evidence to
+   pass.
+
+Mechanical recurrence guard: the policy job now checks out full history before
+running the validator, and the single-Factory contract test requires that
+full-history checkout to precede the Rubberduck validation step. The validator
+continues to fail closed when either approved receipt revision is unavailable.
+
+## Local Aggregate Verification Boundary
+
+The replacement correction's aggregate Python run executed 97 tests and had one
+failure: the repository guard found that newer generated user model-catalog
+evidence differs from the tracked catalog. The #113-specific validator and
+contract suites and the pinned Node suite pass.
+
+1. Why did the aggregate local suite not pass? The generated user catalog and
+   tracked repository catalog differ.
+2. Why was that difference tested during #113 verification? The aggregate suite
+   intentionally checks available ambient generated evidence.
+3. Why is the generated evidence newer than this branch? Catalog freshness is
+   maintained by a separate approved routing workflow.
+4. Why was it not imported into #113? The owner excluded model-catalog refresh
+   work, and mixing that policy state into this correction would widen scope.
+5. Why can #113 continue to hosted verification? The clean hosted runner has no
+   user-generated catalog to import, while the repository-owned validator,
+   contract, and policy checks still run against the exact feature head.
+
+Mechanical recurrence guard: the ambient catalog comparison remains fail closed
+when generated evidence is present, Factory doctor continues to report the
+routing contradiction, and #113 requires the clean hosted policy gate rather
+than treating the scoped local suites as full integration evidence.

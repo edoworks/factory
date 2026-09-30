@@ -30,7 +30,13 @@ agent: explore
   matching active installation, no errors or routing contradictions, and
   expected dirty workspace admission. The validator, 97 Python tests, 22 Node
   tests, and `git diff --check` pass after the policy-bytecode recurrence fix;
-  independent re-review, rendered review, PR, and hosted checks remain pending.
+  independent re-review and rendered review passed. PR #118's first hosted
+  policy run failed because its depth-one checkout omitted the approved
+  pre-change receipt revision. The replacement full-history checkout and
+  contract guard are implemented. Focused validator and contract suites, the
+  pinned Node suite, and `git diff --check` pass. The aggregate Python run has
+  one unrelated ambient generated-catalog mismatch; catalog refresh remains
+  outside issue #113. Commit, push, and replacement hosted checks remain pending.
 - Issue #69 and PR #71 completed the repository-owned OpenCode development
   environment and `CANONICAL_FOR_NEW_WORK` state.
 - Issue #68 is the active consolidation map. PR #74 merged interactive Factory
@@ -170,9 +176,10 @@ agent: explore
 1. From a fresh policy-valid session, require the pinned verifier to return
    `CLOSED` for issue #114, retain the private successor audit receipt, and send
    its completion notification. Do not use the one-time bootstrap path again.
-2. In the registered issue #113 workspace, complete independent and rendered
-   verification, then obtain all hosted checks before integration. Do not copy
-   mixed policy-manifest hashes.
+2. In the registered issue #113 workspace, replace PR #118's head with the
+   verified hosted-checkout correction and obtain all hosted checks before
+   integration. Do not refresh the model catalog or copy mixed policy-manifest
+   hashes.
 3. Reconstruct issue #108 from canonical `main` in its own registered worktree
    after the P0 bootstrap path is complete.
 4. Run `bin/factory-dev doctor` and read its JSON receipt.

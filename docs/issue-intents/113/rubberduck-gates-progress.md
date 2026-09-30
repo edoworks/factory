@@ -30,3 +30,14 @@ only final medium integration gap was the manifest/test refresh completed by
 that rerun. Rendered review, PR, and hosted checks remain pending. It uses
 canonical doctor receipts rather than importing the unrelated unmerged hygiene
 runtime.
+
+PR #118's first hosted policy run failed at the ledger validator because the
+depth-one synthetic merge checkout omitted the approved pre-change revision.
+The validator remains fail closed. The replacement change gives the policy job
+full history and adds a contract assertion that this checkout precedes ledger
+validation; the incident record contains the evidence-based 5-Whys. The 10-test
+validator suite, 11-test single-Factory contract suite, 16-test pinned Node
+suite, and `git diff --check` pass. The 97-test aggregate Python run has one
+unrelated ambient failure because newer generated user catalog evidence differs
+from the tracked catalog; issue #113 does not refresh model-routing evidence.
+Commit, push, hosted checks, and final rendered PR review remain pending.

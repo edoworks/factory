@@ -207,6 +207,9 @@ class SingleFactoryContractTests(unittest.TestCase):
             permissions["python3 {env:FACTORY_DEV_OPENCODE_ROOT}/scripts/validate-rubberduck.py"],
             "allow",
         )
+        full_checkout = "- uses: actions/checkout@v4\n        with:\n          fetch-depth: 0"
+        self.assertIn(full_checkout, workflow)
+        self.assertLess(workflow.index(full_checkout), workflow.index("Validate Rubberduck research ledger"))
         self.assertIn("python3 development/opencode/scripts/validate-rubberduck.py", workflow)
 
     def test_issue_intent_hash_command_is_deterministic(self):
