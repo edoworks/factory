@@ -23,7 +23,7 @@ agent: explore
   premature while Mews & Woofs remains an internal reference fixture. Their
   remote closures remain pending integration and advance no deletion, browser,
   product, Apple, or release state.
-- PR #117 remains open at remote head `af948ef`. Hosted run `36270459972` failed
+- PR #117 remains open at remote head `748815d`. Hosted run `36270459972` failed
   the Factory policy job because its new prose assertion compared raw wrapped
   Markdown, and its iPhone job separately failed during target-app launch without
   diagnostic detail; the iPad job passed. The registered issue workspace
@@ -34,10 +34,17 @@ agent: explore
   failed closed. The owner-authorized guarded recommit combines the preserved
   correction, restores manifest integrity, and atomically advances the workspace
   registry in its resulting revision. Exact-head local gates, guarded push, all
-  three hosted checks, and final rendered review remain required. Confirm PR #117
-  does not auto-close issue #116; after merge, close and verify #15, #17, #103,
-  and #14 first, then close and verify #116 under the owner's 2026-09-26
-  instruction.
+  three hosted checks, and final rendered review remain required. Exact-head
+  local verification at `748815d` passed 87 Python tests, 21 pinned Node tests,
+  launch-ready Factory doctor, `git diff --check`, frozen-intent validation, and
+  independent review with no finding. GitHub nevertheless reports the PR
+  conflicting with canonical base `0eb7484`, exposes no potential merge commit,
+  and created no checks, despite the local commit graph proving that base is a
+  direct ancestor. One evidence-bearing forward commit may trigger a fresh
+  synchronize event; if the contradiction persists, stop without force-pushing
+  or bypassing merge protection. Confirm PR #117 does not auto-close issue #116;
+  after merge, close and verify #15, #17, #103, and #14 first, then close and
+  verify #116 under the owner's 2026-09-26 instruction.
 - Issue #69 and PR #71 completed the repository-owned OpenCode development
   environment and `CANONICAL_FOR_NEW_WORK` state.
 - Issue #68 is the active consolidation map. PR #74 merged interactive Factory

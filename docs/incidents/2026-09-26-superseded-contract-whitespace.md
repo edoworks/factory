@@ -115,3 +115,31 @@ imports only the approved route-relevant subset while updating its manifest
 digest atomically. After that import, the corrected files and this incident
 record require a guarded issue #116 commit and a fresh exact-head rerun before
 push.
+
+## Hosted Mergeability Contradiction
+
+The guarded fast-forward push advanced PR #117 from `af948ef` to exact head
+`748815d3f67c7238ede26fa031b8a7de484f844c`. GitHub continued to report
+`mergeable: CONFLICTING`, exposed no potential merge commit, and created no
+checks. The exact local object chain is `748815d -> b12b195 -> af948ef ->
+cf76348 -> 0eb7484`, while GitHub reports canonical base
+`0eb7484bb34c07a750761cdce9959d083ef68773`.
+
+1. Why did hosted verification not start? GitHub created no check runs for the
+   pushed pull-request head.
+2. Why was no merge candidate available? GitHub reported the head conflicting
+   with `main` and returned no potential merge commit.
+3. Why is that state contradictory? The reported base is an exact ancestor of
+   the reported head in the locally verified object graph.
+4. Why did the guarded push not resolve it? The prior remote head already had
+   the same hosted conflict state, and advancing it by two ordinary commits did
+   not produce a mergeability candidate.
+5. Why can local evidence not clear the gate? Hosted checks depend on GitHub's
+   pull-request event and mergeability state; ancestry proof cannot substitute
+   for required remote jobs.
+
+The bounded recurrence guard permits one evidence-bearing forward commit to
+trigger a fresh synchronize event. It forbids empty commits, force-pushes,
+history rewrites, admin bypasses, and repeated retries. If GitHub still reports
+the ancestry contradiction or creates no checks, stop and track the hosted
+mergeability service as a separate blocker before changing branch history.
