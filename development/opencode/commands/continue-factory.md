@@ -40,11 +40,14 @@ agent: explore
   independent review with no finding. GitHub nevertheless reports the PR
   conflicting with canonical base `0eb7484`, exposes no potential merge commit,
   and created no checks, despite the local commit graph proving that base is a
-  direct ancestor. One evidence-bearing forward commit may trigger a fresh
-  synchronize event; if the contradiction persists, stop without force-pushing
-  or bypassing merge protection. Confirm PR #117 does not auto-close issue #116;
-  after merge, close and verify #15, #17, #103, and #14 first, then close and
-  verify #116 under the owner's 2026-09-26 instruction.
+  direct ancestor. Commit `22bdc16` records the contradiction before the sole
+  guarded synchronize push; review-only corrections made before that push remain
+  part of the same attempt. Once that push occurs, any additional trigger commit
+  requires a separately tracked blocker and renewed owner authority. If the
+  contradiction persists, stop without force-pushing or bypassing merge
+  protection. Confirm PR #117 does not auto-close issue #116; after merge, close
+  and verify #15, #17, #103, and #14 first, then close and verify #116 under the
+  owner's 2026-09-26 instruction.
 - Issue #69 and PR #71 completed the repository-owned OpenCode development
   environment and `CANONICAL_FOR_NEW_WORK` state.
 - Issue #68 is the active consolidation map. PR #74 merged interactive Factory

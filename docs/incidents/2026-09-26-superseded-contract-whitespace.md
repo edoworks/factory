@@ -138,8 +138,11 @@ cf76348 -> 0eb7484`, while GitHub reports canonical base
    pull-request event and mergeability state; ancestry proof cannot substitute
    for required remote jobs.
 
-The bounded recurrence guard permits one evidence-bearing forward commit to
-trigger a fresh synchronize event. It forbids empty commits, force-pushes,
-history rewrites, admin bypasses, and repeated retries. If GitHub still reports
-the ancestry contradiction or creates no checks, stop and track the hosted
-mergeability service as a separate blocker before changing branch history.
+Commit `22bdc163b130ae8b6f31cdd7234b57871d7f20b7` records the contradiction
+before the sole guarded synchronize push. Review-only corrections made before
+that first push remain part of the same attempt; the expected full head and
+clean registered workspace are enforced by `git-push.mjs`. After that push, any
+additional trigger commit requires a separately tracked blocker and renewed
+owner authority. Empty commits, force-pushes, history rewrites, admin bypasses,
+and repeated retries remain forbidden. If GitHub still reports the ancestry
+contradiction or creates no checks, stop before changing branch history.
