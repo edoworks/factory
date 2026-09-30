@@ -23,7 +23,7 @@ agent: explore
   premature while Mews & Woofs remains an internal reference fixture. Their
   remote closures remain pending integration and advance no deletion, browser,
   product, Apple, or release state.
-- PR #117 remains open at remote head `cf76348`. Hosted run `36270459972` failed
+- PR #117 remains open at remote head `af948ef`. Hosted run `36270459972` failed
   the Factory policy job because its new prose assertion compared raw wrapped
   Markdown, and its iPhone job separately failed during target-app launch without
   diagnostic detail; the iPad job passed. The registered issue workspace
