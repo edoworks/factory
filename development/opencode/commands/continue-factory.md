@@ -3,7 +3,41 @@ description: Resume active Edoworks Factory work
 agent: explore
 ---
 
-## Current State
+## Current Work
+
+The owner approved correcting truthful verification before further autonomous
+transport work. Current chunk: `edoworks/factory#121`, registered branch
+`feature/121-analyzer-errors`, baseline `0ff8117a75882a656aa20451e5c21244a3910b28`.
+The analyzer correction and controlled executable regression tests are locally
+implemented. Read `docs/incidents/2026-09-30-analyzer-false-pass.md` for source,
+historical replay, independent review, and verification limitations.
+
+Focused tests now pass 14 scenarios, including successful analysis followed by
+missing diagnostics. Grep read errors cannot become a No warnings result.
+Broad verification is not green: two Python
+installation/profile/catalog comparisons fail, and a Node test cannot load the
+declared development dependency in this fresh workspace. Do not alter baselines,
+provider evidence, or assertions to force a pass, and do not run a denied install
+through another wrapper. Doctor's policy and issue binding are valid, but stale
+routing evidence still blocks launcher readiness; no launch-ready claim is made.
+
+The owner authorized canonical progress writes after a separate identity check.
+The separate issue-111 worktree now has fixture-based test-plane changes with
+green local suites, but those changes are not integrated here. An earlier commit
+probe was denied before execution. A later owner-approved, digest-bound dispatcher
+committed the verified candidate as `774baca7ec6d7eb17cff4be5ca1f3a93f58fd3c7`
+and pushed `feature/121-analyzer-errors`; raw Git was not substituted. A separately
+reviewed exact dispatcher then created draft PR #126 from exact head
+`4af6a7a42039c36500cff96d5c142491fa41e182` to `main` and verified its fixed
+body, author, base, branch, and head. Hosted checks, merge, release, signing,
+provider change, app lock upgrade, and issue closeout remain pending. The primary
+and unrelated issue worktrees remain untouched. Self-service transport issue #111
+and user admission issue #122 are distinct; do not revive paused products,
+browser tooling, cleanup, or old PR work.
+
+## Historical Checkpoints
+
+The following checkpoint and restart records are history, not current priorities.
 
 - `edoworks/factory` is the sole canonical factory.
 - Issue #109 and PR #110 merged the issue-isolated workspace guard as `b588844`.
@@ -171,7 +205,7 @@ agent: explore
 - `OPERATIONALLY_CUT_OVER` and all later states remain unverified.
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
-## Restart
+## Historical Restart Instructions
 
 1. From a fresh policy-valid session, require the pinned verifier to return
    `CLOSED` for issue #114, retain the private successor audit receipt, and send
@@ -208,6 +242,18 @@ agent: explore
    and #79. Do not delete, archive, unarchive, publish, or clean any target. Do
    not create the preservation repository until its exact provisioner is
    reviewed, merged, and launched from a fresh policy-valid session.
+
+## Restart
+
+1. Recheck registered issue-121 worktree state and the analyzer incident. Run the
+   focused tests and exact broad suites through admitted commands, retaining
+   every failure and avoiding unsupported success claims.
+2. Resolve deterministic-test versus installation-qualification and dependency
+   admission through the existing verification scope; no manual user restart or
+   permission-edit handoff is a prerequisite to the local analyzer regression.
+3. Complete required review, authorized integration and hosted checks before
+   closing #121. Then qualify the unattended verification lane, followed by a
+   generation-disabled retained-source NowNest rebuild. No new factory is needed.
 
 ## Boundaries
 

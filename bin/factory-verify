@@ -264,18 +264,37 @@ else
 fi
 observe_storage
 
-# Static analysis (Swift compiler warnings as errors check)
-ANALYZE_RESULT=$(xcodebuild analyze \
+# Static analysis (warnings remain advisory only after a successful analyzer exit)
+ANALYZE_LOG="$RUN_ROOT/static-analysis.log"
+if xcodebuild analyze \
   -project "$APP_NAME.xcodeproj" \
   -scheme "$SCHEME" \
   -destination "$IPHONE_DEST" \
   -derivedDataPath "$DERIVED_DATA_PATH" \
-  2>&1 || true)
-if echo "$ANALYZE_RESULT" | grep -q "warning:"; then
-  WARNING_COUNT=$(echo "$ANALYZE_RESULT" | grep -c "warning:" || true)
-  record "static_analysis" "pass" "$WARNING_COUNT warnings (review recommended)"
+  >"$ANALYZE_LOG" 2>&1; then
+  ANALYZE_STATUS=0
 else
-  record "static_analysis" "pass" "No warnings"
+  ANALYZE_STATUS=$?
+fi
+if [ "$ANALYZE_STATUS" -eq 0 ]; then
+  if WARNING_COUNT=$(grep -c "warning:" "$ANALYZE_LOG"); then
+    WARNING_STATUS=0
+  else
+    WARNING_STATUS=$?
+  fi
+  if [ "$WARNING_STATUS" -gt 1 ]; then
+    record "static_analysis" "fail" "Analyzer succeeded but diagnostics could not be read (grep exit status $WARNING_STATUS)"
+  elif [ "$WARNING_COUNT" -gt 0 ]; then
+    record "static_analysis" "pass" "$WARNING_COUNT warnings (review recommended)"
+  else
+    record "static_analysis" "pass" "No warnings"
+  fi
+else
+  if [ -f "$ANALYZE_LOG" ]; then
+    record "static_analysis" "fail" "Static analysis failed with exit status $ANALYZE_STATUS; diagnostics retained at $ANALYZE_LOG"
+  else
+    record "static_analysis" "fail" "Static analysis failed with exit status $ANALYZE_STATUS; diagnostics log could not be created"
+  fi
 fi
 observe_storage
 
