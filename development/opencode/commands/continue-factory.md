@@ -26,11 +26,14 @@ The separate issue-111 worktree now has fixture-based test-plane changes with
 green local suites, but those changes are not integrated here. An earlier commit
 probe was denied before execution. A later owner-approved, digest-bound dispatcher
 committed the verified candidate as `774baca7ec6d7eb17cff4be5ca1f3a93f58fd3c7`
-and pushed `feature/121-analyzer-errors`; raw Git was not substituted. No PR,
-hosted check, merge, release, signing, provider change, app lock upgrade, or issue
-closeout has occurred. The primary and unrelated issue worktrees remain untouched.
-Self-service transport issue #111 and user admission issue #122 are distinct; do
-not revive paused products, browser tooling, cleanup, or old PR work.
+and pushed `feature/121-analyzer-errors`; raw Git was not substituted. A separately
+reviewed exact dispatcher then created draft PR #126 from exact head
+`4af6a7a42039c36500cff96d5c142491fa41e182` to `main` and verified its fixed
+body, author, base, branch, and head. Hosted checks, merge, release, signing,
+provider change, app lock upgrade, and issue closeout remain pending. The primary
+and unrelated issue worktrees remain untouched. Self-service transport issue #111
+and user admission issue #122 are distinct; do not revive paused products,
+browser tooling, cleanup, or old PR work.
 
 ## Historical Checkpoints
 

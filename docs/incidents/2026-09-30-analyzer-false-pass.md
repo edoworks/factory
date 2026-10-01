@@ -1,7 +1,7 @@
 # Analyzer Outcome Correction
 
 Tracker: `edoworks/factory#121`
-State: committed and pushed after focused verification; PR integration and closeout pending.
+State: draft PR #126 opened after focused verification; hosted integration and closeout pending.
 Baseline: `0ff8117a75882a656aa20451e5c21244a3910b28`.
 Authority: owner requested the analyzer correction first, implementation, and
 validation; canonical progress writes were explicitly authorized.
@@ -140,4 +140,8 @@ denied that invocation before execution. A later owner-approved, digest-bound
 dispatcher committed the verified candidate as
 `774baca7ec6d7eb17cff4be5ca1f3a93f58fd3c7` and pushed the registered feature
 branch. Raw Git was not substituted. No PR, hosted check, merge, release, or
-closeout has occurred.
+closeout had occurred at that checkpoint. A separately reviewed exact dispatcher
+subsequently created draft PR #126 from
+`4af6a7a42039c36500cff96d5c142491fa41e182` to `main` and verified the fixed
+body, `hellofoculoom` author, branch, base, and head in remote readback. Hosted
+checks, merge, release, and closeout remain pending.
