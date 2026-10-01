@@ -2,7 +2,7 @@
   "files": {
     ".gitignore": "4d56952b0fb13bf8f9b6c13a6d4c34a075bac3af447636a1df4335d7576e2f97",
     "active-baseline.json": "78699eb688fa55b3cc0531ce7e030ab5d93668dda0c0fc64c90d0dd5ded7ecad",
-    "commands/continue-factory.md": "5557b8d478c4ee5c76329d28efd5c074bc419a6c63baac7f570f5b6efaf243ab",
+    "commands/continue-factory.md": "dfdaf575da4db6949da93340736ae0744ac6822d3c550933c99a9f3000f62306",
     "commands/rubberduck.md": "8abbda9e7c99cd40b2467654fd14c7a363d595952c5e906a2f0032ec0a5c6c90",
     "model-routing/approved.json": "9d908dfb868cec573954e0741e67385ab56a5f2c7f596e4e07f57b04f5e0a985",
     "model-routing/benchmark-suite.mjs": "0739dd72655c56cdf74839f0c6f5335abb26a5363215f73e71477567ae83cd7d",

@@ -6,6 +6,18 @@ agent: explore
 ## Current State
 
 - `edoworks/factory` is the sole canonical factory.
+- Issue #124 is the current Factory001 exact-release consumption chunk in its
+  admitted `feature/124-release-consumption` workspace. The offline candidate
+  validates declared lock/manifest identity and bundled skill references but
+  always reports release verification and production authorization as false.
+  Read `docs/release-consumption.md` and the 2026-09-30 validation incident.
+  The first seven-test candidate had material null/type defects; corrected
+  regressions and independent re-review passed. No integration or release is claimed.
+  Preserve all other issue workspaces. Storage is below the documented default
+  build envelope, and the inspected published rc3 release has no attached assets
+  and is not immutable. No VM/install/build/cleanup/publication is admitted by
+  this continuation. The following older issue records are context, not authority
+  to resume their scopes during #124 work.
 - Issue #109 and PR #110 merged the issue-isolated workspace guard as `b588844`.
   The primary checkout at `/Users/hello/factory` remains quarantined on local
   `main` at PR #98 head `d4d1068` with mixed preserved WIP; do not reset, clean,
@@ -172,6 +184,13 @@ agent: explore
 - Route readiness is blocked if tracked benchmark/catalog evidence is stale.
 
 ## Restart
+
+For the current #124 chunk, first read its consumption contract and incident,
+rerun the focused offline tests, and inspect the diff. Complete reviewed source
+integration and actual artifact/bootstrap qualification before any production
+adoption. Resolve storage through the separate #112 retention boundary and
+maintenance execution through #123; do not repair either by permission workarounds.
+The historical restart list below does not supersede these current boundaries.
 
 1. From a fresh policy-valid session, require the pinned verifier to return
    `CLOSED` for issue #114, retain the private successor audit receipt, and send
