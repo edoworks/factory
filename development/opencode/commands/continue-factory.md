@@ -23,13 +23,14 @@ routing evidence still blocks launcher readiness; no launch-ready claim is made.
 
 The owner authorized canonical progress writes after a separate identity check.
 The separate issue-111 worktree now has fixture-based test-plane changes with
-green local suites, but those changes are not integrated here. Registered commit
-transport admission was denied before execution; do not bypass the workspace
-HEAD transaction with raw Git or execute the denied helper through a test runner.
-No commit, push, merge, release, signing, provider change, app lock upgrade, or
-issue closeout has occurred. The primary and unrelated issue worktrees remain
-untouched. Self-service transport issue #111 and user admission issue #122 are
-distinct; do not revive paused products, browser tooling, cleanup, or old PR work.
+green local suites, but those changes are not integrated here. An earlier commit
+probe was denied before execution. A later owner-approved, digest-bound dispatcher
+committed the verified candidate as `774baca7ec6d7eb17cff4be5ca1f3a93f58fd3c7`
+and pushed `feature/121-analyzer-errors`; raw Git was not substituted. No PR,
+hosted check, merge, release, signing, provider change, app lock upgrade, or issue
+closeout has occurred. The primary and unrelated issue worktrees remain untouched.
+Self-service transport issue #111 and user admission issue #122 are distinct; do
+not revive paused products, browser tooling, cleanup, or old PR work.
 
 ## Historical Checkpoints
 

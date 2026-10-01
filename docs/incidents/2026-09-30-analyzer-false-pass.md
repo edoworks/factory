@@ -1,7 +1,7 @@
 # Analyzer Outcome Correction
 
 Tracker: `edoworks/factory#121`
-State: locally implemented and focused-verified; integration and closeout pending.
+State: committed and pushed after focused verification; PR integration and closeout pending.
 Baseline: `0ff8117a75882a656aa20451e5c21244a3910b28`.
 Authority: owner requested the analyzer correction first, implementation, and
 validation; canonical progress writes were explicitly authorized.
@@ -134,8 +134,10 @@ The separate issue-111 candidate now has fixture-based profile/catalog tests;
 its green suites do not imply that those changes are integrated into this
 issue-121 worktree. No cross-worktree source or dependency copy was performed.
 
-Integration preflight invoked the registered commit script with no arguments,
-which cannot commit even if admitted. Loaded user-only command policy denied the
-invocation before execution. Raw Git is not substituted because it would not
-perform the registered workflow's atomic HEAD update. No staging, commit, push,
-PR, merge, release, or closeout occurred.
+An earlier integration preflight invoked the registered commit script with no
+arguments, which cannot commit even if admitted. Loaded user-only command policy
+denied that invocation before execution. A later owner-approved, digest-bound
+dispatcher committed the verified candidate as
+`774baca7ec6d7eb17cff4be5ca1f3a93f58fd3c7` and pushed the registered feature
+branch. Raw Git was not substituted. No PR, hosted check, merge, release, or
+closeout has occurred.
