@@ -55,6 +55,10 @@ final class NativeTests: XCTestCase {
             "try { const m = await import(new URL('spec.mjs', location.href).href); return 'loaded:' + m.spec.id; } catch (error) { return error.name + ': ' + error.message; }",
             arguments: [:], in: nil, contentWorld: .page)
         print("FILE_ORIGIN_MODULE_DIAGNOSTIC: \(String(describing: imported))")
+        let appImport = try await host.webView.callAsyncJavaScript(
+            "try { await import(new URL('app.mjs', location.href).href); return 'loaded; setup=' + Boolean(document.querySelector('#players')); } catch (error) { return error.name + ': ' + error.message; }",
+            arguments: [:], in: nil, contentWorld: .page)
+        print("FILE_ORIGIN_APP_IMPORT_DIAGNOSTIC: \(String(describing: appImport))")
         try await checkStorage(host, waitForApp: false)
     }
 
