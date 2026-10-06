@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "baseline_version": "assistant-factory-accounting-v1",
+  "decision_at_utc": "2026-10-06T14:42:31Z",
+  "decision_reference": "Sentinel_51bf51f208208191b0587edfc53e639b",
+  "decision_text": "If you can’t give a percentage then start at 100% assistant, 0% factory.",
+  "assistant_percent": 100,
+  "factory_percent": 0,
+  "basis": "Owner-selected conservative accounting baseline; not empirical labor, token or cost measurement",
+  "credit_rule": "No retroactive credit for the 8.5565-second run. Future credit requires reviewed takeover of predefined work units with unchanged coverage and quality; no hidden prompts or subagents.",
+  "work_units": ["spec-validation", "generation", "deterministic-regeneration", "executed-tests", "artifact-and-review-package"],
+  "next_manual_handoff": "Deterministic source-and-receipt text package for independent review",
+  "unmeasured_labor": ["factory-development", "debugging", "setup", "review", "source-transfer"],
+  "required_approvals": ["owner scope authorization", "executor loopback/browser permission where sandboxed", "separate authorization for feature push or main merge"],
+  "active_assistant_seconds": null,
+  "active_human_seconds": null,
+  "tokens": null,
+  "dollars": null
+}

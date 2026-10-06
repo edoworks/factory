@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "couch-clash-benchmark",
+  "title": "Couch Clash",
+  "description": "A few calls. One couch. A friendly rivalry. Synthetic rehearsal — host enters all outcomes.",
+  "assets": [],
+  "questions": [
+    {"id":"first-team","text":"Who scores first in the first half?","scope":"First half only. No score is an option.","points":100,"options":[{"id":"home","label":"Home"},{"id":"away","label":"Away"},{"id":"none","label":"No score"}]},
+    {"id":"first-play","text":"What is the first scoring play?","scope":"First half only. Extra points excluded.","points":100,"options":[{"id":"touchdown","label":"Touchdown"},{"id":"field-goal","label":"Field goal"},{"id":"safety","label":"Safety"},{"id":"none","label":"No score"}]},
+    {"id":"winner","text":"Who wins the game?","scope":"Final result, including overtime. Hidden until final confirmation.","points":100,"options":[{"id":"home","label":"Home"},{"id":"away","label":"Away"},{"id":"tie","label":"Tie"}]},
+    {"id":"second-leader","text":"Who scores more after halftime?","scope":"Second-half points only, including overtime.","points":200,"options":[{"id":"home","label":"Home"},{"id":"away","label":"Away"},{"id":"tie","label":"Tie"}]},
+    {"id":"second-band","text":"How many combined points after halftime?","scope":"Second half plus overtime; exclude first-half points.","points":200,"options":[{"id":"low","label":"0–20"},{"id":"medium","label":"21–35"},{"id":"high","label":"36+"}]}
+  ],
+  "stages": [
+    {"id":"pregame","title":"Before kickoff","kind":"lock","questions":["first-team","first-play","winner"],"boost":true},
+    {"id":"halftime-results","title":"Halftime results","kind":"reveal","questions":["first-team","first-play"],"boost":false},
+    {"id":"halftime","title":"Before third-quarter play","kind":"lock","questions":["second-leader","second-band"],"boost":false},
+    {"id":"final","title":"Final results","kind":"reveal","questions":["winner","second-leader","second-band"],"boost":false}
+  ]
+}

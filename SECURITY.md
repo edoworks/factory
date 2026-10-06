@@ -24,4 +24,4 @@ has its own security posture.
 - The factory does not store or access Apple credentials
 - All credential use is human-authorized and performed outside the factory
 - The factory's lifecycle scripts run locally on the developer's machine
-- Generated code executes in the developer's Xcode sandbox
+- This fresh checkpoint generates local browser code; native qualification is pending

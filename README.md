@@ -1,103 +1,72 @@
 # Edoworks Factory
 
-A public, versioned, MIT-licensed software factory for producing offline-first
-iOS/iPadOS apps through a deterministic paved road.
+One canonical factory: `edoworks/factory`. This is a fresh, unproven experiment
+combining Factory004's shipping-first direction with recorded predecessor lessons.
+The owner selected a clean implementation on 2026-10-06; historical repository
+retirement instructions no longer select the destination for new work.
 
-## Quick Start
+The first transition commit (`653e833f1cbedd6fa2147ad15a78980c438b2ef3`) contains
+requirements and governance only: **zero implementation code**. This subsequent
+checkpoint adds an original spec-to-web-game compiler and bounded acceptance tests.
+It is not a release, full Couch parity, or a replacement deployed on main.
 
-```bash
-# Download the generated source archive for the exact verified prerelease tag
-FACTORY_VERSION=0.1.0-rc3
-FACTORY_REVISION=a627c88ff9382b4a24887b0a4a5418e8f6c6de7e
-curl -fsSL "https://github.com/edoworks/factory/archive/refs/tags/v${FACTORY_VERSION}.tar.gz" | tar xz
-mv "factory-${FACTORY_VERSION}" factory
+## Run the clean-generation benchmark
 
-# Verify your toolchain
-./factory/bin/factory-doctor
+Use a clean checkout of an exact commit. `toolchain.json` pins the installed Python,
+Node and browser versions; no installation or paid service is performed. Explicitly
+set `FACTORY_NODE` and `FACTORY_CHROME` to those existing executables, then run:
 
-# Scaffold a new app
-./factory/bin/factory-init my-app
-
-# Verify your app
-cd my-app && ../factory/bin/factory-verify
+```sh
+python3 -B benchmark.py --out /absolute/canonical/new-benchmark-directory
 ```
 
-## What It Does
+The output parent must exist; use its real path, not a symlink such as macOS `/tmp`.
+The benchmark archives the exact committed Git HEAD into a fresh private directory,
+records its commit/tree and file hashes, and runs tests and generation from those
+committed bytes. It checks snapshot hashes before and after the run and compares
+generated source hashes with the snapshot. It then runs generator tests, generates twice from an isolated source closure,
+compares every output byte, changes branding/question/scoring data and regenerates,
+then executes engine and headless browser tests for those products and a valid
+question-ID `boost` regression spec. Every browser run checks two real pages sharing
+one origin/store: the first lock must survive a stale second-page write. It emits
+`receipt.json`, individual logs and apps. It refuses dirty source and missing tools.
+Loopback serving/headless Chrome require executor permission where sandboxed.
 
-The factory provides one opinionated journey:
+For generation alone (not a verification claim):
 
+```sh
+python3 -B factory.py --spec specs/couch-clash.json \
+  --revision EXACT_40_CHARACTER_FACTORY_COMMIT --out /absolute/canonical/empty-app
+python3 -m http.server 8000 --bind 127.0.0.1 --directory /absolute/canonical/empty-app
 ```
-download release → factory doctor → factory init → confirm PRD →
-implement bounded increment → factory verify →
-release evidence → human-authorized Apple submission
-```
 
-The factory produces verified release candidates. It does not autonomously
-publish to the App Store. All credential use, uploads, and submissions require
-explicit human authorization.
+Open the local server in a browser. Static ES modules need HTTP; no bundler is
+required. This checkpoint does not install a PWA cache or provide offline reload.
+Generation uses no Couch source or old factory implementation. Python audit hooks
+in the benchmark reject undeclared file reads, network and subprocess access by
+the trusted generator. This is measured closure evidence, not a security sandbox
+for hostile Python. The standalone compiler labels `--revision` as
+`caller_supplied_unverified`; supplying a hex string does not verify Git identity.
+The benchmark separately binds generated source hashes to its committed snapshot.
+The generator reads no Git blobs and its manifest records actual source/spec hashes.
 
-## What's Included
+All generated save/reset operations take the same origin-scoped Web Lock and compare
+the saved value while holding it. A stale tab stops with a visible reload action;
+browsers without Web Locks fail closed. This coordinates cooperating app pages,
+not malicious scripts or other software writing storage outside the protocol.
 
-- SwiftUI universal app template (iPhone + iPad)
-- Lifecycle scripts: `factory doctor`, `factory init`, `factory verify`, `factory uninstall`
-- Storage admission, reservations, scoped build state, and per-run receipts
-- Apple distribution capability registry and validator
-- Privacy manifest template (`PrivacyInfo.xcprivacy`)
-- Release-criteria schema and evidence generator
-- Recovery knowledge boundary and failure classifier
-- CI policy gate (deterministic verification)
+The owner-selected accounting baseline is **100% assistant / 0% factory** in
+`autonomy-baseline.json`. Benchmark wall time is a separate execution observation;
+development, setup, debugging, review, active labor, tokens and dollars remain
+unmeasured. Prior 8.5565-second evidence receives no retroactive automation credit.
+Future comparisons must preserve scope/coverage; the next manual handoff to encode
+is the source-and-receipt package for independent review.
 
-## One Factory, Two Responsibilities
+- [PRD](PRD.md): measurable scope, limits, acceptance and parity gaps.
+- [Lessons](LESSONS.md): evidence to retain without importing old architecture.
+- [Charter](CHARTER.md): authority and product boundaries.
+- [Transition](TRANSITION.md): backup, issue treatment and workflow impact.
 
-`edoworks/factory` is the sole canonical factory. Its product runtime remains
-provider-independent; its separately versioned development environment contains
-the OpenCode policy and safeguards used to improve the factory. Predecessor
-repositories are preservation sources, not execution fallbacks.
-
-Run `bin/factory-dev doctor` before starting development, then use
-`bin/factory-dev [PRODUCT_PATH]` to print the receipt and start a fresh,
-local-config-isolated OpenCode process. The tracked source is under
-`development/opencode`; it does not install or modify global OpenCode config.
-See the [Factory Development PRD](docs/FactoryDevelopment-PRD.md).
-Product repositories remain separate and should pin a supported factory version
-and revision rather than copy or independently maintain factory policy.
-
-## Requirements
-
-- macOS 26.x (current or previous major)
-- Xcode 26.x (current or previous major)
-- Swift 6.x
-- Git
-
-No AI agent, cloud provider, or external service is required at runtime.
-
-`factory doctor` and `factory verify` preserve a configurable recovery floor
-and reserve capacity for the verification workload before Xcode starts. An
-ordinary successful verification removes only its own reproducible build state
-and unsigned archive. Use `factory verify --retain-archive` only when that
-archive is an intentional retained artifact.
-
-## Documentation
-
-- [CHARTER.md](CHARTER.md) — Founding contract, product laws, authority boundaries
-- [CONTRIBUTING.md](CONTRIBUTING.md) — How to contribute
-- [Mews & Woofs MVP PRD](docs/MewsAndWoofs-PRD.md) — Reference App 2 product contract
-- [Factory Development PRD](docs/FactoryDevelopment-PRD.md) — versioned development environment and cutover contract
-- [Single-factory cutover](docs/single-factory-cutover.md) — current state, evidence, and retirement gates
-- [SECURITY.md](SECURITY.md) — Security policy
-
-## License
-
-MIT — see [LICENSE](LICENSE). The "edoworks" name and logo are trademarks of
-the owner and are not covered by the MIT license; see
-[TRADEMARKS.md](TRADEMARKS.md).
-
-## Status
-
-Pre-v1.0. The factory is being qualified by its founder (customer zero) through
-two reference apps before any general usability claim is made.
-
-The documented `v0.1.0-rc3` GitHub release is a mutable prerelease with no
-attached assets. Quick Start uses GitHub's generated archive for that exact tag,
-not a separately uploaded release artifact. `FACTORY_REVISION` records the
-source commit expected at the tag so movement is detectable.
+MIT licensed; the existing license, trademark and security-reporting policies
+remain in force. Old implementation is recoverable through the verified
+[backup](https://github.com/edoworks/factory/tree/backup/pre-clean-slate-20261006T140606Z-dab21a8a).

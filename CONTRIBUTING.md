@@ -1,33 +1,15 @@
-# Contributing to Edoworks Factory
+# Contributing
 
-## How to Contribute
+Use a separate branch and reviewable change in edoworks/factory. Preserve existing
+worktrees. Follow the PRD and change one product capability at a time. Add executable
+failure cases where they protect real behavior. Before merging, run the documented
+new acceptance commands and review the transition's compatibility breaks.
 
-1. Open an issue describing the problem or improvement
-2. Fork the repository and create a feature branch
-3. Make your changes with tests
-4. Open a pull request referencing the issue
+Do not use the removed predecessor development launcher as a prerequisite. The
+owner's clean-slate instruction supersedes the old open-issue bootstrap dependency.
+New work can be tracked after the old backlog reset; this local authorized candidate
+does not claim an old issue was implemented. No default-branch merge is authorized.
 
-## Support
-
-Best-effort community support via GitHub issues. No SLA. No guaranteed
-response time.
-
-## Code Style
-
-- Shell scripts: `set -euo pipefail`, clear error messages, exit codes
-- Swift: Follow Apple's Swift API Design Guidelines
-- Python: Follow PEP 8
-
-## Testing
-
-All changes must pass the CI policy gate before merging. Run locally:
-
-```bash
-factory doctor && factory verify
-```
-
-## License
-
-By contributing, you agree that your contributions are licensed under the MIT
-license. The "edoworks" name and logo are trademarks of the owner and are not
-covered by the MIT license.
+MIT license and trademark policy remain unchanged. Report vulnerabilities privately
+using SECURITY.md. No credentials, private paths, customer records or private
+snapshot exports belong in commits or public issue comments.
