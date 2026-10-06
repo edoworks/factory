@@ -6,13 +6,16 @@ import socket
 from pathlib import Path
 import sys
 
-runtime, spec, out, revision = sys.argv[1:]
+runtime, spec, out, revision = sys.argv[1:5]
+target = sys.argv[5] if len(sys.argv) == 6 else 'web'
 runtime, spec, out = Path(runtime).resolve(), Path(spec).resolve(), Path(out).resolve()
 loader = importlib.util.spec_from_file_location('fresh_factory', runtime / 'factory.py')
 factory = importlib.util.module_from_spec(loader)
 loader.loader.exec_module(factory)
 allowed_reads = {runtime / 'factory.py', runtime / 'toolchain.json', spec}
 allowed_reads.update(runtime / 'templates' / name for name in factory.TEMPLATES)
+if target == 'ios':
+    allowed_reads.update(runtime / 'templates/ios' / name for name in factory.IOS_TEMPLATES)
 seen = set()
 
 
@@ -43,6 +46,6 @@ try:
     raise AssertionError('Network probe unexpectedly passed')
 except PermissionError:
     pass
-manifest = factory.generate(spec, out, revision)
+manifest = factory.generate(spec, out, revision, target)
 print(json.dumps({'status': 'generated', 'audit': 'undeclared read and network probes rejected',
                   'observed_reads': sorted(seen), 'spec_sha256': manifest['spec_sha256']}))

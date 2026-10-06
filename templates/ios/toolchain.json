@@ -1,0 +1,7 @@
+{
+  "xcode": "27.0",
+  "xcode_build": "27A266a",
+  "xcodegen": "2.44.1",
+  "destination": "explicit-coordinated-simulator-required",
+  "qualification": "unbuilt_unexecuted"
+}
