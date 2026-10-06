@@ -44,22 +44,63 @@ final class NativeTests: XCTestCase {
         throw NSError(domain: "NativeFeasibility", code: 1)
     }
 
-    func testBundledModulesWebLocksAndPersistentStore() async throws {
+    func testBundledScriptWebLocksAndPersistentStore() async throws {
         let host = try await readyHost()
         try await checkStorage(host, waitForApp: true)
     }
 
-    func testFileOriginPrimitivesIndependentOfModuleStartup() async throws {
-        let host = try await readyHost(waitForApp: false)
-        let imported = try await host.webView.callAsyncJavaScript(
-            "try { const m = await import(new URL('spec.mjs', location.href).href); return 'loaded:' + m.spec.id; } catch (error) { return error.name + ': ' + error.message; }",
-            arguments: [:], in: nil, contentWorld: .page)
-        print("FILE_ORIGIN_MODULE_DIAGNOSTIC: \(String(describing: imported))")
-        let appImport = try await host.webView.callAsyncJavaScript(
-            "try { await import(new URL('app.mjs', location.href).href); return 'loaded; setup=' + Boolean(document.querySelector('#players')); } catch (error) { return error.name + ': ' + error.message; }",
-            arguments: [:], in: nil, contentWorld: .page)
-        print("FILE_ORIGIN_APP_IMPORT_DIAGNOSTIC: \(String(describing: appImport))")
-        try await checkStorage(host, waitForApp: false)
+    func testCompleteSpecDrivenGameAndReload() async throws {
+        let host = try await readyHost()
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "spec", withExtension: "mjs", subdirectory: "Web"))
+        let line = try String(contentsOf: url, encoding: .utf8).components(separatedBy: "\n")[1]
+        let json = String(line.dropFirst("export const spec = ".count).dropLast())
+        let spec = try JSONSerialization.jsonObject(with: Data(json.utf8))
+        let value = try await host.webView.callAsyncJavaScript("""
+        const wait = async predicate => { for(let i=0;i<100;i++){if(predicate())return;await new Promise(r=>setTimeout(r,50));}throw new Error('Native DOM wait timed out: '+document.querySelector('#warning').textContent); };
+        const click = id => document.querySelector(id).click();
+        document.querySelector('#setup').requestSubmit();
+        await wait(()=>document.querySelector('#player-0'));
+        for(const stage of definition.stages){
+          if(stage.kind==='lock'){
+            for(let player=0;player<2;player++){
+              click('#player-'+player);
+              const form=document.querySelector('#picks');
+              for(const id of stage.questions)form.elements.namedItem('answer:'+id).value=definition.questions.find(q=>q.id===id).options[0].id;
+              if(stage.boost)form.elements.namedItem('control:boost').value=stage.questions[0];
+              form.requestSubmit();await wait(()=>!document.querySelector('#picks'));
+            }
+          }else{
+            const form=document.querySelector('#results');
+            for(const id of stage.questions)form.elements.namedItem('answer:'+id).value=definition.questions.find(q=>q.id===id).options[0].id;
+            const before=localStorage.getItem('factory.game.'+definition.id);
+            form.requestSubmit();
+            if(localStorage.getItem('factory.game.'+definition.id)!==before)throw new Error('Preview mutated persistence');
+            click('#confirm');await wait(()=>!document.querySelector('#confirm'));
+          }
+        }
+        const expected=definition.questions.reduce((n,q)=>n+q.points,0)+definition.stages.filter(s=>s.boost).reduce((n,s)=>n+definition.questions.find(q=>q.id===s.questions[0]).points,0);
+        const scores=[...document.querySelectorAll('.score')].map(n=>n.textContent);
+        if(scores.length!==2||scores.some(s=>s!==expected+' prediction points'))throw new Error('Unexpected final scores: '+scores);
+        if([...document.querySelectorAll('#recap h3')].some(n=>!n.textContent.startsWith('#1 ')))throw new Error('Shared ranks lost');
+        return localStorage.getItem('factory.game.'+definition.id);
+        """, arguments: ["definition": spec], in: nil, contentWorld: .page)
+        let saved = try XCTUnwrap(value as? String)
+        XCTAssertFalse(saved.isEmpty)
+        host.webView.reload()
+        for _ in 0..<100 {
+            if (try? await host.webView.evaluateJavaScript("document.querySelector('#screen h2')?.textContent === 'Final podium'")) as? Bool == true { break }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        let restored = try await host.webView.callAsyncJavaScript("return localStorage.getItem('factory.game.'+definition.id)", arguments: ["definition": spec], in: nil, contentWorld: .page)
+        XCTAssertEqual(restored as? String, saved)
+        let podium = try await host.webView.evaluateJavaScript("document.querySelector('#screen h2')?.textContent")
+        XCTAssertEqual(podium as? String, "Final podium")
+        _ = try await host.webView.evaluateJavaScript("document.querySelector('#reset').click();document.querySelector('#confirm-reset').click()")
+        for _ in 0..<100 {
+            if (try? await host.webView.evaluateJavaScript("Boolean(document.querySelector('#players'))")) as? Bool == true { return }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        XCTFail("Synthetic match reset did not finish")
     }
 
     private func checkStorage(_ host: BundledWebViewController, waitForApp: Bool) async throws {

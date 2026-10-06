@@ -40,6 +40,23 @@ class NativeGeneratorTests(unittest.TestCase):
         self.assertTrue(all('templates/ios/' + name in first['source_closure'] for name in factory.IOS_TEMPLATES))
         self.assertEqual(first['native_qualification'], 'unbuilt_unexecuted')
         self.assertEqual(first['revision_status'], 'caller_supplied_unverified')
+        html = (self.root / 'first/Web/index.html').read_text()
+        self.assertIn('<script src="native-app.js"></script>', html)
+        self.assertNotIn('type="module"', html)
+        self.assertEqual(first['native_packaging']['order'], ['spec.mjs', 'engine.mjs', 'app.mjs'])
+
+    def test_native_packer_rejects_unreviewed_import_or_engine_changes(self):
+        self.generate('web-contract', 'web')
+        files = {p.name: p.read_bytes() for p in (self.root / 'web-contract').iterdir()}
+        for name, suffix in [('engine.mjs', b'\nexport const extra = 1;'),
+                             ('app.mjs', b"\nimport './unknown.mjs';")]:
+            altered = dict(files); altered[name] += suffix
+            with self.assertRaisesRegex(ValueError, 'packaging contract needs review'):
+                factory.native_script(altered)
+        reordered = dict(files)
+        reordered['app.mjs'] = b"import {replay} from './engine.mjs';\n" + files['app.mjs']
+        with self.assertRaisesRegex(ValueError, 'packaging contract needs review'):
+            factory.native_script(reordered)
 
     def test_same_spec_controls_native_identity_and_core_without_rewriting_templates(self):
         self.generate('original')
