@@ -7,13 +7,22 @@ import json
 import os
 from pathlib import Path
 import platform
-import shutil
 import subprocess
 import sys
 import tempfile
 import time
+from snapshot import capture_snapshot, verify_snapshot
 
 ROOT = Path(__file__).resolve().parent
+
+
+def validate_accounting(value):
+    if value['schema_version'] != 1 or value['assistant_percent'] != 100 or value['factory_percent'] != 0:
+        raise ValueError('Accounting baseline remains 100% assistant / 0% factory')
+    if value['work_units'] != ['spec-validation', 'generation', 'deterministic-regeneration', 'executed-tests', 'artifact-and-review-package']:
+        raise ValueError('Accounting work-unit coverage changed')
+    if any(value[key] is not None for key in ('active_assistant_seconds', 'active_human_seconds', 'tokens', 'dollars')):
+        raise ValueError('Unmeasured labor or cost must remain unknown')
 
 
 def main(destination):
@@ -48,18 +57,19 @@ def main(destination):
         return result.stdout
 
     try:
-        run('generator-tests', [sys.executable, '-B', '-m', 'unittest', 'discover', '-s', 'tests', '-p', 'test_*.py', '-v'])
         with tempfile.TemporaryDirectory(prefix='factory-source-closure-') as tmp:
-            isolated = Path(tmp).resolve(); runtime = isolated / 'runtime'; runtime.mkdir()
-            (runtime / 'templates').mkdir()
-            for name in ['factory.py', 'toolchain.json']:
-                shutil.copyfile(ROOT / name, runtime / name)
-            for path in (ROOT / 'templates').iterdir():
-                if path.is_file(): shutil.copyfile(path, runtime / 'templates' / path.name)
-            spec = json.loads((ROOT / 'specs/couch-clash.json').read_text())
+            isolated = Path(tmp).resolve(); runtime = isolated / 'runtime'
+            identity = capture_snapshot(ROOT, runtime, revision)
+            receipt['source_identity'] = identity
+            if (runtime / 'benchmark.py').read_bytes() != (ROOT / 'benchmark.py').read_bytes():
+                raise ValueError('Benchmark runner differs from committed snapshot')
+            receipt['accounting_baseline'] = json.loads((runtime / 'autonomy-baseline.json').read_text())
+            validate_accounting(receipt['accounting_baseline'])
+            run('generator-tests', [sys.executable, '-B', '-m', 'unittest', 'discover', '-s', 'tests', '-p', 'test_*.py', '-v'], cwd=runtime)
+            spec = json.loads((runtime / 'specs/couch-clash.json').read_text())
             spec_path = isolated / 'product-spec.json'; spec_path.write_text(json.dumps(spec))
             for name in ['app', 'regenerated']:
-                run('generate-' + name, [sys.executable, '-B', str(ROOT / 'tests/isolated_generate.py'), str(runtime), str(spec_path), str(root / name), revision], cwd=isolated, timeout=10)
+                run('generate-' + name, [sys.executable, '-B', str(runtime / 'tests/isolated_generate.py'), str(runtime), str(spec_path), str(root / name), revision], cwd=isolated, timeout=10)
             files = {p.name: p.read_bytes() for p in (root / 'app').iterdir()}
             if files != {p.name: p.read_bytes() for p in (root / 'regenerated').iterdir()}:
                 raise AssertionError('Deterministic regeneration differs')
@@ -69,10 +79,24 @@ def main(destination):
             changed['questions'][0]['text'] = 'Which side opens the scoring?'
             changed['questions'][0]['points'] = 333
             spec_path.write_text(json.dumps(changed))
-            run('generate-variant', [sys.executable, '-B', str(ROOT / 'tests/isolated_generate.py'), str(runtime), str(spec_path), str(root / 'variant'), revision], cwd=isolated, timeout=10)
-        for name in ['app', 'variant']:
-            run('engine-' + name, [node, '--test', str(root / name / 'engine.test.mjs')])
-            run('browser-' + name, [node, str(ROOT / 'tests/browser.mjs'), str(root / name)])
+            run('generate-variant', [sys.executable, '-B', str(runtime / 'tests/isolated_generate.py'), str(runtime), str(spec_path), str(root / 'variant'), revision], cwd=isolated, timeout=10)
+            collision = copy.deepcopy(spec); old_id = collision['questions'][0]['id']
+            collision['questions'][0]['id'] = 'boost'
+            for stage in collision['stages']:
+                stage['questions'] = ['boost' if q == old_id else q for q in stage['questions']]
+            spec_path.write_text(json.dumps(collision))
+            run('generate-id-collision', [sys.executable, '-B', str(runtime / 'tests/isolated_generate.py'), str(runtime), str(spec_path), str(root / 'id-collision'), revision], cwd=isolated, timeout=10)
+            receipt['spec_identities'] = {}
+            for name in ['app', 'variant', 'id-collision']:
+                manifest = json.loads((root / name / 'manifest.json').read_text())
+                for source, digest in manifest['source_closure'].items():
+                    if identity['files'].get(source) != digest:
+                        raise ValueError('Generated provenance differs from committed source')
+                receipt['spec_identities'][name] = manifest['spec_sha256']
+                run('engine-' + name, [node, '--test', str(root / name / 'engine.test.mjs')], cwd=runtime)
+                run('browser-' + name, [node, str(runtime / 'tests/browser.mjs'), str(root / name)], cwd=runtime)
+            verify_snapshot(runtime, identity)
+            receipt['source_identity']['verified_after_run'] = True
         receipt['status'] = 'passed'
         receipt['artifact_sha256'] = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
                                      for p in sorted(root.rglob('*')) if p.is_file()}
@@ -81,9 +105,17 @@ def main(destination):
         raise
     finally:
         receipt['seconds'] = round(time.monotonic() - started, 4)
+        receipt['run_observation'] = {'wall_seconds': receipt['seconds'], 'assistant_interventions_during_command': 0,
+                                      'intervention_scope': 'noninteractive benchmark command only; development/setup/review labor unmeasured',
+                                      'manual_output_edits': 0, 'active_assistant_seconds': None, 'active_human_seconds': None,
+                                      'tokens': None, 'dollars': None,
+                                      'factory_run_stages': ['spec validation', 'generation', 'deterministic regeneration', 'tests', 'artifact collection'],
+                                      'assistant_manual_stages': ['invocation/setup', 'source review-package transfer', 'independent review coordination'],
+                                      'required_approvals': 'external to runner; no approval is inferred from a passing test'}
         receipt['retained_bytes'] = sum(p.stat().st_size for p in root.rglob('*') if p.is_file())
         if receipt['seconds'] > 120 or receipt['retained_bytes'] > 100 * 1024 * 1024:
             receipt['status'] = 'failed'; receipt['error'] = 'Benchmark operating limit exceeded'
+        receipt['run_observation']['quality_gate'] = receipt['status']
         (root / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
         print(json.dumps(receipt, indent=2))
     if receipt['status'] != 'passed':

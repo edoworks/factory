@@ -21,9 +21,14 @@ python3 -B benchmark.py --out /absolute/canonical/new-benchmark-directory
 ```
 
 The output parent must exist; use its real path, not a symlink such as macOS `/tmp`.
-The benchmark runs generator tests, generates twice from an isolated source closure,
+The benchmark archives the exact committed Git HEAD into a fresh private directory,
+records its commit/tree and file hashes, and runs tests and generation from those
+committed bytes. It checks snapshot hashes before and after the run and compares
+generated source hashes with the snapshot. It then runs generator tests, generates twice from an isolated source closure,
 compares every output byte, changes branding/question/scoring data and regenerates,
-then executes engine and headless browser tests for both products. It emits
+then executes engine and headless browser tests for those products and a valid
+question-ID `boost` regression spec. Every browser run checks two real pages sharing
+one origin/store: the first lock must survive a stale second-page write. It emits
 `receipt.json`, individual logs and apps. It refuses dirty source and missing tools.
 Loopback serving/headless Chrome require executor permission where sandboxed.
 
@@ -40,8 +45,22 @@ required. This checkpoint does not install a PWA cache or provide offline reload
 Generation uses no Couch source or old factory implementation. Python audit hooks
 in the benchmark reject undeclared file reads, network and subprocess access by
 the trusted generator. This is measured closure evidence, not a security sandbox
-for hostile Python. Git supplies the pinned revision to the benchmark; the
-generator reads no Git blobs and its manifest records actual source/spec hashes.
+for hostile Python. The standalone compiler labels `--revision` as
+`caller_supplied_unverified`; supplying a hex string does not verify Git identity.
+The benchmark separately binds generated source hashes to its committed snapshot.
+The generator reads no Git blobs and its manifest records actual source/spec hashes.
+
+All generated save/reset operations take the same origin-scoped Web Lock and compare
+the saved value while holding it. A stale tab stops with a visible reload action;
+browsers without Web Locks fail closed. This coordinates cooperating app pages,
+not malicious scripts or other software writing storage outside the protocol.
+
+The owner-selected accounting baseline is **100% assistant / 0% factory** in
+`autonomy-baseline.json`. Benchmark wall time is a separate execution observation;
+development, setup, debugging, review, active labor, tokens and dollars remain
+unmeasured. Prior 8.5565-second evidence receives no retroactive automation credit.
+Future comparisons must preserve scope/coverage; the next manual handoff to encode
+is the source-and-receipt package for independent review.
 
 - [PRD](PRD.md): measurable scope, limits, acceptance and parity gaps.
 - [Lessons](LESSONS.md): evidence to retain without importing old architecture.

@@ -95,6 +95,7 @@ def generate(spec_path, destination, revision):
     closure = {'factory.py': digest(Path(__file__).read_bytes()), 'toolchain.json': digest((ROOT / 'toolchain.json').read_bytes())}
     closure.update({'templates/' + name: digest(files[name]) for name in TEMPLATES})
     manifest = {'schema_version': 1, 'factory_repository': 'edoworks/factory', 'factory_revision': revision,
+                'revision_status': 'caller_supplied_unverified',
                 'source_closure': closure, 'spec_sha256': spec_sha, 'toolchain': toolchain,
                 'assets': [], 'network_source_reads': False, 'product_source_reuse': False,
                 'files': {name: digest(data) for name, data in sorted(files.items())}}

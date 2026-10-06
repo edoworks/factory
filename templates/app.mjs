@@ -4,7 +4,7 @@ const key = 'factory.game.' + spec.id;
 const screen = document.querySelector('#screen'), warning = document.querySelector('#warning');
 document.title = spec.title; document.querySelector('#title').textContent = spec.title;
 document.querySelector('#description').textContent = spec.description;
-let events = [], state, blocked = false;
+let events = [], state, blocked = false, persistedRaw = null, writing = false;
 function el(tag, text, parent, attrs = {}) {
   const item = document.createElement(tag); if (text !== null) item.textContent = text;
   for (const [name, value] of Object.entries(attrs)) item.setAttribute(name, value);
@@ -14,20 +14,43 @@ function button(text, parent, action, id) { const b = el('button', text, parent,
 function submit(text, form) { el('button', text, form, {type:'submit'}); }
 function label(text, form, id) { el('label', text, form, {for:id}); }
 function alertError(error) { warning.textContent = error.message; }
-function act(event) {
+async function serializedWrite(change, allowBlocked = false) {
+  if (writing || (blocked && !allowBlocked)) return;
+  writing = true;
+  const controller = new AbortController(), timeout = setTimeout(() => controller.abort(), 3000);
   try {
-    const next = [...events, structuredClone(event)]; replay(next); events = next;
-    try { localStorage.setItem(key, encode(events)); warning.textContent = ''; }
-    catch { warning.textContent = 'Progress is in memory only: storage is unavailable. Keep this page open.'; }
-    render();
-  } catch (error) { alertError(error); }
+    if (!navigator.locks?.request) throw new Error('This browser cannot safely coordinate saved matches. Web Locks are required.');
+    await navigator.locks.request(key, {mode:'exclusive', signal:controller.signal}, () => {
+      // All app writers, including reset, use this same origin-scoped lock.
+      // The comparison is inside the lock; compare-then-write alone is not atomic.
+      if (localStorage.getItem(key) !== persistedRaw) {
+        blocked = true;
+        warning.textContent = 'This match changed in another tab. Please reload; your stale changes were not saved.';
+        render(); return;
+      }
+      change();
+    });
+  } catch (error) {
+    blocked = true; warning.textContent = 'Cannot safely write this match. ' + error.message; render();
+  } finally { clearTimeout(timeout); writing = false; }
 }
-try { const saved = localStorage.getItem(key); if (saved) events = decode(saved); }
+function act(event) {
+  return serializedWrite(() => {
+    try {
+      const next = [...events, structuredClone(event)]; replay(next); events = next;
+      const encoded = encode(events);
+      try { localStorage.setItem(key, encoded); persistedRaw = encoded; warning.textContent = ''; }
+      catch { warning.textContent = 'Progress is in memory only: storage is unavailable. Keep this page open.'; }
+      render();
+    } catch (error) { alertError(error); }
+  });
+}
+try { persistedRaw = localStorage.getItem(key); if (persistedRaw !== null) events = decode(persistedRaw); }
 catch (error) { blocked = true; warning.textContent = 'Cannot safely restore this match. Saved data was not overwritten. ' + error.message; }
 
 function selectQuestion(form, q, special) {
-  label(q.text, form, q.id); el('small', q.scope, form);
-  const select = el('select', null, form, {id:q.id, name:q.id, required:''});
+  label(q.text, form, 'answer-'+q.id); el('small', q.scope, form);
+  const select = el('select', null, form, {id:'answer-'+q.id, name:'answer:'+q.id, required:''});
   el('option', 'Choose…', select, {value:''});
   for (const option of q.options) el('option', option.label, select, {value:option.id});
   el('option', special === 'skip' ? 'Skip — zero points' : 'Void — zero for everyone', select, {value:special});
@@ -37,13 +60,13 @@ function lockCard(player, stage) {
   const form = el('form', null, screen, {id:'picks'});
   for (const id of stage.questions) selectQuestion(form, spec.questions.find(q => q.id === id), 'skip');
   if (stage.boost) {
-    label('Optional boost — double one correct call', form, 'boost');
-    const boost = el('select', null, form, {id:'boost',name:'boost'}); el('option','No boost',boost,{value:''});
+    label('Optional boost — double one correct call', form, 'control-boost');
+    const boost = el('select', null, form, {id:'control-boost',name:'control:boost'}); el('option','No boost',boost,{value:''});
     for (const id of stage.questions) el('option',spec.questions.find(q => q.id === id).text,boost,{value:id});
   }
   el('p', 'Lock is irreversible for this match. Put the phone down after your call.', form, {class:'help'});
   submit('Lock and hide picks',form);
-  form.onsubmit = event => { event.preventDefault(); const values = new FormData(form); act({type:'lock',player,picks:Object.fromEntries(stage.questions.map(id=>[id,values.get(id)])),boost:values.get('boost') || null}); };
+  form.onsubmit = event => { event.preventDefault(); const values = new FormData(form); act({type:'lock',player,picks:Object.fromEntries(stage.questions.map(id=>[id,values.get('answer:'+id)])),boost:values.get('control:boost') || null}); };
   button('Back to handoff',screen,render);
 }
 function host(stage) {
@@ -53,7 +76,7 @@ function host(stage) {
   submit('Preview results',form);
   form.onsubmit = event => {
     event.preventDefault(); const data = new FormData(form);
-    const outcomes = Object.fromEntries(stage.questions.map(id=>[id,data.get(id)]));
+    const outcomes = Object.fromEntries(stage.questions.map(id=>[id,data.get('answer:'+id)]));
     try { replay([...events,{type:'confirm',outcomes}]); } catch(error) { alertError(error); return; }
     screen.replaceChildren(); el('h2','Review before confirming',screen);
     const list = el('ul',null,screen);
@@ -65,7 +88,11 @@ function host(stage) {
 }
 function render() {
   state = replay(events); screen.replaceChildren(); const recap=document.querySelector('#recap');recap.replaceChildren();
-  if(blocked) { el('h2','Saved match needs attention',screen);el('p','Use Reset only if you want to discard this app’s saved match.',screen);return; }
+  if(blocked) {
+    el('h2','Saved match needs attention',screen);
+    el('p','Reload to read the latest saved match. Reset can discard only the saved version this tab read.',screen);
+    button('Reload latest match',screen,()=>location.reload(),'reload');return;
+  }
   if(!state.players.length) {
     el('h2','Gather your couch',screen);const form=el('form',null,screen,{id:'setup'});
     label('Player names — one per line (2–6)',form,'players');const names=el('textarea','Player 1\nPlayer 2',form,{id:'players',required:''});
@@ -87,7 +114,7 @@ function render() {
 }
 document.querySelector('#reset').onclick=()=>{
   screen.replaceChildren();el('h2','Discard this match?',screen);el('p','Only this generated app’s saved match will be erased.',screen);
-  button('Confirm reset',screen,()=>{try{localStorage.removeItem(key);events=[];blocked=false;warning.textContent='';render();}catch{warning.textContent='Reset failed: storage is unavailable.';}},'confirm-reset');
+  button('Confirm reset',screen,()=>serializedWrite(()=>{localStorage.removeItem(key);persistedRaw=null;events=[];blocked=false;warning.textContent='';render();},true),'confirm-reset');
   button('Keep match',screen,render);
 };
 render();
