@@ -1,41 +1,4 @@
-# Xcode
-build/
-DerivedData/
-*.xcuserstate
-*.xcworkspace/xcuserdata/
-*.xcodeproj/xcuserdata/
-*.xcodeproj/project.xcworkspace/xcuserdata/
-*.swp
-*~
-.DS_Store
-
-# Swift Package Manager
-.build/
-.swiftpm/
-Packages/
-Package.pins
-Package.resolved
-
-# Python
 __pycache__/
 *.pyc
-.venv/
-venv/
-
-# Factory evidence (generated, not committed)
-.factory/evidence/
-.factory/artifacts/
-.factory/runs/
-/reference-apps/*/*.xcodeproj/
-/reference-apps/*/.factory/
-/reference-apps/*/.factory-verify.json
-/reference-apps/*/.factory-verify-result.json
-*.xcresult/
-/reference-apps/*/screenshots/
-/development/.opencode-catalog-import-v2/
-
-# Secrets — never commit
-*.p12
-*.cer
-*.mobileprovision
-AuthKey_*.p8
+.DS_Store
+output/
