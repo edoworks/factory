@@ -38,7 +38,8 @@ final class NativeTests: XCTestCase {
                (ready as? Bool) == true { return host }
             try await Task.sleep(nanoseconds: 100_000_000)
         }
-        XCTFail("Bundled module startup failed; do not bypass WebKit security settings.")
+        let diagnostic = try? await web.evaluateJavaScript("JSON.stringify({url: location.href, ready: document.readyState, secure: isSecureContext, locks: Boolean(navigator.locks), screen: document.querySelector('#screen')?.textContent, warning: document.querySelector('#warning')?.textContent, title: document.title})")
+        XCTFail("Bundled startup did not reach setup; do not bypass WebKit security settings. Diagnostic: \(String(describing: diagnostic))")
         throw NSError(domain: "NativeFeasibility", code: 1)
     }
 
