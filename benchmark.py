@@ -25,6 +25,17 @@ def validate_accounting(value):
         raise ValueError('Unmeasured labor or cost must remain unknown')
 
 
+def validate_receipt_metrics(value):
+    if 'paid_api_calls' in value or 'paid_provisioning' in value:
+        raise ValueError('Paid-service limits are declared constraints, not measured usage')
+    if value['declared_run_constraints'] != {'source': 'declared_constraint', 'paid_api_calls_allowed': 0, 'paid_provisioning_allowed': False}:
+        raise ValueError('Run constraints must be explicitly labelled')
+    if value['manual_output_patches'] is not None or any(value['run_observation'][key] is not None for key in ('assistant_interventions_during_command', 'manual_output_edits')):
+        raise ValueError('Unmeasured edits and interventions must remain unknown')
+    if 'executor_report' in value and value['executor_report'].get('source') != 'executor_report':
+        raise ValueError('Executor assertions must identify their source')
+
+
 def main(destination):
     started = time.monotonic()
     root = Path(destination).absolute()
@@ -43,7 +54,8 @@ def main(destination):
     revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     root.mkdir()
     receipt = {'status': 'running', 'factory_revision': revision, 'toolchain': lock,
-               'paid_api_calls': 0, 'paid_provisioning': False, 'manual_output_patches': 0,
+               'declared_run_constraints': {'source': 'declared_constraint', 'paid_api_calls_allowed': 0, 'paid_provisioning_allowed': False},
+               'manual_output_patches': None,
                'checks': [], 'scope': 'generated local web core; native/AI/backend qualification excluded'}
 
     def run(name, args, cwd=ROOT, timeout=90):
@@ -105,9 +117,9 @@ def main(destination):
         raise
     finally:
         receipt['seconds'] = round(time.monotonic() - started, 4)
-        receipt['run_observation'] = {'wall_seconds': receipt['seconds'], 'assistant_interventions_during_command': 0,
-                                      'intervention_scope': 'noninteractive benchmark command only; development/setup/review labor unmeasured',
-                                      'manual_output_edits': 0, 'active_assistant_seconds': None, 'active_human_seconds': None,
+        receipt['run_observation'] = {'wall_seconds': receipt['seconds'], 'assistant_interventions_during_command': None,
+                                      'intervention_scope': 'interventions and edits are not instrumented; development/setup/review labor also unmeasured',
+                                      'manual_output_edits': None, 'active_assistant_seconds': None, 'active_human_seconds': None,
                                       'tokens': None, 'dollars': None,
                                       'factory_run_stages': ['spec validation', 'generation', 'deterministic regeneration', 'tests', 'artifact collection'],
                                       'assistant_manual_stages': ['invocation/setup', 'source review-package transfer', 'independent review coordination'],
@@ -116,6 +128,7 @@ def main(destination):
         if receipt['seconds'] > 120 or receipt['retained_bytes'] > 100 * 1024 * 1024:
             receipt['status'] = 'failed'; receipt['error'] = 'Benchmark operating limit exceeded'
         receipt['run_observation']['quality_gate'] = receipt['status']
+        validate_receipt_metrics(receipt)
         (root / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
         print(json.dumps(receipt, indent=2))
     if receipt['status'] != 'passed':
