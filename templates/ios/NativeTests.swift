@@ -29,12 +29,13 @@ final class NativeTests: XCTestCase {
         XCTAssertFalse(BundledWebViewController.permits(entry, inside: root))
     }
 
-    private func readyHost() async throws -> BundledWebViewController {
+    private func readyHost(waitForApp: Bool = true) async throws -> BundledWebViewController {
         let host = BundledWebViewController()
         host.loadViewIfNeeded()
         let web = try XCTUnwrap(host.webView)
         for _ in 0..<100 {
-            if let ready = try? await web.evaluateJavaScript("Boolean(document.querySelector('#players'))"),
+            let condition = waitForApp ? "Boolean(document.querySelector('#players'))" : "document.readyState === 'complete' && location.protocol === 'file:'"
+            if let ready = try? await web.evaluateJavaScript(condition),
                (ready as? Bool) == true { return host }
             try await Task.sleep(nanoseconds: 100_000_000)
         }
@@ -45,6 +46,19 @@ final class NativeTests: XCTestCase {
 
     func testBundledModulesWebLocksAndPersistentStore() async throws {
         let host = try await readyHost()
+        try await checkStorage(host, waitForApp: true)
+    }
+
+    func testFileOriginPrimitivesIndependentOfModuleStartup() async throws {
+        let host = try await readyHost(waitForApp: false)
+        let imported = try await host.webView.callAsyncJavaScript(
+            "try { const m = await import(new URL('spec.mjs', location.href).href); return 'loaded:' + m.spec.id; } catch (error) { return error.name + ': ' + error.message; }",
+            arguments: [:], in: nil, contentWorld: .page)
+        print("FILE_ORIGIN_MODULE_DIAGNOSTIC: \(String(describing: imported))")
+        try await checkStorage(host, waitForApp: false)
+    }
+
+    private func checkStorage(_ host: BundledWebViewController, waitForApp: Bool) async throws {
         let web = try XCTUnwrap(host.webView)
         let locks = try await web.evaluateJavaScript("Boolean(navigator.locks && navigator.locks.request)")
         XCTAssertEqual(locks as? Bool, true, "Missing Web Locks is a stop gate, not permission to weaken writes.")
@@ -54,7 +68,7 @@ final class NativeTests: XCTestCase {
             "const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 3000); try { return await navigator.locks.request(key, {signal: controller.signal}, () => { localStorage.setItem(key, 'persisted'); return localStorage.getItem(key); }); } finally { clearTimeout(timer); }",
             arguments: ["key": probe], in: nil, contentWorld: .page)
         XCTAssertEqual(result as? String, "persisted")
-        let second = try await readyHost()
+        let second = try await readyHost(waitForApp: waitForApp)
         XCTAssertFalse(web === second.webView)
         let restored = try await second.webView.callAsyncJavaScript(
             "const value = localStorage.getItem(key); localStorage.removeItem(key); return value;",
