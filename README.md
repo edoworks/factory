@@ -1,5 +1,12 @@
 # Edoworks Factory
 
+**Current direction (2026-10-07):** [PRIORITIES.md](PRIORITIES.md) is the
+entrypoint for new work. Deliver differentiated software with verified customer
+revenue and prove product value before expanding factory infrastructure. The
+current Couch Clash benchmark has no demonstrated product-fit go-ahead; see
+[the bounded review](https://github.com/edoworks/factory/pull/136). Older
+factory repositories are historical, not work queues.
+
 One canonical factory: `edoworks/factory`. This is a fresh, unproven experiment
 combining Factory004's shipping-first direction with recorded predecessor lessons.
 The owner selected a clean implementation on 2026-10-06; historical repository

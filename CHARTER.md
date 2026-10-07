@@ -2,8 +2,10 @@
 
 Status: ACTIVE_EXPERIMENT, UNPROVEN. Canonical repository: edoworks/factory.
 
-Produce useful, differentiated software through a repeatable, inspectable path
-from a versioned product intent. Start with one bounded Couch Clash benchmark.
+Produce useful, differentiated software with verified customer revenue through a
+repeatable, inspectable path from a versioned product intent. Current priorities
+and the status of the bounded Couch Clash benchmark are in [PRIORITIES.md](PRIORITIES.md).
+The benchmark is a technical checkpoint; its product fit is unproven.
 Keep factory development independent from generated product runtime. No provider,
 agent, paid service, account, or network is required by the initial generator.
 

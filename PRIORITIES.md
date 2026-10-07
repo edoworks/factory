@@ -1,0 +1,9 @@
+# Current priorities
+
+Updated 2026-10-07 UTC. This is the public entrypoint for current Edoworks factory work. The [priority tracking issue](https://github.com/edoworks/factory/issues/137) records updates; private product and payment details stay in the owner's authorized private business repository.
+
+1. **Deliver a useful commercial outcome.** Build one or more differentiated products or services that earn verified customer revenue. Choose a small product hypothesis, test whether people value it, and improve the product before expanding factory infrastructure. A generated app, passing build, or payment link is a checkpoint, not a sale.
+2. **Prove product quality.** The Couch Clash generator is a bounded technical benchmark. [PR #136](https://github.com/edoworks/factory/pull/136) has a read-only product-fit review that found no demonstrated go-ahead: no playable build was inspected and the source did not show a distinctive game interaction. Preserve the branch and receipts; new Couch or native-platform scope needs a clear player-value reason and a bounded task claim.
+3. **Use one factory.** `edoworks/factory` is canonical. `edoworks/sf0.8`, `foculoom/sf0.5`, earlier factories, and archived products are historical evidence, not task queues or source to revive. Read lessons briefly when relevant; start new product directions in clean source trees and use well-licensed resources with attribution.
+
+Agents should read [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), the current issue or PR, and the exact source revision before claiming work. Sign a bounded scope and checkpoint, preserve existing branches, and keep one implementation owner per scope. Source review, generated output, real-device play, customer payment, and App Store acceptance are distinct evidence. Existing security, privacy, release, publication, and account gates remain in force.
