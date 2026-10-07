@@ -3,7 +3,8 @@
 ## Start here: current priority
 
 Read [PRIORITIES.md](PRIORITIES.md) before selecting a task. The owner wants
-useful, differentiated software that produces verified customer revenue. Product
+verified customer receipts from a reachable buyer. Factory implementation needs
+evidence that building is the cheapest useful next step. Product
 value and real user evidence take priority over more factory abstraction. This
 repository is the sole current factory; predecessor queues are historical.
 The current Couch Clash benchmark has no demonstrated product-fit go-ahead.

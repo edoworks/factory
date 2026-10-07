@@ -2,14 +2,15 @@
 
 Status: ACTIVE_EXPERIMENT, UNPROVEN. Canonical repository: edoworks/factory.
 
-Produce useful, differentiated software with verified customer revenue through a
-repeatable, inspectable path from a versioned product intent. Current priorities
+Provide a repeatable, inspectable path from a versioned product intent to useful
+software when buyer evidence warrants a build. Verified customer receipts remain
+the business outcome, not a factory benchmark. Current priorities
 and the status of the bounded Couch Clash benchmark are in [PRIORITIES.md](PRIORITIES.md).
 The benchmark is a technical checkpoint; its product fit is unproven.
 Keep factory development independent from generated product runtime. No provider,
 agent, paid service, account, or network is required by the initial generator.
 
-Ship product value before building portfolio automation or self-improvement.
+Require a concrete product need before building portfolio automation or self-improvement.
 Report actual tests and failures; source review, generated files, simulator
 evidence, human use, and App Store acceptance are different claims.
 

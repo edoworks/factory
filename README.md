@@ -1,8 +1,8 @@
 # Edoworks Factory
 
 **Current direction (2026-10-07):** [PRIORITIES.md](PRIORITIES.md) is the
-entrypoint for new work. Deliver differentiated software with verified customer
-revenue and prove product value before expanding factory infrastructure. The
+entrypoint for new work. Keep factory work tied to a buyer-backed product need;
+verified customer receipts are the business outcome, and a build is not the default next step. The
 current Couch Clash benchmark has no demonstrated product-fit go-ahead; see
 [the bounded review](https://github.com/edoworks/factory/pull/136). Older
 factory repositories are historical, not work queues.
