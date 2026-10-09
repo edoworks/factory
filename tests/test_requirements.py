@@ -56,6 +56,16 @@ class RequirementsTests(unittest.TestCase):
             self.prd.write_text(content)
             with self.assertRaises(ValueError): validate_prd(self.prd)
 
+    def test_active_section_excludes_comments_fences_and_inline_mentions(self):
+        valid = EXAMPLE.read_text()
+        self.prd.write_text('The `## Factory reuse and contribution` section follows.\n' + valid)
+        self.assertEqual(validate_prd(self.prd)['status'], 'declarations_valid')
+        for hidden in ('<!--\n' + valid + '\n-->', '````markdown\n' + valid + '\n````',
+                       '<!-- never closed\n' + valid,
+                       HEADING + '\n````markdown\n' + valid + '\n````'):
+            self.prd.write_text(hidden)
+            with self.assertRaises(ValueError): validate_prd(self.prd)
+
     def test_status_only_promotion_fails(self):
         for status in ('verified', 'reused', 'production_ready'):
             item = copy.deepcopy(self.value); item['capabilities'][0]['status'] = status

@@ -36,12 +36,69 @@ def unique_object(pairs):
     return result
 
 
+def active_section(document):
+    # Recognize our deliberately narrow Markdown format, not rendered examples.
+    lines, headings = [], []
+    fence = None
+    comment = False
+    for original in document.splitlines():
+        line = original
+        if fence is None:
+            visible = ''
+            while line:
+                if comment:
+                    end = line.find('-->')
+                    if end < 0:
+                        line = ''
+                    else:
+                        comment = False; line = line[end + 3:]
+                else:
+                    start = line.find('<!--')
+                    if start < 0:
+                        visible += line; line = ''
+                    else:
+                        visible += line[:start]; line = line[start + 4:]; comment = True
+            line = visible
+        boundary = re.fullmatch(r' {0,3}(`{3,}|~{3,})(.*)', line)
+        if fence is not None:
+            if boundary and boundary[1][0] == fence[0] and len(boundary[1]) >= len(fence) and not boundary[2].strip():
+                fence = None
+        elif boundary:
+            fence = boundary[1]
+        elif line.startswith('## '):
+            headings.append((len(lines), line))
+        lines.append(line)
+    selected = [index for index, title in headings if title == HEADING]
+    require(len(selected) == 1, 'One active factory reuse and contribution section required')
+    start = selected[0]
+    end = next((index for index, _ in headings if index > start), len(lines))
+    return '\n'.join(lines[start + 1:end])
+
+
+def json_declarations(section):
+    blocks, contents = [], []
+    fence = None
+    is_json = False
+    for line in section.splitlines():
+        boundary = re.fullmatch(r' {0,3}(`{3,}|~{3,})(.*)', line)
+        if fence is None:
+            if boundary:
+                fence = boundary[1]; is_json = boundary[2].strip() == 'json'; contents = []
+        elif boundary and boundary[1][0] == fence[0] and len(boundary[1]) >= len(fence) and not boundary[2].strip():
+            if is_json:
+                blocks.append('\n'.join(contents))
+            fence = None
+        elif is_json:
+            contents.append(line)
+    require(fence is None, 'Unclosed evidence section fence')
+    return blocks
+
+
 def validate_prd(path):
     path = Path(path)
     document = path.read_text()
-    require(document.splitlines().count(HEADING) == 1, 'One factory reuse and contribution section required')
-    section = document.split(HEADING, 1)[1].split('\n## ', 1)[0]
-    blocks = re.findall(r'```json\s*\n(.*?)\n```', section, re.S)
+    section = active_section(document)
+    blocks = json_declarations(section)
     require(len(blocks) == 1, 'One JSON declaration required in factory section')
     value = json.loads(blocks[0], object_pairs_hook=unique_object)
     require(type(value) is dict and set(value) == {'schema_version', 'capabilities'}, 'Invalid requirements fields')
