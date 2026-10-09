@@ -69,3 +69,39 @@ replacement hypothesis. No claim of demand, retention, revenue or paid readiness
 without direct evidence. Proposed quality thresholds: zero observed critical data
 loss/authorization defects, all bounded acceptance tests pass, deterministic files
 match, and no unsupported qualification claims.
+
+## Factory reuse and contribution
+
+This active checkpoint reuses the existing factory evidence mechanism. The entry
+below deliberately remains a candidate pending a receipt for this exact change;
+prior tests or a valid declaration do not establish new execution. The initial
+zero-code/no-Couch-copy constraints above describe benchmark provenance, not a
+universal prohibition on licensed future reuse. See CONTRIBUTING.md for the shared
+workflow and status meanings.
+
+```json
+{
+  "schema_version": 1,
+  "capabilities": [{
+    "id": "source-and-test-handoff",
+    "status": "candidate",
+    "source": {
+      "reference": "edoworks/factory snapshot.py and benchmark.py",
+      "revision": "3ba88620eb49e853d966a8820a9531ff198e4100",
+      "license": "MIT",
+      "attribution": "Edoworks Factory contributors; preserve LICENSE and TRADEMARKS.md"
+    },
+    "artifact_sha256": null,
+    "scope": "Committed source identity and declared evidence for the local web benchmark",
+    "limitations": ["No new execution receipt is claimed by this declaration", "Native/device/security/product-fit qualification is excluded"],
+    "consumer": "Edoworks Factory clean-generation benchmark",
+    "interface": "snapshot.capture_snapshot and snapshot.verify_snapshot",
+    "evidence": null,
+    "gap": "Repeated manual handoffs can omit scope or promote reported results without exact supporting evidence",
+    "contribution": {
+      "change": "Require a compact active-PRD evidence declaration through the existing benchmark",
+      "behavior_test": "Reject missing sections and unsupported promoted claims; accept explicit unknowns; retain existing generation contracts"
+    }
+  }]
+}
+```

@@ -77,6 +77,7 @@ def main(destination):
                 raise ValueError('Benchmark runner differs from committed snapshot')
             receipt['accounting_baseline'] = json.loads((runtime / 'autonomy-baseline.json').read_text())
             validate_accounting(receipt['accounting_baseline'])
+            receipt['requirements'] = json.loads(run('requirements', [sys.executable, '-B', str(runtime / 'requirements.py'), str(runtime / 'PRD.md')], cwd=runtime))
             run('generator-tests', [sys.executable, '-B', '-m', 'unittest', 'discover', '-s', 'tests', '-p', 'test_*.py', '-v'], cwd=runtime)
             spec = json.loads((runtime / 'specs/couch-clash.json').read_text())
             spec_path = isolated / 'product-spec.json'; spec_path.write_text(json.dumps(spec))
