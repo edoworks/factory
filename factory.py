@@ -13,10 +13,36 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parent
 TEMPLATES = ('index.html', 'style.css', 'engine.mjs', 'app.mjs', 'engine.test.mjs')
+IOS_TEMPLATES = ('App.swift', 'BundledWebView.swift', 'NativeTests.swift', 'NativeUITests.swift', 'project.json', 'toolchain.json')
 
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def native_script(files):
+    """Pack only the reviewed fixed graph, not arbitrary JavaScript modules.
+
+    Each module keeps its own lexical scope. The only imported bindings are
+    immutable spec/fingerprint and unchanged function declarations. Any template
+    change requires re-review of this contract; unknown syntax is never guessed.
+    """
+    contracts = {
+        'engine.mjs': '42cf7d4a032246efe961a3f957f8b2946a42d11d074fc70c08d659cd2a14b3ea',
+        'app.mjs': '74f0c8913fec7691d76faf07243b4b80a163b717ce9a834f475e46eb1c94d655',
+    }
+    for name, expected in contracts.items():
+        require(digest(files[name]) == expected, 'Native packaging contract needs review: ' + name)
+    spec = files['spec.mjs'].decode().replace('export const fingerprint = ', 'const fingerprint = ', 1).replace('export const spec = ', 'const spec = ', 1)
+    engine = files['engine.mjs'].decode().removeprefix("import {spec, fingerprint} from './spec.mjs';\n")
+    for name in ('replay', 'scores', 'encode', 'decode'):
+        engine = engine.replace('export function ' + name + '(', 'function ' + name + '(', 1)
+    app = files['app.mjs'].decode().removeprefix("import {spec} from './spec.mjs';\nimport {replay, scores, encode, decode} from './engine.mjs';\n")
+    # The IIFE result enables testing the exact packed engine without a global API.
+    return ("(() => { 'use strict';\nconst specModule = (() => {\n" + spec +
+            "\nreturn {spec, fingerprint};\n})();\nconst engineModule = (({spec, fingerprint}) => {\n" + engine +
+            "\nreturn {replay, scores, encode, decode};\n})(specModule);\n(({spec}, {replay, scores, encode, decode}) => {\n" + app +
+            "\n})(specModule, engineModule);\nreturn engineModule;\n})();\n").encode()
 
 
 def require(ok, message):
@@ -76,7 +102,8 @@ def validate(spec):
     return spec
 
 
-def generate(spec_path, destination, revision):
+def generate(spec_path, destination, revision, target='web'):
+    require(target in ('web', 'ios'), 'Unsupported generation target')
     require(re.fullmatch(r'[0-9a-f]{40}', revision), 'Exact factory revision required')
     source_bytes = Path(spec_path).read_bytes()
     require(len(source_bytes) <= 32768, 'Spec size limit')
@@ -94,16 +121,42 @@ def generate(spec_path, destination, revision):
     files['spec.mjs'] = ('export const fingerprint = ' + json.dumps(spec_sha) + ';\nexport const spec = ' + canonical.decode() + ';\n').encode()
     closure = {'factory.py': digest(Path(__file__).read_bytes()), 'toolchain.json': digest((ROOT / 'toolchain.json').read_bytes())}
     closure.update({'templates/' + name: digest(files[name]) for name in TEMPLATES})
+    if target == 'ios':
+        packed = native_script(files)
+        native = {name: (ROOT / 'templates/ios' / name).read_bytes() for name in IOS_TEMPLATES}
+        closure.update({'templates/ios/' + name: digest(data) for name, data in native.items()})
+        files = {'Web/' + name: data for name, data in files.items()}
+        files['Web/native-app.js'] = packed
+        files['Web/index.html'] = files['Web/index.html'].replace(b'<script type="module" src="app.mjs"></script>', b'<script src="native-app.js"></script>')
+        # Bundle-only restrictions are additional native policy; web behavior stays unchanged.
+        policy = "default-src 'none'; script-src 'self' file:; style-src 'self' file:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'"
+        files['Web/index.html'] = files['Web/index.html'].replace(b'<head>', ('<head><meta http-equiv="Content-Security-Policy" content="' + policy + '">').encode(), 1)
+        files.update({'Sources/' + name: native[name] for name in ('App.swift', 'BundledWebView.swift')})
+        files['Tests/NativeTests.swift'] = native['NativeTests.swift']
+        files['UITests/NativeUITests.swift'] = native['NativeUITests.swift']
+        project = json.loads(native['project.json'])
+        settings = project['targets']['GeneratedApp']['settings']['base']
+        settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'local.factory.' + spec['id']
+        project['targets']['GeneratedAppTests']['settings']['base']['PRODUCT_BUNDLE_IDENTIFIER'] = settings['PRODUCT_BUNDLE_IDENTIFIER'] + '.tests'
+        project['targets']['GeneratedAppUITests']['settings']['base']['PRODUCT_BUNDLE_IDENTIFIER'] = settings['PRODUCT_BUNDLE_IDENTIFIER'] + '.uitests'
+        project['targets']['GeneratedApp']['info']['properties']['CFBundleDisplayName'] = spec['title']
+        files['project.json'] = (json.dumps(project, sort_keys=True, indent=2) + '\n').encode()
+        files['native-toolchain.json'] = native['toolchain.json']
     manifest = {'schema_version': 1, 'factory_repository': 'edoworks/factory', 'factory_revision': revision,
                 'revision_status': 'caller_supplied_unverified',
                 'source_closure': closure, 'spec_sha256': spec_sha, 'toolchain': toolchain,
                 'assets': [], 'network_source_reads': False, 'product_source_reuse': False,
                 'files': {name: digest(data) for name, data in sorted(files.items())}}
+    if target == 'ios':
+        manifest['target'] = 'ios-simulator-source'
+        manifest['native_qualification'] = 'unbuilt_unexecuted'
+        manifest['native_packaging'] = {'strategy': 'reviewed-fixed-module-graph-v1', 'order': ['spec.mjs', 'engine.mjs', 'app.mjs'], 'scope': 'separate lexical scopes; immutable imports; no general module transpilation'}
     files['manifest.json'] = (json.dumps(manifest, sort_keys=True, indent=2) + '\n').encode()
     require(sum(map(len, files.values())) <= 5 * 1024 * 1024, 'Output size limit')
     scratch = Path(tempfile.mkdtemp(prefix='.factory-generate-', dir=dest.parent))
     try:
         for name, data in files.items():
+            (scratch / name).parent.mkdir(parents=True, exist_ok=True)
             (scratch / name).write_bytes(data)
         # rename refuses a nonempty destination that appeared after preflight.
         os.rename(scratch, dest)
@@ -118,9 +171,10 @@ if __name__ == '__main__':
     parser.add_argument('--spec', required=True)
     parser.add_argument('--out', required=True)
     parser.add_argument('--revision', required=True)
+    parser.add_argument('--target', choices=('web', 'ios'), default='web')
     args = parser.parse_args()
     try:
-        result = generate(args.spec, args.out, args.revision)
+        result = generate(args.spec, args.out, args.revision, args.target)
         print(json.dumps({'status': 'generated', 'spec_sha256': result['spec_sha256'], 'files': len(result['files']) + 1}))
     except (ValueError, OSError, TypeError, KeyError) as exc:
         print(json.dumps({'status': 'rejected', 'error': str(exc)}), file=sys.stderr)
