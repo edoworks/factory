@@ -1,5 +1,9 @@
 # Edoworks Factory
 
+**Deprecated 2026-10-25.** This repository is a historical record. Do not use
+it to start new products or infer that Edoworks remains an operating factory.
+The source and review history are being preserved in the Foculoom archives.
+
 One canonical factory: `edoworks/factory`. This is a fresh, unproven experiment
 combining Factory004's shipping-first direction with recorded predecessor lessons.
 The owner selected a clean implementation on 2026-10-06; historical repository
