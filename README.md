@@ -4,7 +4,7 @@
 it to start new products or infer that Edoworks remains an operating factory.
 The source and review history are being preserved in the Foculoom archives.
 
-One canonical factory: `edoworks/factory`. This is a fresh, unproven experiment
+The former canonical factory was `edoworks/factory`. It was an unproven experiment
 combining Factory004's shipping-first direction with recorded predecessor lessons.
 The owner selected a clean implementation on 2026-10-06; historical repository
 retirement instructions no longer select the destination for new work.

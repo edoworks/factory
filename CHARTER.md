@@ -7,7 +7,7 @@ planned. Existing source and evidence are retained for recovery in the Foculoom
 archives. The remainder of this charter records the former experiment and is not
 an instruction to resume it.
 
-Produce useful, differentiated software through a repeatable, inspectable path
+Historical objective: produce useful, differentiated software through a repeatable, inspectable path
 from a versioned product intent. Start with one bounded Couch Clash benchmark.
 Keep factory development independent from generated product runtime. No provider,
 agent, paid service, account, or network is required by the initial generator.
